@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { Camera, Loader2, User, Mail, MapPin, Briefcase, Github, Linkedin } from 'lucide-react';
 
 export default function BasicInfoForm() {
-  const { portfolio, updateProfileFields } = usePortfolio();
+  const { portfolio, updateProfileFields, showToast } = usePortfolio();
   const [uploading, setUploading] = useState(false);
 
   if (!portfolio) return null;
@@ -19,20 +19,36 @@ export default function BasicInfoForm() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file (PNG/JPEG).');
+      showToast('error', 'Please select a valid image file (PNG/JPEG).');
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      alert('Image size should be less than 2MB.');
+      showToast('error', 'Image size should be less than 2MB.');
+      return;
+    }
+
+    // 1. Optimistic UI base64 fallback
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      updateProfileFields({
+        profile_image_url: reader.result,
+        avatar_url: reader.result
+      });
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Guest/Demo mode bypass
+    if (portfolio.user_id === 'guest-user-id') {
+      showToast('success', 'Demo photo updated locally (Guest Mode)!');
       return;
     }
 
     setUploading(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${portfolio.id}/avatar-${Date.now()}.${fileExt}`;
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${portfolio.user_id || 'guest'}/${Date.now()}-${sanitizedName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -44,10 +60,14 @@ export default function BasicInfoForm() {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      updateProfileFields({ profile_image_url: publicUrl });
+      updateProfileFields({
+        profile_image_url: publicUrl,
+        avatar_url: publicUrl
+      });
+      showToast('success', 'Profile photo uploaded successfully!');
     } catch (err) {
       console.error('Image upload failed:', err);
-      alert(err.message || 'Image upload failed. Make sure the "avatars" bucket exists and is public.');
+      showToast('error', err.message || 'Image upload failed. Ensure the "avatars" bucket is public.');
     } finally {
       setUploading(false);
     }

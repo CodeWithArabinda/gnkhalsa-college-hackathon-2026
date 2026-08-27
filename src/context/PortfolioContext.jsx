@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { generateSlug } from '../lib/slugGenerator';
 import { demoProfile } from '../utils/demoData';
+import { useAuth } from './AuthContext';
 
 const PortfolioContext = createContext(undefined);
 
@@ -11,10 +12,17 @@ const isUUID = (id) => {
 };
 
 export const PortfolioProvider = ({ children }) => {
+  const { user } = useAuth();
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const fetchPortfolio = useCallback(async (userId) => {
     if (!userId) return;
@@ -145,6 +153,7 @@ export const PortfolioProvider = ({ children }) => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
+          user_id: user?.id,
           full_name: portfolio.full_name,
           headline: portfolio.headline,
           bio: portfolio.bio,
@@ -307,7 +316,9 @@ export const PortfolioProvider = ({ children }) => {
     savePortfolio,
     loadDemoData,
     updateProfileFields,
-    updateChildItems
+    updateChildItems,
+    toast,
+    showToast
   };
 
   return (

@@ -39,12 +39,13 @@ export default function DashboardPage() {
     fetchPortfolio,
     savePortfolio,
     loadDemoData,
-    updateProfileFields
+    updateProfileFields,
+    toast,
+    showToast
   } = usePortfolio();
 
   const [activeTab, setActiveTab] = useState('basic');
   const [copied, setCopied] = useState(false);
-  const [toast, setToast] = useState(null);
 
   // 1. Route Protection
   useEffect(() => {
@@ -80,10 +81,6 @@ export default function DashboardPage() {
     }
   };
 
-  const showToast = (type, message) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const copyPublicLink = () => {
     const publicUrl = `${window.location.origin}/p/${portfolio.public_slug}`;
