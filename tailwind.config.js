@@ -7,31 +7,43 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
+        neo: {
+          light: {
+            bg: '#FFFDF8',
+            card: '#FFFFFF',
+            yellow: '#FFE600',
+            cyan: '#4DEEEA',
+            pink: '#FF70A6',
+            mint: '#A8FF78',
+            orange: '#FFAA00',
+            text: '#0F172A',
+            muted: '#475569'
+          },
           dark: {
-            bg: '#0B0F17',
-            surface: '#161F30',
-            border: '#1E293B',
-            primary: '#38BDF8',
-            secondary: '#10B981',
+            bg: '#0F1117',
+            card: '#1A1D27',
+            cyan: '#38BDF8',
+            green: '#00FFA3',
+            red: '#F43F5E',
+            yellow: '#FBBF24',
             text: '#F8FAFC',
             muted: '#94A3B8'
-          },
-          light: {
-            bg: '#F8FAFC',
-            surface: '#FFFFFF',
-            border: '#E2E8F0',
-            primary: '#1E3A8A',
-            secondary: '#2563EB',
-            text: '#0F172A',
-            muted: '#64748B'
           }
         }
       },
       fontFamily: {
+        heading: ['Space Grotesk', 'sans-serif'],
         sans: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        heading: ['Plus Jakarta Sans', 'sans-serif'],
+      },
+      borderWidth: {
+        '3': '3px',
+      },
+      boxShadow: {
+        brutal: '4px 4px 0px 0px #000000',
+        'brutal-lg': '6px 6px 0px 0px #000000',
+        'brutal-cyan': '4px 4px 0px 0px #38BDF8',
+        'brutal-dark-cyan': '6px 6px 0px 0px #38BDF8',
       }
     },
   },
