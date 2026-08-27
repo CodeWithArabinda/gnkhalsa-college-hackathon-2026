@@ -7,7 +7,8 @@ const AuthContext = createContext({
   loading: true,
   signUp: async () => {},
   signIn: async () => {},
-  signOut: async () => {}
+  signOut: async () => {},
+  loginAsGuest: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
@@ -58,7 +59,28 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const loginAsGuest = () => {
+    setUser({
+      id: 'guest-user-id',
+      email: 'guest@stackfolio.demo',
+      isGuest: true,
+      user_metadata: { full_name: 'Aarya Shah (Guest)' }
+    });
+    setSession({
+      user: {
+        id: 'guest-user-id',
+        email: 'guest@stackfolio.demo',
+        isGuest: true
+      }
+    });
+  };
+
   const signOut = async () => {
+    if (user?.isGuest) {
+      setUser(null);
+      setSession(null);
+      return;
+    }
     return await supabase.auth.signOut();
   };
 
@@ -68,7 +90,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     signUp,
     signIn,
-    signOut
+    signOut,
+    loginAsGuest
   };
 
   return (

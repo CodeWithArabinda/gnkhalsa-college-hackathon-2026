@@ -22,6 +22,37 @@ export const PortfolioProvider = ({ children }) => {
     setError(null);
 
     try {
+      if (userId === 'guest-user-id') {
+        const experiences = demoProfile.experiences.map((exp, idx) => ({ ...exp, id: `temp-exp-${idx}` }));
+        const education = demoProfile.education.map((edu, idx) => ({ ...edu, id: `temp-edu-${idx}` }));
+        const projects = demoProfile.projects.map((proj, idx) => ({ ...proj, id: `temp-proj-${idx}` }));
+        const skills = demoProfile.skills.map((skill, idx) => ({ ...skill, id: `temp-skill-${idx}` }));
+        const achievements = demoProfile.achievements.map((ach, idx) => ({ ...ach, id: `temp-ach-${idx}` }));
+
+        setPortfolio({
+          id: 'demo-profile-uuid-aarya-shah',
+          user_id: 'guest-user-id',
+          full_name: demoProfile.full_name,
+          headline: demoProfile.headline,
+          bio: demoProfile.bio,
+          profile_image_url: demoProfile.profile_image_url,
+          location: demoProfile.location,
+          email: demoProfile.email,
+          github_url: demoProfile.github_url,
+          linkedin_url: demoProfile.linkedin_url,
+          selected_template: demoProfile.selected_template,
+          is_published: true,
+          public_slug: 'aarya-shah-r4x9',
+          experiences,
+          education,
+          projects,
+          skills,
+          achievements
+        });
+        setLoading(false);
+        return;
+      }
+
       // 1. Fetch complete profile with child tables
       const { data, error: fetchError } = await supabase
         .from('profiles')
@@ -96,6 +127,14 @@ export const PortfolioProvider = ({ children }) => {
 
   const savePortfolio = useCallback(async () => {
     if (!portfolio) return { success: false, error: 'No portfolio loaded' };
+
+    if (portfolio.user_id === 'guest-user-id') {
+      setSaving(true);
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      setSaving(false);
+      return { success: true, guest: true };
+    }
+
     setSaving(true);
     setError(null);
 
