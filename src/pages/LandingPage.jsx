@@ -87,98 +87,78 @@ export default function LandingPage() {
       {/* MAIN CONTAINER */}
       <main className="max-w-6xl mx-auto px-6">
         
-        {/* HERO SECTION */}
-        <section className="py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Hero text */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            {/* Sticker Badges Row */}
-            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-              <span className="inline-block bg-[#FFE600] text-black font-mono font-bold px-3 py-1 border-2 border-black rounded-full text-xs rotate-[-2deg] shadow-[2px_2px_0px_0px_#000]">
-                🚀 Resume-to-Portfolio
-              </span>
-              <span className="inline-block bg-[#4DEEEA] text-black font-mono font-bold px-3 py-1 border-2 border-black rounded-full text-xs rotate-[1deg] shadow-[2px_2px_0px_0px_#000]">
-                ⚡ Zero Code Needed
+        {/* HERO SECTION (Massive Centered Neo-Brutalist Layout) */}
+        <section className="pt-16 pb-12 flex flex-col items-center text-center px-4 max-w-6xl mx-auto">
+          
+          {/* Top Badge Pill */}
+          <div className="bg-white border-2 border-black px-4 py-1.5 text-xs font-mono font-bold rounded-full shadow-[2px_2px_0px_0px_#000] mb-8 inline-flex items-center gap-2">
+            <span>▶</span>
+            <span>AI RESUME-TO-PORTFOLIO ENGINE</span>
+          </div>
+
+          {/* Massive 3-Line Headline (Rubik Mono One / font-heavy) */}
+          <h1 className="font-heavy text-5xl sm:text-7xl lg:text-[86px] leading-[1.08] text-[#15130F] tracking-tight uppercase max-w-5xl mx-auto">
+            <div>DITCH STATIC RESUMES.</div>
+            <div>BUILD LIVE SITES.</div>
+            <div className="relative inline-block my-3 transform -rotate-2">
+              <span className="bg-[#FFE600] px-5 sm:px-10 py-1.5 sm:py-2.5 border-3 border-black shadow-[6px_6px_0px_0px_#000] text-black inline-block">
+                GET HIRED FASTER.
               </span>
             </div>
+          </h1>
 
-            {/* Space Grotesk Heading scaled up */}
-            <h1 className="text-5xl md:text-7xl font-heading font-extrabold tracking-tight leading-tight text-slate-900">
-              Turn your static resume into an <span className="bg-[#FFE600] px-2.5 py-0.5 border-3 border-black inline-block rotate-[-1deg] shadow-brutal my-1">interactive</span> portfolio.
-            </h1>
-            
-            {/* Patrick Hand description text scaled up */}
-            <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide max-w-2xl mx-auto lg:mx-0">
-              Stop sending flat PDFs to recruiters. StackFolio turns your job resume into a responsive, beautiful, shareable digital portfolio with live project demos and a permanent public link.
-            </p>
+          {/* Subheading (Patrick Hand Font) */}
+          <p className="font-hand text-2xl sm:text-3xl text-slate-800 max-w-2xl mx-auto mt-6 mb-8 leading-relaxed">
+            Upload your resume PDF or image. StackFolio auto-extracts your skills, formats your projects, and generates a live recruiter-ready portfolio in seconds.
+          </p>
 
-            {/* CTAs aligned cleanly */}
-            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
-              <Link
-                to="/dashboard"
-                className="inline-flex items-center justify-center space-x-2 bg-[#FFE600] text-black font-heading font-black text-base px-8 py-4 border-3 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
-              >
-                <span>Create Portfolio Free →</span>
-              </Link>
-              <Link
-                to="/p/aarya-shah-r4x9"
-                className="inline-flex items-center justify-center space-x-2 bg-white text-black font-heading font-black text-base px-8 py-4 border-3 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
-              >
-                <span>Explore Demo Profile ★</span>
-              </Link>
+          {/* Social Proof Metric Grid (4 Neo-Brutalist Boxes) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl my-8">
+            <div className="bg-white border-2 border-black rounded-lg p-3 sm:p-4 shadow-[3px_3px_0px_0px_#000] font-mono text-center">
+              <div className="text-xl sm:text-2xl font-black text-black">1.2K+</div>
+              <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Portfolios Generated</div>
+            </div>
+
+            <div className="bg-white border-2 border-black rounded-lg p-3 sm:p-4 shadow-[3px_3px_0px_0px_#000] font-mono text-center">
+              <div className="text-xl sm:text-2xl font-black text-black">100/100</div>
+              <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Recruiter Score</div>
+            </div>
+
+            <div className="bg-white border-2 border-black rounded-lg p-3 sm:p-4 shadow-[3px_3px_0px_0px_#000] font-mono text-center">
+              <div className="text-xl sm:text-2xl font-black text-black">0</div>
+              <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Code Required</div>
+            </div>
+
+            <div className="bg-white border-2 border-black rounded-lg p-3 sm:p-4 shadow-[3px_3px_0px_0px_#000] font-mono text-center">
+              <div className="text-xl sm:text-2xl font-black text-black">₹0</div>
+              <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Free Forever Starter</div>
             </div>
           </div>
 
-          {/* Hero Graphic Frame (Recruiter Scorecard) */}
-          <div className="lg:col-span-5 flex justify-center">
-            <div className="w-full max-w-[380px] bg-white border-3 border-black p-6 rounded-2xl shadow-[6px_6px_0px_0px_#000] rotate-[1.5deg] space-y-6">
-              <div className="flex justify-between items-center pb-3 border-b-2 border-black/10 font-mono">
-                <span className="font-bold text-xs text-slate-500">Recruiter Scorecard</span>
-                <span className="px-2.5 py-1 bg-[#A8FF78] border-2 border-black rounded-lg text-xs font-black shadow-[2px_2px_0px_0px_#000]">
-                  100/100 🟢
-                </span>
-              </div>
-
-              {/* Mock profile item */}
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-black bg-[#FFE600] shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
-                    alt="Aarya Shah"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-heading font-black text-base text-[#0F172A]">Aarya Shah</h3>
-                  <p className="text-xs text-slate-600 font-mono">BCA Candidate & React Dev</p>
-                </div>
-              </div>
-
-              {/* Rubric checks showcase */}
-              <div className="space-y-2 text-xs font-bold text-slate-700">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Name & Headline Added (+10)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>3 Sync Projects with Live Demos (+35)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>8 Core Skills Listed (+10)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Verified Credentials Added (+25)</span>
-                </div>
-              </div>
-
-              <div className="bg-[#4DEEEA] border-2 border-black p-3 rounded-xl text-center font-mono font-bold text-xs shadow-[2px_2px_0px_0px_#000]">
-                Link: /p/aarya-shah-r4x9 📋
-              </div>
-            </div>
+          {/* Twin CTA Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2">
+            <Link
+              to="/dashboard"
+              className="bg-[#FFE600] text-black text-xl font-bold px-8 py-4 border-3 border-black rounded-xl shadow-brutal-lg hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] transition-all inline-flex items-center space-x-2"
+            >
+              <span>Create Portfolio Free →</span>
+            </Link>
+            <Link
+              to="/p/aarya-shah-r4x9"
+              className="bg-white text-black text-xl font-bold px-8 py-4 border-3 border-black rounded-xl shadow-brutal-lg hover:bg-slate-50 transition-all inline-flex items-center space-x-2"
+            >
+              <span>Explore Live Demo ★</span>
+            </Link>
           </div>
+
         </section>
+
+        {/* Bottom Feature Ticker Strip */}
+        <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw] border-y-2 border-black bg-white py-3 mb-12 font-mono text-xs font-bold tracking-widest text-slate-800 uppercase shadow-[0px_2px_0px_0px_#000] text-center overflow-hidden">
+          <div className="whitespace-nowrap select-none">
+            ⚡ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE
+          </div>
+        </div>
 
         {/* Hero -> Features divider */}
         <SectionDivider text="ENGINE FEATURES" />

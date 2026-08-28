@@ -36,6 +36,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
         hand: ['"Patrick Hand"', 'cursive'],
+        heavy: ['"Rubik Mono One"', 'sans-serif'],
       },
       borderWidth: {
         '3': '3px',
