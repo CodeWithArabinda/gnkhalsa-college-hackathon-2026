@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { Cpu, Terminal, ShieldAlert, Award, Star, Compass, ArrowRight, CheckCircle2, Globe, BarChart3, Bot, Sparkles, Mail, Github, Linkedin, ExternalLink } from 'lucide-react';
 
 const SectionDivider = ({ text = "SECTION BREAK" }) => (
-  <div className="relative my-16 flex items-center justify-center max-w-6xl mx-auto px-6">
-    <div className="w-full border-t-[3px] border-black" />
-    <span className="absolute bg-[#FFE600] border-2 border-black px-4 py-1 font-mono text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000]">
+  <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw] my-16 flex items-center justify-center">
+    <div className="w-full border-t-2 border-black" />
+    <span className="absolute bg-[#FFE600] border-3 border-black px-6 py-2 shadow-[3px_3px_0px_0px_#000] rounded-none md:rounded-md font-mono text-sm md:text-base font-extrabold tracking-widest text-black uppercase">
       ✦ {text} ✦
     </span>
   </div>
@@ -44,10 +44,10 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#FFFDF8] bg-grid-pattern relative text-[#0F172A] font-sans antialiased">
+    <div className="min-h-screen w-full bg-[#FFFDF8] bg-grid-pattern relative text-[#0F172A] font-sans antialiased overflow-x-hidden">
       
-      {/* HEADER NAVBAR (Sticky SaaS Style) */}
-      <header className="sticky top-0 z-50 bg-[#FFFDF8]/95 backdrop-blur-sm border-b-[3px] border-black px-6 py-4 shadow-[0px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center transition-all">
+      {/* HEADER NAVBAR (Sticky SaaS Style - Clean border-b-2) */}
+      <header className="sticky top-0 z-50 bg-[#FFFDF8]/95 backdrop-blur-sm border-b-2 border-black px-6 py-4 shadow-[0px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center transition-all">
         {/* Left Logo + BETA Badge */}
         <div className="flex items-center space-x-2 shrink-0">
           <div className="w-8 h-8 bg-[#FFE600] border-2 border-black rounded-lg flex items-center justify-center font-heading font-black text-lg shadow-[2px_2px_0px_0px_#000]">
@@ -59,8 +59,8 @@ export default function LandingPage() {
           </span>
         </div>
 
-        {/* Center Links (Patrick Hand Font Upgrade) */}
-        <nav className="hidden md:flex items-center space-x-8 text-lg md:text-xl font-hand font-medium tracking-wide text-black shrink-0">
+        {/* Center Links (Patrick Hand Font - text-2xl) */}
+        <nav className="hidden md:flex items-center space-x-8 text-2xl font-hand font-bold tracking-wide text-black shrink-0">
           <a href="#features" className="hover:text-[#FF6B6B] transition-colors">Features</a>
           <a href="#templates" className="hover:text-[#FF6B6B] transition-colors">Templates</a>
           <a href="#rubric" className="hover:text-[#FF6B6B] transition-colors">Readiness Rubric</a>
@@ -71,7 +71,7 @@ export default function LandingPage() {
         <div className="flex items-center space-x-4 shrink-0">
           <Link
             to="/auth"
-            className="text-lg md:text-xl font-hand font-medium tracking-wide text-black hover:text-[#FF6B6B] transition-colors"
+            className="text-2xl font-hand font-bold tracking-wide text-black hover:text-[#FF6B6B] transition-colors"
           >
             Sign In
           </Link>
@@ -101,11 +101,13 @@ export default function LandingPage() {
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-heading font-black leading-none tracking-tight text-slate-900">
+            {/* Space Grotesk Heading scaled up */}
+            <h1 className="text-5xl md:text-7xl font-heading font-extrabold tracking-tight leading-tight text-slate-900">
               Turn your static resume into an <span className="bg-[#FFE600] px-2.5 py-0.5 border-3 border-black inline-block rotate-[-1deg] shadow-brutal my-1">interactive</span> portfolio.
             </h1>
             
-            <p className="text-base md:text-lg font-medium text-slate-700 max-w-2xl mx-auto lg:mx-0">
+            {/* Patrick Hand description text scaled up */}
+            <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide max-w-2xl mx-auto lg:mx-0">
               Stop sending flat PDFs to recruiters. StackFolio turns your job resume into a responsive, beautiful, shareable digital portfolio with live project demos and a permanent public link.
             </p>
 
@@ -129,9 +131,9 @@ export default function LandingPage() {
           {/* Hero Graphic Frame (Recruiter Scorecard) */}
           <div className="lg:col-span-5 flex justify-center">
             <div className="w-full max-w-[380px] bg-white border-3 border-black p-6 rounded-2xl shadow-[6px_6px_0px_0px_#000] rotate-[1.5deg] space-y-6">
-              <div className="flex justify-between items-center pb-3 border-b-2 border-black/10">
-                <span className="font-mono font-bold text-xs text-slate-500">Recruiter Scorecard</span>
-                <span className="px-2.5 py-1 bg-[#A8FF78] border-2 border-black rounded-lg text-xs font-mono font-black shadow-[2px_2px_0px_0px_#000]">
+              <div className="flex justify-between items-center pb-3 border-b-2 border-black/10 font-mono">
+                <span className="font-bold text-xs text-slate-500">Recruiter Scorecard</span>
+                <span className="px-2.5 py-1 bg-[#A8FF78] border-2 border-black rounded-lg text-xs font-black shadow-[2px_2px_0px_0px_#000]">
                   100/100 🟢
                 </span>
               </div>
@@ -184,8 +186,8 @@ export default function LandingPage() {
         {/* FEATURES STEP GRID */}
         <section id="features" className="py-20 scroll-mt-24 space-y-12">
           <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-5xl font-heading font-black text-[#0F172A]">Product Features</h2>
-            <p className="text-slate-600 max-w-lg mx-auto text-sm font-medium">
+            <h2 className="text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-[#0F172A]">Product Features</h2>
+            <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide max-w-lg mx-auto">
               Transform your career credentials into a high-converting recruiter asset in four simple steps.
             </p>
           </div>
@@ -202,10 +204,11 @@ export default function LandingPage() {
                         <Icon className="w-4 h-4" />
                       </div>
                     </div>
-                    <h3 className="text-lg font-heading font-black text-[#0F172A]">{feat.title}</h3>
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed">{feat.desc}</p>
+                    {/* Card Title scaled to text-2xl */}
+                    <h3 className="text-2xl font-heading font-bold text-[#0F172A]">{feat.title}</h3>
+                    {/* Card text upgraded to Patrick Hand font */}
+                    <p className="font-hand text-lg md:text-xl text-slate-900 font-medium leading-relaxed tracking-wide">{feat.desc}</p>
                   </div>
-                  <div className="w-full h-1 bg-black/10 rounded" />
                 </div>
               );
             })}
@@ -219,8 +222,8 @@ export default function LandingPage() {
         <section id="templates" className="py-20 scroll-mt-24 bg-white border-3 border-black p-8 rounded-3xl shadow-brutal-lg space-y-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="space-y-2 text-center md:text-left">
-              <h2 className="text-3xl font-heading font-black text-black">Dual Design Layouts</h2>
-              <p className="text-sm font-medium text-slate-600">
+              <h2 className="text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-black">Dual Design Layouts</h2>
+              <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide">
                 Swap templates instantly. Your content automatically fits each layout.
               </p>
             </div>
@@ -241,8 +244,8 @@ export default function LandingPage() {
                 <span className="inline-block px-2.5 py-1 bg-[#FF70A6] border-2 border-black text-[10px] font-mono font-bold rounded-md shadow-[1.5px_1.5px_0px_0px_#000]">
                   LIGHT CORPORATE
                 </span>
-                <h3 className="font-heading font-black text-xl text-[#0F172A]">Warm Neo-Brutalist Layout</h3>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                <h3 className="font-heading font-extrabold text-2xl text-[#0F172A]">Warm Neo-Brutalist Layout</h3>
+                <p className="font-hand text-lg md:text-xl text-slate-900 font-medium leading-relaxed">
                   High contrast, solid black borders, and warm retro backgrounds designed to stand out for marketing, creative, or client relations roles.
                 </p>
               </div>
@@ -260,8 +263,8 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Bio snippet */}
-                <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
+                {/* Bio snippet using Patrick Hand */}
+                <p className="font-hand text-base text-slate-800 leading-relaxed">
                   Building tech products at startup velocity. Ex-PM intern at Google.
                 </p>
 
@@ -294,8 +297,8 @@ export default function LandingPage() {
                 <span className="inline-block px-2.5 py-1 bg-[#38BDF8] border-2 border-white text-[10px] font-mono font-bold text-slate-900 rounded-md shadow-[1.5px_1.5px_0px_0px_#38BDF8]">
                   DARK DEVELOPER
                 </span>
-                <h3 className="font-heading font-black text-xl text-white">Obsidian Terminal Layout</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <h3 className="font-heading font-extrabold text-2xl text-white">Obsidian Terminal Layout</h3>
+                <p className="font-hand text-lg md:text-xl text-slate-300 font-medium leading-relaxed">
                   Developer terminal experience with cyan borders, monospaced tech tags, and terminal window card headers. Perfect for software engineers.
                 </p>
               </div>
@@ -354,8 +357,8 @@ export default function LandingPage() {
             <div className="inline-block bg-[#A8FF78] text-black font-extrabold px-3 py-1 border-2 border-black rounded-full text-xs uppercase shadow-[2px_2px_0px_0px_#000]">
               Recruiter-Ready Scoring
             </div>
-            <h2 className="text-3xl font-heading font-black text-[#0F172A]">Recruiter Checklist Rubric</h2>
-            <p className="text-sm font-medium text-slate-700 leading-relaxed">
+            <h2 className="text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-[#0F172A]">Recruiter Checklist Rubric</h2>
+            <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide">
               Recruiters spend an average of 6 seconds looking at candidate resumes. StackFolio guides you with a real-time scoring engine that checks for standard parameters: avatar photo, work experience details, verified certificate credentials, contact handles, and active project code repo links.
             </p>
           </div>
@@ -379,8 +382,8 @@ export default function LandingPage() {
         {/* PRICING SECTION */}
         <section id="pricing" className="py-20 scroll-mt-24 space-y-12">
           <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-5xl font-heading font-black text-[#0F172A]">Flexible SaaS Pricing</h2>
-            <p className="text-slate-600 max-w-lg mx-auto text-sm font-medium">
+            <h2 className="text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-[#0F172A]">Flexible SaaS Pricing</h2>
+            <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide max-w-lg mx-auto">
               Start building for free or unlock powerful SaaS features to boost your hireability rate.
             </p>
           </div>
@@ -392,8 +395,8 @@ export default function LandingPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-heading font-black text-[#0F172A]">Free Developer</h3>
-                    <p className="text-xs text-slate-500 font-medium">Perfect for starters</p>
+                    <h3 className="text-2xl font-heading font-bold text-[#0F172A]">Free Developer</h3>
+                    <p className="text-xs text-slate-500 font-medium font-mono">Perfect for starters</p>
                   </div>
                   <div className="text-3xl font-heading font-black text-black">₹0</div>
                 </div>
@@ -403,26 +406,27 @@ export default function LandingPage() {
                 <ul className="space-y-3 text-xs font-bold text-slate-700">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>1 Active Portfolio URL (/p/slug)</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">1 Active Portfolio URL (/p/slug)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Dark Developer Layout template</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Dark Developer Layout template</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Supabase Database storage sync</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Supabase Database storage sync</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Standard PDF resume parser</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Standard PDF resume parser</span>
                   </li>
                 </ul>
               </div>
 
+              {/* Upgraded Free Tier Button */}
               <Link
                 to="/dashboard"
-                className="w-full text-center inline-flex items-center justify-center space-x-1.5 text-xs font-black py-3 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-lg shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] transition-all"
+                className="w-full text-center inline-flex items-center justify-center space-x-1.5 text-base py-3 bg-slate-100 border-2 border-black font-bold shadow-[3px_3px_0px_0px_#000] hover:bg-slate-200 text-black rounded-lg transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
               >
                 <span>Deploy Free Portfolio</span>
               </Link>
@@ -438,8 +442,8 @@ export default function LandingPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-heading font-black text-[#0F172A]">StackFolio Pro</h3>
-                    <p className="text-xs text-slate-500 font-medium">For serious job seekers</p>
+                    <h3 className="text-2xl font-heading font-bold text-[#0F172A]">StackFolio Pro</h3>
+                    <p className="text-xs text-slate-500 font-medium font-mono">For serious job seekers</p>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-heading font-black text-black">₹199<span className="text-xs font-mono font-bold">/yr</span></div>
@@ -452,30 +456,30 @@ export default function LandingPage() {
                 <ul className="space-y-3 text-xs font-bold text-slate-700">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Custom domain mapping (e.g. yourname.dev)</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Custom domain mapping (e.g. yourname.dev)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Unlock all Premium layouts (Light Corporate + Dark)</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Unlock all Premium layouts (Light Corporate + Dark)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Recruiter Analytics & view counters dashboard</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Recruiter Analytics & view counters dashboard</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>Priority resume parsing & auto-fill improvement recommendations</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">Priority resume parsing & auto-fill recommendations</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span>AI Interview Candidate Q&A bot helper</span>
+                    <span className="font-hand text-lg md:text-xl text-slate-900">AI Interview Candidate Q&A bot helper</span>
                   </li>
                 </ul>
               </div>
 
               <Link
                 to="/dashboard"
-                className="w-full text-center inline-flex items-center justify-center space-x-1.5 text-xs font-black py-3 bg-[#FFE600] text-black border-2 border-black rounded-lg shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] transition-all"
+                className="w-full text-center inline-flex items-center justify-center space-x-1.5 text-base py-3 bg-[#FFE600] text-black border-2 border-black rounded-lg shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
               >
                 <span>Upgrade to Pro ⚡</span>
               </Link>
@@ -490,8 +494,8 @@ export default function LandingPage() {
         {/* ROADMAP SECTION */}
         <section className="py-20 space-y-12">
           <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-5xl font-heading font-black text-[#0F172A]">Future Vision Roadmap</h2>
-            <p className="text-slate-600 max-w-lg mx-auto text-sm font-medium">
+            <h2 className="text-4xl md:text-5xl font-heading font-extrabold tracking-tight text-[#0F172A]">Future Vision Roadmap</h2>
+            <p className="font-hand text-xl md:text-2xl text-slate-900 font-medium leading-relaxed tracking-wide max-w-lg mx-auto">
               We are building the future of hiring interactions. Here is what is landing next.
             </p>
           </div>
@@ -502,8 +506,8 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-[#4DEEEA] border-2 border-black flex items-center justify-center text-black shadow-[2px_2px_0px_0px_#000]">
                 <Globe className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-black text-lg text-[#0F172A]">Custom Domain Mapping (.dev)</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <h3 className="text-2xl font-heading font-bold text-[#0F172A]">Custom Domain Mapping (.dev)</h3>
+              <p className="font-hand text-lg md:text-xl text-slate-900 font-medium leading-relaxed tracking-wide">
                 Map your custom subdomain or domain name directly to the StackFolio template rendering engine, providing absolute branding control.
               </p>
             </div>
@@ -513,8 +517,8 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-[#FF70A6] border-2 border-black flex items-center justify-center text-black shadow-[2px_2px_0px_0px_#000]">
                 <BarChart3 className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-black text-lg text-[#0F172A]">Recruiter View Analytics</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <h3 className="text-2xl font-heading font-bold text-[#0F172A]">Recruiter View Analytics</h3>
+              <p className="font-hand text-lg md:text-xl text-slate-900 font-medium leading-relaxed tracking-wide">
                 Receive instant dashboard alerts when recruiters view your portfolio, tracking geography, duration, and which project links they click.
               </p>
             </div>
@@ -524,8 +528,8 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-[#A8FF78] border-2 border-black flex items-center justify-center text-black shadow-[2px_2px_0px_0px_#000]">
                 <Bot className="w-5 h-5" />
               </div>
-              <h3 className="font-heading font-black text-lg text-[#0F172A]">AI Candidate Q&A Bot</h3>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <h3 className="text-2xl font-heading font-bold text-[#0F172A]">AI Candidate Q&A Bot</h3>
+              <p className="font-hand text-lg md:text-xl text-slate-900 font-medium leading-relaxed tracking-wide">
                 Embed a custom AI chatbot that responds to interview queries autonomously using context from your database experiences.
               </p>
             </div>
