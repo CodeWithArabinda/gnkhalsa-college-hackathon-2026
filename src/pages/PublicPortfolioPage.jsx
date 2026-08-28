@@ -73,7 +73,7 @@ export default function PublicPortfolioPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFFDF8] flex flex-col items-center justify-center text-slate-800">
+      <div className="min-h-screen bg-grid-pattern flex flex-col items-center justify-center text-slate-800">
         <Loader2 className="w-10 h-10 animate-spin text-black mb-4" />
         <p className="text-sm font-mono font-bold">Retrieving portfolio details...</p>
       </div>
@@ -82,7 +82,7 @@ export default function PublicPortfolioPage() {
 
   if (error || !portfolio) {
     return (
-      <div className="min-h-screen bg-[#FFFDF8] text-[#0F172A] font-sans flex flex-col items-center justify-center p-6 border-t-8 border-black">
+      <div className="min-h-screen bg-grid-pattern text-[#0F172A] font-sans flex flex-col items-center justify-center p-6 border-t-8 border-black">
         <div className="max-w-md w-full bg-white border-3 border-black p-8 rounded-2xl shadow-brutal text-center space-y-6">
           <div className="w-16 h-16 rounded-full bg-[#FF70A6] border-2 border-black flex items-center justify-center text-black font-black text-xl mx-auto shadow-[2px_2px_0px_0px_#000]">
             !

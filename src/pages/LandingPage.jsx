@@ -35,7 +35,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFFDF8] text-[#0F172A] font-sans antialiased border-t-8 border-black">
+    <div className="min-h-screen bg-grid-pattern text-[#0F172A] font-sans antialiased border-t-8 border-black">
       
       {/* HEADER NAVBAR */}
       <header className="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center">

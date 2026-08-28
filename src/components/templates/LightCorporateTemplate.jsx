@@ -30,7 +30,7 @@ export default function LightCorporateTemplate({ portfolio }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFFDF8] text-[#0F172A] font-sans antialiased p-6 sm:p-12 border-t-8 border-black">
+    <div className="min-h-screen bg-grid-pattern text-[#0F172A] font-sans antialiased p-6 sm:p-12 border-t-8 border-black">
       <div className="max-w-4xl mx-auto space-y-16">
 
         {/* HERO HEADER SECTION */}

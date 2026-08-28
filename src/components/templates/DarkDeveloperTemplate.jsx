@@ -21,7 +21,7 @@ export default function DarkDeveloperTemplate({ portfolio }) {
   } = portfolio;
 
   return (
-    <div className="min-h-screen bg-[#0F1117] text-[#F8FAFC] font-sans antialiased p-6 sm:p-12">
+    <div className="min-h-screen bg-grid-pattern-dark text-[#F8FAFC] font-sans antialiased p-6 sm:p-12">
       <div className="max-w-4xl mx-auto space-y-12">
 
         {/* HEADER SECTION (Terminal Window style) */}

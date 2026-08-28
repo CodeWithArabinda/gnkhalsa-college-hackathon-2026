@@ -65,7 +65,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF8] flex flex-col items-center justify-center p-6 border-t-8 border-black">
+    <div className="min-h-screen bg-grid-pattern flex flex-col items-center justify-center p-6 border-t-8 border-black">
       
       {/* Auth Card */}
       <div className="max-w-md w-full bg-white border-3 border-black p-8 rounded-2xl shadow-[6px_6px_0px_0px_#000] space-y-6">
