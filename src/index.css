@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Patrick+Hand&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
 
 @theme {
   /* Neo-Light Palettes */
@@ -28,6 +32,7 @@
   --font-heading: "Space Grotesk", sans-serif;
   --font-sans: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-hand: "Patrick Hand", cursive;
 
   /* Border utilities */
   --border-width-3: 3px;

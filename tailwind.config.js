@@ -35,6 +35,7 @@ export default {
         heading: ['Space Grotesk', 'sans-serif'],
         sans: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
+        hand: ['"Patrick Hand"', 'cursive'],
       },
       borderWidth: {
         '3': '3px',

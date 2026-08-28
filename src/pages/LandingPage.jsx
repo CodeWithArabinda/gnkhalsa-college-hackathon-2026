@@ -2,6 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Cpu, Terminal, ShieldAlert, Award, Star, Compass, ArrowRight, CheckCircle2, Globe, BarChart3, Bot, Sparkles, Mail, Github, Linkedin, ExternalLink } from 'lucide-react';
 
+const SectionDivider = ({ text = "SECTION BREAK" }) => (
+  <div className="relative my-16 flex items-center justify-center max-w-6xl mx-auto px-6">
+    <div className="w-full border-t-[3px] border-black" />
+    <span className="absolute bg-[#FFE600] border-2 border-black px-4 py-1 font-mono text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000]">
+      ✦ {text} ✦
+    </span>
+  </div>
+);
+
 export default function LandingPage() {
   const features = [
     {
@@ -35,10 +44,10 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-grid-pattern text-[#0F172A] font-sans antialiased border-t-8 border-black">
+    <div className="min-h-screen w-full bg-[#FFFDF8] bg-grid-pattern relative text-[#0F172A] font-sans antialiased">
       
-      {/* HEADER NAVBAR (SaaS Style) */}
-      <header className="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center z-10 relative">
+      {/* HEADER NAVBAR (Sticky SaaS Style) */}
+      <header className="sticky top-0 z-50 bg-[#FFFDF8]/95 backdrop-blur-sm border-b-[3px] border-black px-6 py-4 shadow-[0px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center transition-all">
         {/* Left Logo + BETA Badge */}
         <div className="flex items-center space-x-2 shrink-0">
           <div className="w-8 h-8 bg-[#FFE600] border-2 border-black rounded-lg flex items-center justify-center font-heading font-black text-lg shadow-[2px_2px_0px_0px_#000]">
@@ -50,19 +59,19 @@ export default function LandingPage() {
           </span>
         </div>
 
-        {/* Center Links (Production SaaS Style) */}
-        <nav className="hidden md:flex items-center space-x-8 text-xs font-heading font-black text-[#0F172A]">
-          <a href="#features" className="hover:text-[#FFE600] transition-colors">Features</a>
-          <a href="#templates" className="hover:text-[#FFE600] transition-colors">Templates</a>
-          <a href="#rubric" className="hover:text-[#FFE600] transition-colors">Readiness Rubric</a>
-          <a href="#pricing" className="hover:text-[#FFE600] transition-colors">Pricing</a>
+        {/* Center Links (Patrick Hand Font Upgrade) */}
+        <nav className="hidden md:flex items-center space-x-8 text-lg md:text-xl font-hand font-medium tracking-wide text-black shrink-0">
+          <a href="#features" className="hover:text-[#FF6B6B] transition-colors">Features</a>
+          <a href="#templates" className="hover:text-[#FF6B6B] transition-colors">Templates</a>
+          <a href="#rubric" className="hover:text-[#FF6B6B] transition-colors">Readiness Rubric</a>
+          <a href="#pricing" className="hover:text-[#FF6B6B] transition-colors">Pricing</a>
         </nav>
 
         {/* Right Action buttons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 shrink-0">
           <Link
             to="/auth"
-            className="text-xs font-black text-[#0F172A] hover:underline"
+            className="text-lg md:text-xl font-hand font-medium tracking-wide text-black hover:text-[#FF6B6B] transition-colors"
           >
             Sign In
           </Link>
@@ -76,10 +85,10 @@ export default function LandingPage() {
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className="max-w-6xl mx-auto px-6 py-12 md:py-20 space-y-28">
+      <main className="max-w-6xl mx-auto px-6">
         
         {/* HERO SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <section className="py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Hero text */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             {/* Sticker Badges Row */}
@@ -167,10 +176,13 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Hero -> Features divider */}
+        <SectionDivider text="ENGINE FEATURES" />
 
         {/* FEATURES STEP GRID */}
-        <div id="features" className="space-y-12 scroll-mt-6">
+        <section id="features" className="py-20 scroll-mt-24 space-y-12">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-5xl font-heading font-black text-[#0F172A]">Product Features</h2>
             <p className="text-slate-600 max-w-lg mx-auto text-sm font-medium">
@@ -198,10 +210,13 @@ export default function LandingPage() {
               );
             })}
           </div>
-        </div>
+        </section>
+
+        {/* Features -> Templates divider */}
+        <SectionDivider text="TEMPLATES SHOWCASE" />
 
         {/* TEMPLATES PREVIEW SHOWCASE */}
-        <div id="templates" className="bg-white border-3 border-black p-8 rounded-3xl shadow-brutal-lg space-y-10 scroll-mt-6">
+        <section id="templates" className="py-20 scroll-mt-24 bg-white border-3 border-black p-8 rounded-3xl shadow-brutal-lg space-y-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="space-y-2 text-center md:text-left">
               <h2 className="text-3xl font-heading font-black text-black">Dual Design Layouts</h2>
@@ -328,10 +343,13 @@ export default function LandingPage() {
             </div>
 
           </div>
-        </div>
+        </section>
+
+        {/* Templates -> Rubric divider */}
+        <SectionDivider text="CHECKLIST RUBRIC" />
 
         {/* READINESS RUBRIC HIGHLIGHT */}
-        <div id="rubric" className="bg-[#FFFDF8] border-3 border-black p-8 rounded-3xl shadow-brutal flex flex-col md:flex-row gap-8 items-center scroll-mt-6">
+        <section id="rubric" className="py-20 scroll-mt-24 bg-[#FFFDF8] border-3 border-black p-8 rounded-3xl shadow-brutal flex flex-col md:flex-row gap-8 items-center">
           <div className="space-y-4 md:w-3/5 text-center md:text-left">
             <div className="inline-block bg-[#A8FF78] text-black font-extrabold px-3 py-1 border-2 border-black rounded-full text-xs uppercase shadow-[2px_2px_0px_0px_#000]">
               Recruiter-Ready Scoring
@@ -341,7 +359,7 @@ export default function LandingPage() {
               Recruiters spend an average of 6 seconds looking at candidate resumes. StackFolio guides you with a real-time scoring engine that checks for standard parameters: avatar photo, work experience details, verified certificate credentials, contact handles, and active project code repo links.
             </p>
           </div>
-          <div className="bg-[#FFE600] border-3 border-black p-6 rounded-2xl md:w-2/5 w-full text-center shadow-brutal relative rotate-[1.5deg]">
+          <div className="bg-[#FFE600] border-3 border-black p-6 rounded-2xl md:w-2/5 w-full text-center shadow-brutal relative rotate-[1.5deg] shrink-0">
             <div className="text-4xl font-heading font-black text-black">100 Pts</div>
             <div className="text-xs font-mono font-bold text-black uppercase tracking-wider mt-1">recruiter readiness</div>
             <div className="h-0.5 bg-black my-4" />
@@ -353,10 +371,13 @@ export default function LandingPage() {
               <li>✓ Core Work Timeline: 10 Pts</li>
             </ul>
           </div>
-        </div>
+        </section>
+
+        {/* Rubric -> Pricing divider */}
+        <SectionDivider text="CHOOSE PLAN" />
 
         {/* PRICING SECTION */}
-        <div id="pricing" className="space-y-12 scroll-mt-6">
+        <section id="pricing" className="py-20 scroll-mt-24 space-y-12">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-5xl font-heading font-black text-[#0F172A]">Flexible SaaS Pricing</h2>
             <p className="text-slate-600 max-w-lg mx-auto text-sm font-medium">
@@ -381,19 +402,19 @@ export default function LandingPage() {
 
                 <ul className="space-y-3 text-xs font-bold text-slate-700">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>1 Active Portfolio URL (/p/slug)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Dark Developer Layout template</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Supabase Database storage sync</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Standard PDF resume parser</span>
                   </li>
                 </ul>
@@ -430,23 +451,23 @@ export default function LandingPage() {
 
                 <ul className="space-y-3 text-xs font-bold text-slate-700">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Custom domain mapping (e.g. yourname.dev)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Unlock all Premium layouts (Light Corporate + Dark)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Recruiter Analytics & view counters dashboard</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>Priority resume parsing & auto-fill improvement recommendations</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     <span>AI Interview Candidate Q&A bot helper</span>
                   </li>
                 </ul>
@@ -461,10 +482,13 @@ export default function LandingPage() {
             </div>
 
           </div>
-        </div>
+        </section>
+
+        {/* Pricing -> Roadmap divider */}
+        <SectionDivider text="ROADMAP VISION" />
 
         {/* ROADMAP SECTION */}
-        <div className="space-y-12">
+        <section className="py-20 space-y-12">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-5xl font-heading font-black text-[#0F172A]">Future Vision Roadmap</h2>
             <p className="text-slate-600 max-w-lg mx-auto text-sm font-medium">
@@ -506,7 +530,7 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
-        </div>
+        </section>
 
       </main>
 
