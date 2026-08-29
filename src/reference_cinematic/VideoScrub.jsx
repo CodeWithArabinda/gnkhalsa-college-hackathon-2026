@@ -19,47 +19,43 @@ export default function VideoScrub({ containerRef }) {
     if (!video) return;
 
     let targetTime = 0;
-    let animationFrameId = null;
-    let trigger = null;
+    let currentTime = 0;
+    let rafId;
 
-    const lerpLoop = () => {
+    const updateVideoFrame = () => {
       if (video.duration && !isNaN(video.duration)) {
-        const diff = targetTime - video.currentTime;
-        if (Math.abs(diff) > 0.001) {
+        currentTime += (targetTime - currentTime) * 0.08;
+        if (Math.abs(currentTime - video.currentTime) > 0.005) {
           try {
-            video.currentTime += diff * 0.12;
+            if ('fastSeek' in video && typeof video.fastSeek === 'function') {
+              video.fastSeek(currentTime);
+            } else {
+              video.currentTime = currentTime;
+            }
           } catch (e) {
             // ignore seek exception
           }
         }
       }
-      animationFrameId = requestAnimationFrame(lerpLoop);
+      rafId = requestAnimationFrame(updateVideoFrame);
     };
+    rafId = requestAnimationFrame(updateVideoFrame);
 
-    const initScrollTrigger = () => {
-      trigger = ScrollTrigger.create({
-        trigger: containerRef?.current || document.body,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.8,
-        onUpdate: (self) => {
-          if (video.duration && !isNaN(video.duration)) {
-            targetTime = self.progress * video.duration;
-          }
-        },
-      });
-      animationFrameId = requestAnimationFrame(lerpLoop);
-    };
-
-    if (video.readyState >= 1) {
-      initScrollTrigger();
-    } else {
-      video.addEventListener('loadedmetadata', initScrollTrigger, { once: true });
-    }
+    const st = ScrollTrigger.create({
+      trigger: containerRef?.current || document.body,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1,
+      onUpdate: (self) => {
+        if (video.duration) {
+          targetTime = self.progress * video.duration;
+        }
+      },
+    });
 
     return () => {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      if (trigger) trigger.kill();
+      cancelAnimationFrame(rafId);
+      st.kill();
     };
   }, [mounted, containerRef, videoSrc]);
 
