@@ -314,7 +314,7 @@ export default function CinematicSpaceTemplate({ portfolio }) {
     <div className="min-h-screen bg-[#060608] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#ff6b1a] selection:text-black">
       
       {/* 3D Video Scrub background layer */}
-      <VideoScrub />
+      <VideoScrub activeTab={activeTab} />
 
       {/* Ambient background glow */}
       <div className="fixed inset-0 pointer-events-none z-0">
