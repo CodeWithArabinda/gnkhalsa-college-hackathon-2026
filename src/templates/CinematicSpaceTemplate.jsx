@@ -237,10 +237,11 @@ function ProjectShowcaseModal({ items, startIdx, onClose }) {
 }
 
 /* ═══════════════════════════════════════════════
-   MAIN CINEMATIC SPACE TEMPLATE
+   MAIN CINEMATIC SPACE TEMPLATE (CONTINUOUS LONG-SCROLL)
    ═══════════════════════════════════════════════ */
 export default function CinematicSpaceTemplate({ portfolio }) {
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'projects' | 'about' | 'contact'
+  const containerRef = useRef(null);
+  const [activeSection, setActiveSection] = useState('overview');
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [showcaseIdx, setShowcaseIdx] = useState(null);
 
@@ -274,6 +275,37 @@ export default function CinematicSpaceTemplate({ portfolio }) {
     { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' },
   ];
+
+  const scrollToSection = (id) => {
+    setActiveSection(id);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Scroll observer to highlight active nav pill
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['overview', 'projects', 'about', 'contact'];
+      const scrollPos = window.scrollY + window.innerHeight * 0.33;
+
+      for (const sId of sections) {
+        const el = document.getElementById(sId);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(sId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Format projects array for 3D wheel gallery
   const formattedProjects = useMemo(() => {
@@ -311,12 +343,12 @@ export default function CinematicSpaceTemplate({ portfolio }) {
   const categories = ['ALL', 'WEBSITE', 'DESIGNS', 'MOBILE'];
 
   return (
-    <div className="min-h-screen bg-[#060608] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#ff6b1a] selection:text-black">
+    <div ref={containerRef} className="min-h-screen bg-[#080808] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#ff6b1a] selection:text-black">
       
-      {/* 3D Video Scrub background layer */}
-      <VideoScrub activeTab={activeTab} />
+      {/* Bidirectional 3D Video Scrub Background */}
+      <VideoScrub containerRef={containerRef} />
 
-      {/* Ambient background glow */}
+      {/* Ambient lighting glow */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-[#ff6b1a]/15 via-amber-900/10 to-transparent rounded-full blur-[150px]" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#ff6b1a]/5 rounded-full blur-[120px]" />
@@ -326,19 +358,19 @@ export default function CinematicSpaceTemplate({ portfolio }) {
       <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#0A0A0E]/80 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 shadow-2xl flex items-center space-x-2">
         <div className="flex items-center space-x-1">
           {navItems.map((item) => {
-            const isActive = activeTab === item.id;
+            const isActive = activeSection === item.id;
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => scrollToSection(item.id)}
                 className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all relative ${
                   isActive ? 'text-black font-extrabold' : 'text-white/60 hover:text-white'
                 }`}
               >
                 {isActive && (
                   <motion.div
-                    layoutId="activeTabPill"
+                    layoutId="activeNavPill"
                     className="absolute inset-0 bg-[#ff6b1a] rounded-full z-0 shadow-[0_0_15px_rgba(255,107,26,0.5)]"
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
@@ -361,266 +393,258 @@ export default function CinematicSpaceTemplate({ portfolio }) {
         </div>
       </header>
 
-      {/* 2. TABBED CONTENT RENDERER */}
-      <main className="relative z-10 min-h-screen">
+      {/* 2. CONTINUOUS LONG-SCROLL CANVAS */}
+      <main className="relative z-10">
         
-        {/* VIEW 1: HERO OVERVIEW */}
-        {activeTab === 'overview' && (
-          <section className="min-h-screen flex flex-col justify-center px-8 sm:px-16 md:px-24 max-w-5xl mx-auto space-y-8 pt-20">
+        {/* SECTION 1: HERO OVERVIEW */}
+        <section id="overview" className="min-h-screen flex flex-col justify-center px-8 sm:px-16 md:px-24 max-w-5xl mx-auto space-y-8 pt-20">
+          <div>
+            <p className="text-[10px] md:text-xs text-[#ff6b1a] font-mono font-bold tracking-[0.3em] uppercase mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#ff6b1a] animate-ping" />
+              <span>{headline || 'Digital Experience Designer'}</span>
+            </p>
+
+            <h1 className="font-black tracking-tighter text-[clamp(2.5rem,7vw,6.5rem)] leading-none text-white mb-6">
+              Hey, I'm <span className="text-[#ff6b1a]">{full_name || 'Developer'}</span>.
+            </h1>
+          </div>
+
+          <div className="max-w-2xl space-y-4">
+            <BlurText
+              text={bio || 'I create *immersive* digital experiences that blend design, motion, and technology into something visually *memorable* and smooth to use.'}
+              delay={25}
+              animateBy="words"
+              className="text-base md:text-lg text-white/70 font-light leading-relaxed"
+            />
+            <BlurText
+              text="Combining development with *cinematic* styling, interactive components, and *modern* recruiter-ready presentation."
+              delay={20}
+              animateBy="words"
+              className="text-xs md:text-sm text-white/40 font-light leading-relaxed"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => scrollToSection('projects')}
+              className="px-6 py-3.5 bg-[#ff6b1a] hover:bg-[#ff843d] text-black font-mono font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-[0_0_25px_rgba(255,107,26,0.4)] transition-all hover:scale-105"
+            >
+              Explore Work ↓
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('contact')}
+              className="px-6 py-3.5 border border-white/20 hover:border-white/50 text-white font-mono font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-white/5 transition-all"
+            >
+              Get In Touch
+            </button>
+          </div>
+        </section>
+
+        {/* SECTION 2: 3D PROJECT ARCHIVE */}
+        <section id="projects" className="relative w-full min-h-screen py-24 px-6 sm:px-12 max-w-6xl mx-auto space-y-8 flex flex-col justify-between">
+          
+          {/* Header Title */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 z-20">
             <div>
-              <p className="text-[10px] md:text-xs text-[#ff6b1a] font-mono font-bold tracking-[0.3em] uppercase mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#ff6b1a] animate-ping" />
-                <span>{headline || 'Digital Experience Designer'}</span>
+              <p className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold mb-1">
+                Creative
               </p>
-
-              <h1 className="font-black tracking-tighter text-[clamp(2.5rem,7vw,6.5rem)] leading-none text-white mb-6">
-                Hey, I'm <span className="text-[#ff6b1a]">{full_name || 'Developer'}</span>.
-              </h1>
+              <h2 className="text-4xl sm:text-6xl font-extrabold tracking-tighter text-white">
+                Archive.
+              </h2>
             </div>
 
-            <div className="max-w-2xl space-y-4">
-              <BlurText
-                text={bio || 'I create *immersive* digital experiences that blend design, motion, and technology into something visually *memorable* and smooth to use.'}
-                delay={25}
-                animateBy="words"
-                className="text-base md:text-lg text-white/70 font-light leading-relaxed"
+            {/* Category Filters */}
+            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-4 py-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full transition-all ${
+                    activeCategory === cat ? 'bg-[#ff6b1a] text-black' : 'text-white/40 hover:text-white'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3D Circular Wheel Canvas */}
+          <div className="w-full h-[450px] bg-[#0A0A0E]/80 border border-white/10 rounded-3xl overflow-hidden relative shadow-2xl z-10">
+            {galleryItems.length > 0 ? (
+              <CircularGallery
+                key={activeCategory}
+                items={galleryItems}
+                bend={3}
+                textColor="gradient"
+                borderRadius={0.06}
+                font="bold 28px 'Space Grotesk', sans-serif"
+                scrollSpeed={2}
+                onItemClick={(idx) => setShowcaseIdx(idx)}
               />
-              <BlurText
-                text="Combining development with *cinematic* styling, interactive components, and *modern* recruiter-ready presentation."
-                delay={20}
-                animateBy="words"
-                className="text-xs md:text-sm text-white/40 font-light leading-relaxed"
-              />
-            </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-white/30 font-mono text-xs uppercase tracking-widest">
+                No projects found in this category.
+              </div>
+            )}
+          </div>
 
-            <div className="flex flex-wrap items-center gap-4 pt-4">
-              <button
-                type="button"
-                onClick={() => setActiveTab('projects')}
-                className="px-6 py-3.5 bg-[#ff6b1a] hover:bg-[#ff843d] text-black font-mono font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-[0_0_25px_rgba(255,107,26,0.4)] transition-all hover:scale-105"
-              >
-                Explore Work ↓
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('contact')}
-                className="px-6 py-3.5 border border-white/20 hover:border-white/50 text-white font-mono font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-white/5 transition-all"
-              >
-                Get In Touch
-              </button>
-            </div>
-          </section>
-        )}
+          {/* Wheel Control Helper */}
+          <div className="text-center z-20 font-mono text-[10px] text-white/40 uppercase tracking-[0.3em]">
+            Drag or Scroll Wheel to Rotate • Click Card to Open Showcase
+          </div>
 
-        {/* VIEW 2: 3D PROJECT ARCHIVE */}
-        {activeTab === 'projects' && (
-          <section className="relative w-full h-screen overflow-hidden flex flex-col justify-between pt-24 pb-8">
+        </section>
+
+        {/* SECTION 3: ABOUT & 3D PROFILE CARD */}
+        <section id="about" className="px-6 sm:px-14 lg:px-16 py-28 max-w-[1250px] mx-auto space-y-16">
+          
+          {/* Top Grid: Profile Card + Biography */}
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-12 items-start">
             
-            {/* Header Title */}
-            <div className="px-8 sm:px-16 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 z-20">
-              <div>
-                <p className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold mb-1">
-                  Creative
-                </p>
-                <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tighter text-white">
-                  Archive.
-                </h1>
+            {/* Left Column: Interactive 3D Profile Card */}
+            <div className="flex justify-center sticky top-28">
+              <ProfileCard
+                name={full_name}
+                title={headline}
+                handle={userHandle}
+                avatarUrl={userAvatar}
+                status="Available for Hire"
+                contactText="Hire Me"
+                showUserInfo={true}
+                enableTilt={true}
+                onContactClick={() => scrollToSection('contact')}
+              />
+            </div>
+
+            {/* Right Column: Dynamic Candidate Biography */}
+            <div className="space-y-6">
+              <p className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
+                Biography & Approach
+              </p>
+              
+              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                Design, Motion & <br />
+                <span className="font-serif italic text-[#ff6b1a] font-normal">Modern Tech</span>.
+              </h2>
+
+              <div className="space-y-4 text-xs sm:text-sm text-white/60 font-light leading-relaxed font-sans">
+                <p>{bio || 'Passionate software engineer focused on building responsive, high-performance web applications with modern frontend frameworks and backend databases.'}</p>
               </div>
 
-              {/* Category Filters */}
-              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-4 py-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full transition-all ${
-                      activeCategory === cat ? 'bg-[#ff6b1a] text-black' : 'text-white/40 hover:text-white'
-                    }`}
-                  >
-                    {cat}
-                  </button>
+              {userEmail && (
+                <a
+                  href={`mailto:${userEmail}`}
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-[#ff6b1a]/40 text-[#ff6b1a] text-[10px] font-mono font-bold uppercase tracking-widest rounded-xl hover:bg-[#ff6b1a] hover:text-black transition-colors"
+                >
+                  View Resume / Email <ArrowUpRight className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
+
+          </div>
+
+          {/* Bottom 3-Column Skills & Experience Matrix */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-white/10">
+            
+            {/* Column 1: Tech Stack */}
+            <div className="space-y-4">
+              <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
+                Tech I Work With
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((s) => (
+                  <span key={s.id} className="px-3 py-1.5 bg-white/90 rounded-lg text-[10px] font-mono font-bold text-black uppercase">
+                    {s.name}
+                  </span>
                 ))}
               </div>
             </div>
 
-            {/* 3D Circular Wheel Canvas */}
-            <div className="flex-1 w-full relative z-10">
-              {galleryItems.length > 0 ? (
-                <CircularGallery
-                  key={activeCategory}
-                  items={galleryItems}
-                  bend={3}
-                  textColor="gradient"
-                  borderRadius={0.06}
-                  font="bold 28px 'Space Grotesk', sans-serif"
-                  scrollSpeed={2}
-                  onItemClick={(idx) => setShowcaseIdx(idx)}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center text-white/30 font-mono text-xs uppercase tracking-widest">
-                  No projects found in this category.
-                </div>
-              )}
+            {/* Column 2: Tools & Credentials */}
+            <div className="space-y-4">
+              <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
+                Credentials & Honors
+              </p>
+              <div className="space-y-2 font-mono text-xs">
+                {achievements.map((ach) => (
+                  <div key={ach.id} className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                    <div className="font-bold text-white text-[11px]">{ach.title}</div>
+                    <div className="text-[10px] text-white/50">{ach.issuer} · {ach.date}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Wheel Control Helper */}
-            <div className="text-center z-20 font-mono text-[10px] text-white/40 uppercase tracking-[0.3em]">
-              Drag or Scroll Wheel to Rotate • Click Card to Open Showcase
+            {/* Column 3: Career History */}
+            <div className="space-y-4">
+              <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
+                Work & Education
+              </p>
+              <div className="space-y-3 font-mono">
+                {experiences.map((exp) => (
+                  <div key={exp.id} className="border-l-2 border-[#ff6b1a]/40 pl-3 py-0.5 space-y-0.5">
+                    <h4 className="text-[11px] text-white font-bold">{exp.role}</h4>
+                    <p className="text-[10px] text-[#ff6b1a]">{exp.company} ({exp.start_date} – {exp.end_date})</p>
+                  </div>
+                ))}
+                {education.map((edu) => (
+                  <div key={edu.id} className="border-l-2 border-amber-500/40 pl-3 py-0.5 space-y-0.5">
+                    <h4 className="text-[11px] text-white font-bold">{edu.institution}</h4>
+                    <p className="text-[10px] text-slate-400">{edu.degree} ({edu.start_year} – {edu.end_year})</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-          </section>
-        )}
+          </div>
 
-        {/* VIEW 3: ABOUT & 3D PROFILE CARD */}
-        {activeTab === 'about' && (
-          <section className="px-6 sm:px-14 lg:px-16 pt-28 pb-20 max-w-[1250px] mx-auto space-y-16">
-            
-            {/* Top Grid: Profile Card + Biography */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-12 items-start">
-              
-              {/* Left Column: Interactive 3D Profile Card */}
-              <div className="flex justify-center sticky top-28">
-                <ProfileCard
-                  name={full_name}
-                  title={headline}
-                  handle={userHandle}
-                  avatarUrl={userAvatar}
-                  status="Available for Hire"
-                  contactText="Hire Me"
-                  showUserInfo={true}
-                  enableTilt={true}
-                  onContactClick={() => setActiveTab('contact')}
-                />
-              </div>
+        </section>
 
-              {/* Right Column: Dynamic Candidate Biography */}
-              <div className="space-y-6">
-                <p className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
-                  Biography & Approach
-                </p>
-                
-                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-                  Design, Motion & <br />
-                  <span className="font-serif italic text-[#ff6b1a] font-normal">Modern Tech</span>.
-                </h1>
+        {/* SECTION 4: CONTACT & FOOTER */}
+        <section id="contact" className="min-h-screen flex flex-col justify-center items-center text-center px-8 sm:px-16 max-w-4xl mx-auto space-y-8 py-20">
+          <span className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
+            [ Contact Trigger ]
+          </span>
 
-                <div className="space-y-4 text-xs sm:text-sm text-white/60 font-light leading-relaxed font-sans">
-                  <p>{bio || 'Passionate software engineer focused on building responsive, high-performance web applications with modern frontend frameworks and backend databases.'}</p>
-                </div>
+          <h2 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            Let's build something <br />
+            <span className="font-serif italic text-[#ff6b1a] font-normal">extraordinary together</span>.
+          </h2>
 
-                {userEmail && (
-                  <a
-                    href={`mailto:${userEmail}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-[#ff6b1a]/40 text-[#ff6b1a] text-[10px] font-mono font-bold uppercase tracking-widest rounded-xl hover:bg-[#ff6b1a] hover:text-black transition-colors"
-                  >
-                    View Resume / Email <ArrowUpRight className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
+          <p className="text-xs sm:text-sm text-white/50 max-w-lg font-sans leading-relaxed">
+            Have an ambitious software project or job opportunity? Send a direct email to collaborate.
+          </p>
 
+          {userEmail && (
+            <div className="pt-4">
+              <MagneticCTA href={`mailto:${userEmail}`}>
+                Send Email ({userEmail})
+              </MagneticCTA>
             </div>
+          )}
 
-            {/* Bottom 3-Column Skills & Experience Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-white/10">
-              
-              {/* Column 1: Tech Stack */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
-                  Tech I Work With
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((s) => (
-                    <span key={s.id} className="px-3 py-1.5 bg-white/90 rounded-lg text-[10px] font-mono font-bold text-black uppercase">
-                      {s.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 2: Tools & Credentials */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
-                  Credentials & Honors
-                </p>
-                <div className="space-y-2 font-mono text-xs">
-                  {achievements.map((ach) => (
-                    <div key={ach.id} className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
-                      <div className="font-bold text-white text-[11px]">{ach.title}</div>
-                      <div className="text-[10px] text-white/50">{ach.issuer} · {ach.date}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 3: Career History */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
-                  Work & Education
-                </p>
-                <div className="space-y-3 font-mono">
-                  {experiences.map((exp) => (
-                    <div key={exp.id} className="border-l-2 border-[#ff6b1a]/40 pl-3 py-0.5 space-y-0.5">
-                      <h4 className="text-[11px] text-white font-bold">{exp.role}</h4>
-                      <p className="text-[10px] text-[#ff6b1a]">{exp.company} ({exp.start_date} – {exp.end_date})</p>
-                    </div>
-                  ))}
-                  {education.map((edu) => (
-                    <div key={edu.id} className="border-l-2 border-amber-500/40 pl-3 py-0.5 space-y-0.5">
-                      <h4 className="text-[11px] text-white font-bold">{edu.institution}</h4>
-                      <p className="text-[10px] text-slate-400">{edu.degree} ({edu.start_year} – {edu.end_year})</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-          </section>
-        )}
-
-        {/* VIEW 4: CONTACT & FOOTER */}
-        {activeTab === 'contact' && (
-          <section id="contact-section" className="min-h-screen flex flex-col justify-center items-center text-center px-8 sm:px-16 max-w-4xl mx-auto space-y-8 pt-20">
-            <span className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
-              [ Contact Trigger ]
-            </span>
-
-            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-              Let's build something <br />
-              <span className="font-serif italic text-[#ff6b1a] font-normal">extraordinary together</span>.
-            </h1>
-
-            <p className="text-xs sm:text-sm text-white/50 max-w-lg font-sans leading-relaxed">
-              Have an ambitious software project or job opportunity? Send a direct email to collaborate.
-            </p>
-
-            {userEmail && (
-              <div className="pt-4">
-                <MagneticCTA href={`mailto:${userEmail}`}>
-                  Send Email ({userEmail})
-                </MagneticCTA>
-              </div>
+          {/* Social Links */}
+          <div className="flex items-center justify-center gap-6 pt-6 text-xs font-mono">
+            {github_url && (
+              <a href={safeUrl(github_url)} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors">
+                <Github className="w-4 h-4 text-[#ff6b1a]" /> GitHub
+              </a>
             )}
+            {linkedin_url && (
+              <a href={safeUrl(linkedin_url)} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors">
+                <Linkedin className="w-4 h-4 text-[#ff6b1a]" /> LinkedIn
+              </a>
+            )}
+          </div>
 
-            {/* Social Links */}
-            <div className="flex items-center justify-center gap-6 pt-6 text-xs font-mono">
-              {github_url && (
-                <a href={safeUrl(github_url)} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors">
-                  <Github className="w-4 h-4 text-[#ff6b1a]" /> GitHub
-                </a>
-              )}
-              {linkedin_url && (
-                <a href={safeUrl(linkedin_url)} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors">
-                  <Linkedin className="w-4 h-4 text-[#ff6b1a]" /> LinkedIn
-                </a>
-              )}
-            </div>
-
-            <footer className="pt-16 text-[10px] font-mono text-white/20 uppercase tracking-widest">
-              © {new Date().getFullYear()} {full_name} • Built with StackFolio
-            </footer>
-          </section>
-        )}
+          <footer className="pt-16 text-[10px] font-mono text-white/20 uppercase tracking-widest">
+            © {new Date().getFullYear()} {full_name} • Built with StackFolio
+          </footer>
+        </section>
 
       </main>
 
