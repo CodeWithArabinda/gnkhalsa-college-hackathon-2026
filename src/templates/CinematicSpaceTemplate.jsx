@@ -4,6 +4,7 @@ import { Github, Linkedin, Mail, MapPin, ExternalLink, Briefcase, GraduationCap,
 import ProfileCard from './ProfileCard';
 import BlurText from './BlurText';
 import CircularGallery from './CircularGallery';
+import VideoScrub from './VideoScrub';
 
 function safeUrl(url) {
   if (!url) return '#';
@@ -112,7 +113,7 @@ function ProjectShowcaseModal({ items, startIdx, onClose }) {
       <AnimatePresence mode="wait" custom={dir}>
         <motion.div key={idx} className="absolute inset-0 flex flex-col md:flex-row" initial="enter" animate="center" exit="exit" custom={dir}>
           
-          {/* Left Media Canvas */}
+          {/* Left Media Lens */}
           <motion.div
             className="relative w-full md:w-[56%] h-[42vh] md:h-full shrink-0 overflow-hidden cursor-crosshair"
             variants={imageV}
@@ -236,7 +237,7 @@ function ProjectShowcaseModal({ items, startIdx, onClose }) {
 }
 
 /* ═══════════════════════════════════════════════
-   MAIN CINEMATIC SPACE TEMPLATE (SARANG 1:1 REPLICA)
+   MAIN CINEMATIC SPACE TEMPLATE
    ═══════════════════════════════════════════════ */
 export default function CinematicSpaceTemplate({ portfolio }) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'projects' | 'about' | 'contact'
@@ -310,8 +311,11 @@ export default function CinematicSpaceTemplate({ portfolio }) {
   const categories = ['ALL', 'WEBSITE', 'DESIGNS', 'MOBILE'];
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#ff6b1a] selection:text-black">
+    <div className="min-h-screen bg-[#060608] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#ff6b1a] selection:text-black">
       
+      {/* 3D Video Scrub background layer */}
+      <VideoScrub />
+
       {/* Ambient background glow */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-[#ff6b1a]/15 via-amber-900/10 to-transparent rounded-full blur-[150px]" />
@@ -533,7 +537,7 @@ export default function CinematicSpaceTemplate({ portfolio }) {
                 </div>
               </div>
 
-              {/* Column 2: Tools & Libraries */}
+              {/* Column 2: Tools & Credentials */}
               <div className="space-y-4">
                 <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
                   Credentials & Honors
@@ -576,7 +580,7 @@ export default function CinematicSpaceTemplate({ portfolio }) {
 
         {/* VIEW 4: CONTACT & FOOTER */}
         {activeTab === 'contact' && (
-          <section className="min-h-screen flex flex-col justify-center items-center text-center px-8 sm:px-16 max-w-4xl mx-auto space-y-8 pt-20">
+          <section id="contact-section" className="min-h-screen flex flex-col justify-center items-center text-center px-8 sm:px-16 max-w-4xl mx-auto space-y-8 pt-20">
             <span className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
               [ Contact Trigger ]
             </span>
