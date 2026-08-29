@@ -56,9 +56,12 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
+      const errMsg = err.message?.includes("VITE_GEMINI_API_KEY")
+        ? "⚠️ Gemini API key is missing or invalid. Please add VITE_GEMINI_API_KEY to your .env file."
+        : `⚠️ Error: ${err.message || "Something went wrong processing your request."}`;
       setMessages((prev) => [
         ...prev,
-        { id: `err-${Date.now()}`, role: "assistant", text: "Something went wrong processing your request." }
+        { id: `err-${Date.now()}`, role: "assistant", text: errMsg }
       ]);
     } finally {
       setIsGenerating(false);

@@ -1,52 +1,70 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-
 export async function processUserPrompt(userPrompt, currentSchema) {
-  if (!apiKey || !genAI) {
-    console.error("VITE_GEMINI_API_KEY is missing in environment variables.");
-    throw new Error("Missing Gemini API Key. Please add VITE_GEMINI_API_KEY to your .env file.");
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey || apiKey === "your_gemini_api_key_here") {
+    console.error("Missing or invalid VITE_GEMINI_API_KEY in .env");
+    throw new Error("Missing VITE_GEMINI_API_KEY");
   }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
 
   const systemInstruction = `
 You are an expert AI Web Architect. 
-Your job is to update an existing developer portfolio JSON schema based on user instructions.
+Your job is to mutate and return an updated developer portfolio JSON schema based on the user request.
 
-CRITICAL RULES:
-1. You MUST return ONLY a valid JSON object with two keys:
-   - "schema": The complete updated portfolio schema object.
-   - "copilotMessage": A concise, friendly 1-sentence confirmation explaining what you changed.
-2. DO NOT wrap the output in markdown backticks (\`\`\`json). Return raw JSON only.
-3. Preserve existing sections while modifying or adding requested content (names, headlines, bio, skills, projects, colors).
-4. If asked to change the user's name or headline, update the "HeroBlock" section heading and tagline accordingly.
+STRICT INSTRUCTIONS:
+1. Return ONLY valid JSON with this exact structure:
+   {
+     "schema": { ...updated portfolioSchema object... },
+     "copilotMessage": "Short 1-sentence confirmation of changes."
+   }
+2. Never wrap output in markdown codeblocks (no \`\`\`json).
+3. If user requests to change name or headline, update the HeroBlock section content directly.
+4. Keep all existing valid schema fields intact.
 `;
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: systemInstruction,
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.2,
-    },
-  });
+  const promptText = `
+Current Schema:
+${JSON.stringify(currentSchema)}
 
-  const promptContent = `
-Current Portfolio Schema:
-${JSON.stringify(currentSchema, null, 2)}
-
-User Change Request:
-"${userPrompt}"
-
-Update the schema precisely according to the user's request.
+User Request:
+${userPrompt}
 `;
 
-  const response = await model.generateContent(promptContent);
-  const text = response.response.text();
-  const parsed = JSON.parse(text);
+  const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash"];
+  let lastError = null;
 
-  return {
-    updatedSchema: parsed.schema || parsed,
-    aiMessage: parsed.copilotMessage || "Portfolio successfully updated!",
-  };
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: systemInstruction,
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.2,
+        },
+      });
+
+      const response = await model.generateContent(promptText);
+      let rawText = response.response.text().trim();
+
+      // Strip markdown codeblock backticks if present
+      if (rawText.startsWith("```")) {
+        rawText = rawText.replace(/^```(json)?\n?/, "").replace(/```$/, "").trim();
+      }
+
+      const parsed = JSON.parse(rawText);
+      return {
+        updatedSchema: parsed.schema || parsed,
+        aiMessage: parsed.copilotMessage || "Portfolio schema successfully updated!",
+      };
+    } catch (err) {
+      console.warn(`Attempt with ${modelName} failed:`, err);
+      lastError = err;
+    }
+  }
+
+  console.error("Detailed Gemini API Execution Error:", lastError);
+  throw lastError || new Error("Gemini API call failed");
 }
