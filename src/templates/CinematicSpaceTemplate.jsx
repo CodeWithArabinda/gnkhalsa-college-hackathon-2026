@@ -1,18 +1,253 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Github, Linkedin, Mail, MapPin, ExternalLink, Briefcase, GraduationCap, Award, ArrowUpRight, Sparkles, Code2, Terminal, Send, ChevronRight, X } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Github, Linkedin, Mail, MapPin, ExternalLink, Briefcase, GraduationCap, Award, ArrowUpRight, Download, Sparkles, X } from 'lucide-react';
 import ProfileCard from './ProfileCard';
 import BlurText from './BlurText';
 import CircularGallery from './CircularGallery';
 
+function safeUrl(url) {
+  if (!url) return '#';
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+/* ─── Magnetic CTA ─── */
+function MagneticCTA({ href, children }) {
+  const ref = useRef(null);
+  return (
+    <a
+      ref={ref}
+      href={safeUrl(href)}
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseMove={(e) => {
+        if (!ref.current) return;
+        const b = ref.current.getBoundingClientRect();
+        ref.current.style.transform = `translate(${(e.clientX - b.left - b.width / 2) * 0.25}px,${(e.clientY - b.top - b.height / 2) * 0.25}px)`;
+      }}
+      onMouseLeave={() => {
+        if (ref.current) ref.current.style.transform = 'translate(0,0)';
+      }}
+      className="inline-flex items-center gap-3 px-7 py-3.5 bg-[#ff6b1a] text-black font-black rounded-xl text-[10px] uppercase tracking-[0.25em] hover:bg-[#ff8c42] will-change-transform"
+      style={{ transition: 'transform 0.2s cubic-bezier(.23,1,.32,1), background-color 0.3s' }}
+    >
+      {children}
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M3.5 9.5L9.5 3.5M9.5 3.5H5.5M9.5 3.5v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    </a>
+  );
+}
+
+/* ─── Fullscreen Project Showcase Modal ─── */
+function ProjectShowcaseModal({ items, startIdx, onClose }) {
+  const [idx, setIdx] = useState(startIdx || 0);
+  const [dir, setDir] = useState(1);
+  const locked = useRef(false);
+  const touchY = useRef(0);
+  const imgRef = useRef(null);
+  const current = items[idx];
+
+  const go = useCallback((next) => {
+    if (next < 0 || next >= items.length || locked.current || next === idx) return;
+    locked.current = true;
+    setDir(next > idx ? 1 : -1);
+    setIdx(next);
+    setTimeout(() => { locked.current = false; }, 600);
+  }, [items, idx]);
+
+  useEffect(() => {
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (!locked.current) {
+        if (e.deltaY > 25) go(idx + 1);
+        else if (e.deltaY < -25) go(idx - 1);
+      }
+    };
+    const onTS = (e) => { touchY.current = e.touches[0].clientY; };
+    const onTE = (e) => {
+      const d = touchY.current - e.changedTouches[0].clientY;
+      if (Math.abs(d) > 40) go(d > 0 ? idx + 1 : idx - 1);
+    };
+    const onKey = (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'j') go(idx + 1);
+      else if (e.key === 'ArrowUp' || e.key === 'k') go(idx - 1);
+      else if (e.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', onTS, { passive: true });
+    window.addEventListener('touchend', onTE, { passive: true });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTS);
+      window.removeEventListener('touchend', onTE);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [go, idx, onClose]);
+
+  const slideV = {
+    enter: (d) => ({ y: d > 0 ? '8%' : '-8%', opacity: 0 }),
+    center: { y: '0%', opacity: 1 },
+    exit: (d) => ({ y: d > 0 ? '-8%' : '8%', opacity: 0 }),
+  };
+  const imageV = { enter: { scale: 1.12, opacity: 0 }, center: { scale: 1.02, opacity: 1 }, exit: { scale: 0.95, opacity: 0 } };
+  const spring = { type: 'tween', duration: 0.6, ease: [0.76, 0, 0.24, 1] };
+
+  if (!current) return null;
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] bg-[#060606] overflow-hidden select-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div
+        className="pointer-events-none fixed inset-0 z-[105]"
+        style={{ background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)' }}
+      />
+
+      <AnimatePresence mode="wait" custom={dir}>
+        <motion.div key={idx} className="absolute inset-0 flex flex-col md:flex-row" initial="enter" animate="center" exit="exit" custom={dir}>
+          
+          {/* Left Media Canvas */}
+          <motion.div
+            className="relative w-full md:w-[56%] h-[42vh] md:h-full shrink-0 overflow-hidden cursor-crosshair"
+            variants={imageV}
+            transition={{ ...spring, duration: 0.7 }}
+            onMouseMove={(e) => {
+              if (!imgRef.current) return;
+              const r = imgRef.current.getBoundingClientRect();
+              imgRef.current.style.transform = `scale(1.06) translate(${((e.clientX - r.left) / r.width - 0.5) * 12}px,${((e.clientY - r.top) / r.height - 0.5) * 8}px)`;
+            }}
+            onMouseLeave={() => {
+              if (imgRef.current) imgRef.current.style.transform = 'scale(1.02) translate(0,0)';
+            }}
+          >
+            {current.image ? (
+              <img
+                ref={imgRef}
+                src={current.image}
+                alt={current.text}
+                className="w-full h-full object-cover will-change-transform"
+                style={{ transform: 'scale(1.02)', transition: 'transform 0.4s cubic-bezier(.23,1,.32,1)' }}
+              />
+            ) : (
+              <div className="w-full h-full bg-[#111] flex items-center justify-center text-white/30 text-xs font-mono">
+                Project Preview
+              </div>
+            )}
+            <div className="absolute inset-0 hidden md:block" style={{ background: 'linear-gradient(90deg, transparent 55%, #060606 100%)' }} />
+            <div className="absolute inset-0 md:hidden" style={{ background: 'linear-gradient(180deg, transparent 40%, #060606 100%)' }} />
+          </motion.div>
+
+          {/* Right Details Panel */}
+          <motion.div className="flex-1 flex flex-col justify-center px-8 md:px-16 py-6 md:py-0 relative z-10" variants={slideV} custom={dir} transition={spring}>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-[#ff6b1a] font-mono text-xs font-black tracking-[0.3em]">{String(idx + 1).padStart(2, '0')}</span>
+              <div className="w-10 h-px bg-white/10" />
+              <span className="text-white/20 font-mono text-xs tracking-[0.3em]">{String(items.length).padStart(2, '0')}</span>
+            </div>
+
+            <span
+              className="inline-block self-start px-3.5 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.4em] mb-4 border"
+              style={{ background: 'rgba(255,107,26,0.08)', borderColor: 'rgba(255,107,26,0.15)', color: '#ff6b1a' }}
+            >
+              {current.category || 'PROJECT'}
+            </span>
+
+            <h1 className="font-black text-white leading-[0.95] tracking-[-0.04em] mb-4 text-3xl sm:text-5xl">
+              {current.text}
+            </h1>
+
+            {current.description && (
+              <p className="text-xs sm:text-sm text-white/50 font-light leading-[1.8] mb-6 max-w-md font-sans">
+                {current.description}
+              </p>
+            )}
+
+            {current.tech && current.tech.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-6">
+                {current.tech.map((t, i) => (
+                  <span key={i} className="px-3 py-1 bg-white/[0.04] border border-white/[0.08] rounded-lg text-[9px] text-[#ff6b1a] tracking-[0.15em] font-mono uppercase">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3">
+              {current.live_url && <MagneticCTA href={current.live_url}>View Live Demo</MagneticCTA>}
+              {current.github_url && (
+                <a
+                  href={safeUrl(current.github_url)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 border border-white/20 text-white/80 hover:text-white hover:border-white/50 rounded-xl text-[10px] uppercase tracking-[0.25em] font-bold transition-all"
+                >
+                  <Github className="w-3.5 h-3.5" /> Repository
+                </a>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Side dots */}
+      <div className="fixed right-5 md:right-8 top-1/2 -translate-y-1/2 z-[120] flex flex-col items-center gap-3">
+        <button
+          onClick={() => go(idx - 1)}
+          disabled={idx === 0}
+          className={`p-2 rounded-full border backdrop-blur-sm transition-all ${idx === 0 ? 'border-white/[0.04] text-white/[0.08] cursor-default' : 'border-white/10 text-white/40 hover:text-white'}`}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 7.5l3.5-3.5 3.5 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
+        <div className="flex flex-col gap-[6px] py-2">
+          {items.map((_, i) => (
+            <button key={i} onClick={() => go(i)} title={items[i]?.text} className="flex items-center justify-center">
+              <motion.div
+                className="rounded-full"
+                animate={{ width: i === idx ? 6 : 4, height: i === idx ? 18 : 4, backgroundColor: i === idx ? '#ff6b1a' : 'rgba(255,255,255,0.15)' }}
+                transition={{ duration: 0.35, ease: [0.76, 0, 0.24, 1] }}
+              />
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => go(idx + 1)}
+          disabled={idx === items.length - 1}
+          className={`p-2 rounded-full border backdrop-blur-sm transition-all ${idx === items.length - 1 ? 'border-white/[0.04] text-white/[0.08] cursor-default' : 'border-white/10 text-white/40 hover:text-white'}`}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
+      </div>
+
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="fixed top-6 right-6 md:right-16 z-[120] flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 text-white/60 hover:text-white hover:bg-white/10 text-[10px] tracking-[0.3em] uppercase transition-all backdrop-blur-md"
+      >
+        <X className="w-4 h-4" /> Close
+      </button>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   MAIN CINEMATIC SPACE TEMPLATE (SARANG 1:1 REPLICA)
+   ═══════════════════════════════════════════════ */
 export default function CinematicSpaceTemplate({ portfolio }) {
-  const [activeSection, setActiveSection] = useState('overview');
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'projects' | 'about' | 'contact'
+  const [activeCategory, setActiveCategory] = useState('ALL');
+  const [showcaseIdx, setShowcaseIdx] = useState(null);
 
   if (!portfolio) return null;
 
   const {
     full_name = 'Developer',
-    headline = 'Creative Developer & Designer',
+    headline = 'Digital Experience Designer',
     bio = '',
     profile_image_url = '',
     avatar_url = '',
@@ -32,418 +267,366 @@ export default function CinematicSpaceTemplate({ portfolio }) {
   const userEmail = contact_email || email;
   const userHandle = (full_name || 'dev').toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  const scrollToSection = (id) => {
-    setActiveSection(id);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const navTabs = [
+  const navItems = [
     { id: 'overview', label: 'Overview' },
-    { id: 'profile', label: 'Identity' },
-    { id: 'projects', label: 'Projects' },
-    { id: 'skills', label: 'Skills' },
-    { id: 'experience', label: 'Experience' },
+    { id: 'projects', label: 'Archive' },
+    { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' },
   ];
 
-  // Map projects for CircularGallery (image + text)
-  const galleryItems = (projects.length > 0 ? projects : [
-    { title: 'Interactive Web Platform', description: 'Next.js & Tailwind CSS dynamic portal', technologies: ['React', 'Tailwind', 'GSAP'] },
-    { title: 'AI Assistant Interface', description: 'Real-time conversational studio', technologies: ['TypeScript', 'Node.js', 'AI'] },
-    { title: 'SaaS Command Center', description: 'High-performance recruiter dashboard', technologies: ['Vite', 'Supabase', 'React'] }
-  ]).map((p, idx) => ({
-    id: p.id || `proj-${idx}`,
-    image: p.image_url || `https://picsum.photos/seed/${p.id || idx}/800/600`,
-    text: p.title || `Project ${idx + 1}`,
-    description: p.description || '',
-    technologies: p.technologies || p.tech || [],
-    github_url: p.github_url || p.link || '',
-    live_url: p.live_url || ''
-  }));
+  // Format projects array for 3D wheel gallery
+  const formattedProjects = useMemo(() => {
+    const rawList = projects.length > 0 ? projects : [
+      { id: 'p1', title: 'Creative Studio Platform', description: 'Next.js & WebGL interactive experience', technologies: ['React', 'WebGL', 'GSAP'], category: 'WEBSITE' },
+      { id: 'p2', title: 'AI Workspace Engine', description: 'Real-time intelligent dashboard interface', technologies: ['TypeScript', 'Tailwind', 'AI'], category: 'DESIGNS' },
+      { id: 'p3', title: 'Portfolio Architecture', description: 'Modular multi-layout SaaS engine', technologies: ['Vite', 'Supabase', 'React'], category: 'MOBILE' }
+    ];
+
+    return rawList.map((p, idx) => ({
+      id: p.id || `proj-${idx}`,
+      image: p.image_url || `https://picsum.photos/seed/${p.id || idx}/800/600`,
+      text: p.title || `Project ${idx + 1}`,
+      description: p.description || '',
+      tech: p.technologies || p.tech || [],
+      category: (p.category || 'WEBSITE').toUpperCase(),
+      github_url: p.github_url || '',
+      live_url: p.live_url || ''
+    }));
+  }, [projects]);
+
+  // Filter projects by category
+  const filteredProjects = useMemo(() => {
+    if (activeCategory === 'ALL') return formattedProjects;
+    return formattedProjects.filter((p) => (p.category || '').toUpperCase().includes(activeCategory.toUpperCase()));
+  }, [formattedProjects, activeCategory]);
+
+  const galleryItems = useMemo(() => {
+    return filteredProjects.map((p) => ({
+      image: p.image,
+      text: p.text
+    }));
+  }, [filteredProjects]);
+
+  const categories = ['ALL', 'WEBSITE', 'DESIGNS', 'MOBILE'];
 
   return (
-    <div className="min-h-screen bg-[#060608] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#FF5722]/20 via-[#0B0B0E] to-[#060608] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#FF5722] selection:text-white">
+    <div className="min-h-screen bg-[#080808] text-white font-sans antialiased relative overflow-x-hidden selection:bg-[#ff6b1a] selection:text-black">
       
-      {/* Ambient Lighting Orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-gradient-to-b from-[#FF5722]/20 via-[#FF6B00]/10 to-transparent rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -left-40 w-96 h-96 bg-[#FF6B1A]/10 rounded-full blur-[130px]" />
-        <div className="absolute bottom-20 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[160px]" />
+      {/* Ambient background glow */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-[#ff6b1a]/15 via-amber-900/10 to-transparent rounded-full blur-[150px]" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#ff6b1a]/5 rounded-full blur-[120px]" />
       </div>
 
-      {/* Floating Glass Navigation */}
-      <nav className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-[#121218]/85 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 shadow-2xl flex items-center space-x-1 sm:space-x-3">
-        {navTabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => scrollToSection(tab.id)}
-            className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition-all relative ${
-              activeSection === tab.id
-                ? 'text-[#FF6B1A] font-bold bg-white/5'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {tab.label}
-            {activeSection === tab.id && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-[#FF6B1A] rounded-full shadow-[0_0_8px_#FF6B1A]" />
-            )}
-          </button>
-        ))}
-      </nav>
-
-      {/* Main Section Canvas */}
-      <div className="relative z-10 pt-28 pb-20 px-6 sm:px-12 max-w-6xl mx-auto space-y-28">
-
-        {/* 1. HERO SECTION */}
-        <section id="overview" className="min-h-[75vh] flex flex-col justify-center items-start space-y-8 pt-4">
-          <p className="text-[10px] sm:text-xs text-[#FF6B1A] tracking-[0.3em] uppercase font-mono font-bold flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#FF6B1A] animate-ping" />
-            <span>Digital Experience & Interactive Development</span>
-          </p>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-white">
-            Hey, I'm <br />
-            <span className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent">
-              {full_name}.
-            </span>
-          </h1>
-
-          <div className="max-w-2xl space-y-4">
-            <BlurText
-              text={bio || `I create *immersive* digital experiences that blend design, motion, and technology into something visually *memorable* and smooth to use.`}
-              delay={30}
-              animateBy="words"
-              direction="bottom"
-              className="text-base sm:text-lg text-white/80 font-medium leading-relaxed"
-            />
-            {headline && (
-              <p className="text-xs sm:text-sm font-serif italic text-amber-300/90 leading-relaxed">
-                Specialized as {headline}
-              </p>
-            )}
-          </div>
-
-          {/* Quick Badges & Contacts */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            {userEmail && (
-              <a
-                href={`mailto:${userEmail}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B1A] hover:bg-[#ff853a] text-black font-extrabold text-xs tracking-wider uppercase rounded-xl shadow-[0_0_25px_rgba(255,107,26,0.4)] transition-all hover:scale-105"
-              >
-                <Mail className="w-4 h-4" /> Get In Touch
-              </a>
-            )}
-            {github_url && (
-              <a
-                href={github_url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-white transition-all"
-              >
-                <Github className="w-4 h-4 text-[#FF6B1A]" /> GitHub
-              </a>
-            )}
-            {linkedin_url && (
-              <a
-                href={linkedin_url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-mono text-white transition-all"
-              >
-                <Linkedin className="w-4 h-4 text-[#FF6B1A]" /> LinkedIn
-              </a>
-            )}
-          </div>
-        </section>
-
-        {/* 2. 3D TILT PROFILE CARD SECTION (IDENTITY) */}
-        <section id="profile" className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-10 border-y border-white/10">
-          <div className="space-y-6">
-            <span className="text-[10px] text-[#FF6B1A] font-mono tracking-[0.3em] uppercase font-bold">
-              [ 01 ] Interactive Studio Card
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-              Identity & <span className="font-serif italic text-[#FF6B1A] font-normal">Atmosphere</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
-              Hover over the 3D studio card to experience dynamic perspective tilt, directional lighting glare, and backing warm ambient orange reflections.
-            </p>
-
-            <div className="space-y-3 font-mono text-xs text-slate-300">
-              {location && (
-                <div className="flex items-center gap-2 p-3 bg-white/[0.03] border border-white/10 rounded-xl">
-                  <MapPin className="w-4 h-4 text-[#FF6B1A]" />
-                  <span>Base Location: {location}</span>
-                </div>
-              )}
-              {userEmail && (
-                <div className="flex items-center gap-2 p-3 bg-white/[0.03] border border-white/10 rounded-xl">
-                  <Mail className="w-4 h-4 text-[#FF6B1A]" />
-                  <span>Direct Email: {userEmail}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <ProfileCard
-              name={full_name}
-              title={headline}
-              handle={userHandle}
-              avatarUrl={userAvatar}
-              status="Available for Hire"
-              contactText="Hire Me"
-              showUserInfo={true}
-              enableTilt={true}
-              onContactClick={() => {
-                if (userEmail) window.location.href = `mailto:${userEmail}`;
-              }}
-            />
-          </div>
-        </section>
-
-        {/* 3. 3D CIRCULAR GALLERY & PROJECT SHOWCASE */}
-        <section id="projects" className="space-y-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-white/10 pb-4 gap-2">
-            <div>
-              <span className="text-[10px] text-[#FF6B1A] font-mono tracking-[0.3em] uppercase font-bold">
-                [ 02 ] Selected Works
-              </span>
-              <h2 className="text-3xl font-extrabold text-white">
-                3D Interactive <span className="font-serif italic text-[#FF6B1A] font-normal">Project Deck</span>
-              </h2>
-            </div>
-            <p className="text-xs text-slate-400 font-mono">Drag or scroll to rotate wheel gallery</p>
-          </div>
-
-          {/* 3D Wheel Canvas */}
-          <div className="w-full h-[400px] bg-[#0A0A0F] border border-white/10 rounded-3xl overflow-hidden relative shadow-2xl">
-            <CircularGallery
-              items={galleryItems}
-              bend={3}
-              textColor="gradient"
-              borderRadius={0.06}
-              font="bold 28px 'Space Grotesk', sans-serif"
-              scrollSpeed={2}
-              onItemClick={(idx) => {
-                setSelectedProject(galleryItems[idx]);
-              }}
-            />
-          </div>
-
-          {/* Fallback Glassmorphic Project Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            {galleryItems.map((proj) => (
-              <div
-                key={proj.id}
-                onClick={() => setSelectedProject(proj)}
-                className="bg-white/[0.03] border border-white/10 hover:border-[#FF6B1A]/60 transition-all duration-300 rounded-2xl p-6 space-y-4 cursor-pointer group hover:shadow-[0_0_30px_rgba(255,107,26,0.2)]"
-              >
-                {proj.image && (
-                  <div className="h-44 rounded-xl overflow-hidden border border-white/10 relative">
-                    <img
-                      src={proj.image}
-                      alt={proj.text}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-lg text-white group-hover:text-[#FF6B1A] transition-colors">
-                      {proj.text}
-                    </h3>
-                    <ArrowUpRight className="w-5 h-5 text-slate-400 group-hover:text-[#FF6B1A] transition-colors" />
-                  </div>
-                  <p className="text-xs text-slate-400 leading-relaxed font-sans">{proj.description}</p>
-                </div>
-
-                {proj.technologies && proj.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-2">
-                    {proj.technologies.map((t) => (
-                      <span
-                        key={t}
-                        className="px-2.5 py-0.5 bg-[#FF6B1A]/10 text-[#FF6B1A] text-[10px] font-mono rounded border border-[#FF6B1A]/20"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 4. SKILLS & EXPERIENCE MATRIX */}
-        <section id="skills" className="space-y-8">
-          <div className="border-b border-white/10 pb-4">
-            <span className="text-[10px] text-[#FF6B1A] font-mono tracking-[0.3em] uppercase font-bold">
-              [ 03 ] Competencies
-            </span>
-            <h2 className="text-3xl font-extrabold text-white">
-              Tech Arsenal & <span className="font-serif italic text-[#FF6B1A] font-normal">Career History</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            {/* Skills */}
-            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 space-y-4">
-              <h3 className="text-xs font-mono font-bold text-[#FF6B1A] uppercase tracking-widest flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#FF6B1A]" /> Technical Stack
-              </h3>
-              <div className="flex flex-wrap gap-2.5 pt-2">
-                {skills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="flex items-center space-x-2 px-3.5 py-1.5 bg-[#121218] border border-white/10 hover:border-[#FF6B1A]/50 rounded-xl transition-colors"
-                  >
-                    <span className="text-xs font-medium text-white">{skill.name}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 bg-[#FF6B1A]/20 text-[#FF6B1A] rounded uppercase font-bold">
-                      {skill.level || 'PRO'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Experience & Education */}
-            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 space-y-6" id="experience">
-              {experiences.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-mono font-bold text-[#FF6B1A] uppercase tracking-widest flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-[#FF6B1A]" /> Work Timeline
-                  </h3>
-                  <div className="space-y-4 border-l-2 border-[#FF6B1A]/40 pl-4">
-                    {experiences.map((exp) => (
-                      <div key={exp.id} className="space-y-1">
-                        <div className="flex justify-between items-baseline flex-wrap gap-1">
-                          <h4 className="font-bold text-sm text-white">{exp.company}</h4>
-                          <span className="text-[10px] font-mono text-[#FF6B1A]">{exp.start_date} – {exp.end_date}</span>
-                        </div>
-                        <div className="text-xs font-mono text-amber-300">{exp.role}</div>
-                        <p className="text-xs text-slate-400 leading-relaxed">{exp.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {education.length > 0 && (
-                <div className="space-y-4 pt-2">
-                  <h3 className="text-xs font-mono font-bold text-[#FF6B1A] uppercase tracking-widest flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-[#FF6B1A]" /> Education
-                  </h3>
-                  <div className="space-y-4 border-l-2 border-amber-500/40 pl-4">
-                    {education.map((edu) => (
-                      <div key={edu.id} className="space-y-1">
-                        <div className="flex justify-between items-baseline flex-wrap gap-1">
-                          <h4 className="font-bold text-sm text-white">{edu.institution}</h4>
-                          <span className="text-[10px] font-mono text-amber-400">{edu.start_year} – {edu.end_year}</span>
-                        </div>
-                        <div className="text-xs font-mono text-slate-300">{edu.degree} {edu.field && `| ${edu.field}`}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </section>
-
-        {/* 5. CONTACT & FOOTER */}
-        <section id="contact" className="bg-gradient-to-r from-[#FF6B1A]/20 via-amber-600/10 to-[#FF6B1A]/20 border border-[#FF6B1A]/30 rounded-3xl p-8 sm:p-14 text-center space-y-6 relative overflow-hidden">
-          <div className="space-y-2 relative z-10">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
-              Let's build something <span className="font-serif italic text-[#FF6B1A] font-normal">extraordinary</span>.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto">
-              Interested in working together or reviewing project technical blueprints? Let's connect.
-            </p>
-          </div>
-
-          {userEmail && (
-            <div className="pt-2">
-              <a
-                href={`mailto:${userEmail}`}
-                className="inline-flex items-center space-x-2 bg-[#FF6B1A] hover:bg-[#ff853a] text-black font-heading font-extrabold text-sm px-8 py-3.5 rounded-full shadow-[0_0_30px_rgba(255,107,26,0.5)] transition-all hover:scale-105"
-              >
-                <Send className="w-4 h-4" />
-                <span>Email {userEmail}</span>
-              </a>
-            </div>
-          )}
-
-          <div className="pt-8 border-t border-white/10 text-xs font-mono text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <span>© {new Date().getFullYear()} {full_name}. Built with StackFolio.</span>
-            <span>Cinematic Space Engine</span>
-          </div>
-        </section>
-
-      </div>
-
-      {/* PROJECT SHOWCASE MODAL OVERLAY */}
-      {selectedProject && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0F1015] border border-white/15 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl p-6 space-y-5 animate-fadeIn relative">
-            <div className="flex justify-between items-center pb-3 border-b border-white/10">
-              <h3 className="font-heading font-black text-xl text-white">{selectedProject.text}</h3>
+      {/* 1. FIXED TOP FLOATING NAVBAR */}
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#0A0A0E]/80 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 shadow-2xl flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
               <button
-                onClick={() => setSelectedProject(null)}
-                className="p-1.5 text-slate-400 hover:text-white border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all relative ${
+                  isActive ? 'text-black font-extrabold' : 'text-white/60 hover:text-white'
+                }`}
               >
-                <X className="w-5 h-5" />
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabPill"
+                    className="absolute inset-0 bg-[#ff6b1a] rounded-full z-0 shadow-[0_0_15px_rgba(255,107,26,0.5)]"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Quick Resume Download Action */}
+        <div className="pl-2 border-l border-white/15">
+          <a
+            href={userEmail ? `mailto:${userEmail}` : '#'}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/15 text-white/80 hover:text-white transition-all flex items-center justify-center"
+            title="Download Resume / Contact"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </header>
+
+      {/* 2. TABBED CONTENT RENDERER */}
+      <main className="relative z-10 min-h-screen">
+        
+        {/* VIEW 1: HERO OVERVIEW */}
+        {activeTab === 'overview' && (
+          <section className="min-h-screen flex flex-col justify-center px-8 sm:px-16 md:px-24 max-w-5xl mx-auto space-y-8 pt-20">
+            <div>
+              <p className="text-[10px] md:text-xs text-[#ff6b1a] font-mono font-bold tracking-[0.3em] uppercase mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#ff6b1a] animate-ping" />
+                <span>{headline || 'Digital Experience Designer'}</span>
+              </p>
+
+              <h1 className="font-black tracking-tighter text-[clamp(2.5rem,7vw,6.5rem)] leading-none text-white mb-6">
+                Hey, I'm <span className="text-[#ff6b1a]">{full_name || 'Developer'}</span>.
+              </h1>
+            </div>
+
+            <div className="max-w-2xl space-y-4">
+              <BlurText
+                text={bio || 'I create *immersive* digital experiences that blend design, motion, and technology into something visually *memorable* and smooth to use.'}
+                delay={25}
+                animateBy="words"
+                className="text-base md:text-lg text-white/70 font-light leading-relaxed"
+              />
+              <BlurText
+                text="Combining development with *cinematic* styling, interactive components, and *modern* recruiter-ready presentation."
+                delay={20}
+                animateBy="words"
+                className="text-xs md:text-sm text-white/40 font-light leading-relaxed"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => setActiveTab('projects')}
+                className="px-6 py-3.5 bg-[#ff6b1a] hover:bg-[#ff843d] text-black font-mono font-black text-xs uppercase tracking-[0.2em] rounded-xl shadow-[0_0_25px_rgba(255,107,26,0.4)] transition-all hover:scale-105"
+              >
+                Explore Work ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('contact')}
+                className="px-6 py-3.5 border border-white/20 hover:border-white/50 text-white font-mono font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-white/5 transition-all"
+              >
+                Get In Touch
               </button>
             </div>
+          </section>
+        )}
 
-            {selectedProject.image && (
-              <div className="h-56 rounded-xl overflow-hidden border border-white/10">
-                <img src={selectedProject.image} alt={selectedProject.text} className="w-full h-full object-cover" />
+        {/* VIEW 2: 3D PROJECT ARCHIVE */}
+        {activeTab === 'projects' && (
+          <section className="relative w-full h-screen overflow-hidden flex flex-col justify-between pt-24 pb-8">
+            
+            {/* Header Title */}
+            <div className="px-8 sm:px-16 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 z-20">
+              <div>
+                <p className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold mb-1">
+                  Creative
+                </p>
+                <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tighter text-white">
+                  Archive.
+                </h1>
               </div>
-            )}
 
-            <p className="text-xs text-slate-300 leading-relaxed font-sans">{selectedProject.description}</p>
-
-            {selectedProject.technologies && selectedProject.technologies.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {selectedProject.technologies.map(t => (
-                  <span key={t} className="px-2.5 py-1 bg-[#FF6B1A]/15 text-[#FF6B1A] font-mono text-xs rounded border border-[#FF6B1A]/30">
-                    {t}
-                  </span>
+              {/* Category Filters */}
+              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-4 py-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full transition-all ${
+                      activeCategory === cat ? 'bg-[#ff6b1a] text-black' : 'text-white/40 hover:text-white'
+                    }`}
+                  >
+                    {cat}
+                  </button>
                 ))}
               </div>
+            </div>
+
+            {/* 3D Circular Wheel Canvas */}
+            <div className="flex-1 w-full relative z-10">
+              {galleryItems.length > 0 ? (
+                <CircularGallery
+                  key={activeCategory}
+                  items={galleryItems}
+                  bend={3}
+                  textColor="gradient"
+                  borderRadius={0.06}
+                  font="bold 28px 'Space Grotesk', sans-serif"
+                  scrollSpeed={2}
+                  onItemClick={(idx) => setShowcaseIdx(idx)}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-white/30 font-mono text-xs uppercase tracking-widest">
+                  No projects found in this category.
+                </div>
+              )}
+            </div>
+
+            {/* Wheel Control Helper */}
+            <div className="text-center z-20 font-mono text-[10px] text-white/40 uppercase tracking-[0.3em]">
+              Drag or Scroll Wheel to Rotate • Click Card to Open Showcase
+            </div>
+
+          </section>
+        )}
+
+        {/* VIEW 3: ABOUT & 3D PROFILE CARD */}
+        {activeTab === 'about' && (
+          <section className="px-6 sm:px-14 lg:px-16 pt-28 pb-20 max-w-[1250px] mx-auto space-y-16">
+            
+            {/* Top Grid: Profile Card + Biography */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-12 items-start">
+              
+              {/* Left Column: Interactive 3D Profile Card */}
+              <div className="flex justify-center sticky top-28">
+                <ProfileCard
+                  name={full_name}
+                  title={headline}
+                  handle={userHandle}
+                  avatarUrl={userAvatar}
+                  status="Available for Hire"
+                  contactText="Hire Me"
+                  showUserInfo={true}
+                  enableTilt={true}
+                  onContactClick={() => setActiveTab('contact')}
+                />
+              </div>
+
+              {/* Right Column: Dynamic Candidate Biography */}
+              <div className="space-y-6">
+                <p className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
+                  Biography & Approach
+                </p>
+                
+                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                  Design, Motion & <br />
+                  <span className="font-serif italic text-[#ff6b1a] font-normal">Modern Tech</span>.
+                </h1>
+
+                <div className="space-y-4 text-xs sm:text-sm text-white/60 font-light leading-relaxed font-sans">
+                  <p>{bio || 'Passionate software engineer focused on building responsive, high-performance web applications with modern frontend frameworks and backend databases.'}</p>
+                </div>
+
+                {userEmail && (
+                  <a
+                    href={`mailto:${userEmail}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-[#ff6b1a]/40 text-[#ff6b1a] text-[10px] font-mono font-bold uppercase tracking-widest rounded-xl hover:bg-[#ff6b1a] hover:text-black transition-colors"
+                  >
+                    View Resume / Email <ArrowUpRight className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+
+            </div>
+
+            {/* Bottom 3-Column Skills & Experience Matrix */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-white/10">
+              
+              {/* Column 1: Tech Stack */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
+                  Tech I Work With
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((s) => (
+                    <span key={s.id} className="px-3 py-1.5 bg-white/90 rounded-lg text-[10px] font-mono font-bold text-black uppercase">
+                      {s.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 2: Tools & Libraries */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
+                  Credentials & Honors
+                </p>
+                <div className="space-y-2 font-mono text-xs">
+                  {achievements.map((ach) => (
+                    <div key={ach.id} className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                      <div className="font-bold text-white text-[11px]">{ach.title}</div>
+                      <div className="text-[10px] text-white/50">{ach.issuer} · {ach.date}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 3: Career History */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-mono font-bold text-[#ff6b1a] uppercase tracking-[0.3em]">
+                  Work & Education
+                </p>
+                <div className="space-y-3 font-mono">
+                  {experiences.map((exp) => (
+                    <div key={exp.id} className="border-l-2 border-[#ff6b1a]/40 pl-3 py-0.5 space-y-0.5">
+                      <h4 className="text-[11px] text-white font-bold">{exp.role}</h4>
+                      <p className="text-[10px] text-[#ff6b1a]">{exp.company} ({exp.start_date} – {exp.end_date})</p>
+                    </div>
+                  ))}
+                  {education.map((edu) => (
+                    <div key={edu.id} className="border-l-2 border-amber-500/40 pl-3 py-0.5 space-y-0.5">
+                      <h4 className="text-[11px] text-white font-bold">{edu.institution}</h4>
+                      <p className="text-[10px] text-slate-400">{edu.degree} ({edu.start_year} – {edu.end_year})</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+        )}
+
+        {/* VIEW 4: CONTACT & FOOTER */}
+        {activeTab === 'contact' && (
+          <section className="min-h-screen flex flex-col justify-center items-center text-center px-8 sm:px-16 max-w-4xl mx-auto space-y-8 pt-20">
+            <span className="text-[10px] text-[#ff6b1a] font-mono tracking-[0.4em] uppercase font-bold">
+              [ Contact Trigger ]
+            </span>
+
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
+              Let's build something <br />
+              <span className="font-serif italic text-[#ff6b1a] font-normal">extraordinary together</span>.
+            </h1>
+
+            <p className="text-xs sm:text-sm text-white/50 max-w-lg font-sans leading-relaxed">
+              Have an ambitious software project or job opportunity? Send a direct email to collaborate.
+            </p>
+
+            {userEmail && (
+              <div className="pt-4">
+                <MagneticCTA href={`mailto:${userEmail}`}>
+                  Send Email ({userEmail})
+                </MagneticCTA>
+              </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
-              {selectedProject.github_url && (
-                <a
-                  href={selectedProject.github_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5"
-                >
-                  <Github className="w-4 h-4" /> Code Repo
+            {/* Social Links */}
+            <div className="flex items-center justify-center gap-6 pt-6 text-xs font-mono">
+              {github_url && (
+                <a href={safeUrl(github_url)} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors">
+                  <Github className="w-4 h-4 text-[#ff6b1a]" /> GitHub
                 </a>
               )}
-              {selectedProject.live_url && (
-                <a
-                  href={selectedProject.live_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-[#FF6B1A] hover:bg-[#ff853a] text-black font-mono text-xs font-extrabold rounded-xl transition-colors flex items-center gap-1.5"
-                >
-                  <ExternalLink className="w-4 h-4" /> Live Demo
+              {linkedin_url && (
+                <a href={safeUrl(linkedin_url)} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors">
+                  <Linkedin className="w-4 h-4 text-[#ff6b1a]" /> LinkedIn
                 </a>
               )}
             </div>
-          </div>
-        </div>
+
+            <footer className="pt-16 text-[10px] font-mono text-white/20 uppercase tracking-widest">
+              © {new Date().getFullYear()} {full_name} • Built with StackFolio
+            </footer>
+          </section>
+        )}
+
+      </main>
+
+      {/* FULLSCREEN SHOWCASE MODAL OVERLAY */}
+      {showcaseIdx !== null && (
+        <ProjectShowcaseModal
+          items={filteredProjects}
+          startIdx={showcaseIdx}
+          onClose={() => setShowcaseIdx(null)}
+        />
       )}
 
     </div>
