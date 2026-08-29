@@ -37,10 +37,12 @@ export default function StudioEditor() {
   // AI Prompt Processor — calls Gemini 2.5 Flash schema engine
   const handleApplyPrompt = async (promptText) => {
     const result = await processUserPrompt(promptText, schema);
-    if (result && result.schema) {
+    if (result && result.updatedSchema) {
+      setSchema(result.updatedSchema);
+    } else if (result && result.schema) {
       setSchema(result.schema);
     }
-    return result.message || "Updated portfolio schema!";
+    return result.aiMessage || result.message || "Portfolio successfully updated!";
   };
 
   const handlePublish = () => {
