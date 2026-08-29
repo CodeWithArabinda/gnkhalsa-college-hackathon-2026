@@ -153,10 +153,11 @@ export default function LandingPage() {
 
         </section>
 
-        {/* Bottom Feature Ticker Strip */}
-        <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw] border-y-2 border-black bg-white py-3 mb-12 font-mono text-xs font-bold tracking-widest text-slate-800 uppercase shadow-[0px_2px_0px_0px_#000] text-center overflow-hidden">
-          <div className="whitespace-nowrap select-none">
-            ⚡ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE
+        {/* Bottom Infinite Marquee Banner */}
+        <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw] border-y-2 border-black bg-white py-3 mb-12 overflow-hidden whitespace-nowrap shadow-[0px_2px_0px_0px_#000]">
+          <div className="animate-marquee font-mono text-xs md:text-sm font-bold tracking-widest text-black uppercase select-none">
+            <span className="px-4">⚡ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE • 1-CLICK AI GAP COMPLETER</span>
+            <span className="px-4">⚡ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE • 1-CLICK AI GAP COMPLETER</span>
           </div>
         </div>
 

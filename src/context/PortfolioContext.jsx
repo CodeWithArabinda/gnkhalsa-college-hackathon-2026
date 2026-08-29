@@ -293,6 +293,30 @@ export const PortfolioProvider = ({ children }) => {
     });
   }, [portfolio]);
 
+  const applyParsedResume = useCallback((parsedDraft) => {
+    if (!portfolio || !parsedDraft) return;
+
+    setPortfolio((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        full_name: parsedDraft.full_name || prev.full_name,
+        headline: parsedDraft.headline || prev.headline,
+        bio: parsedDraft.bio || prev.bio,
+        location: parsedDraft.location || prev.location,
+        email: parsedDraft.email || prev.email,
+        github_url: parsedDraft.github_url || prev.github_url,
+        linkedin_url: parsedDraft.linkedin_url || prev.linkedin_url,
+        experiences: parsedDraft.experiences || prev.experiences,
+        education: parsedDraft.education || prev.education,
+        projects: parsedDraft.projects || prev.projects,
+        skills: parsedDraft.skills || prev.skills,
+        achievements: parsedDraft.achievements || prev.achievements
+      };
+    });
+    showToast('success', '📄 Resume successfully parsed & auto-filled!');
+  }, [portfolio, showToast]);
+
   const updateProfileFields = useCallback((fields) => {
     setPortfolio((prev) => {
       if (!prev) return prev;
@@ -315,6 +339,7 @@ export const PortfolioProvider = ({ children }) => {
     fetchPortfolio,
     savePortfolio,
     loadDemoData,
+    applyParsedResume,
     updateProfileFields,
     updateChildItems,
     toast,

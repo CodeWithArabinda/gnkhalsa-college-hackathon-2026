@@ -11,6 +11,8 @@ import SkillsForm from '../components/editor/SkillsForm';
 import AchievementsForm from '../components/editor/AchievementsForm';
 import ReadinessScoreCard from '../components/readiness/ReadinessScoreCard';
 import LivePreviewContainer from '../components/preview/LivePreviewContainer';
+import ResumeUploadModal from '../components/parser/ResumeUploadModal';
+import AIGapCompleter from '../components/parser/AIGapCompleter';
 
 import {
   LogOut,
@@ -39,6 +41,7 @@ export default function DashboardPage() {
     fetchPortfolio,
     savePortfolio,
     loadDemoData,
+    applyParsedResume,
     updateProfileFields,
     toast,
     showToast
@@ -46,6 +49,7 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState('basic');
   const [copied, setCopied] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   // 1. Route Protection
   useEffect(() => {
@@ -158,23 +162,30 @@ export default function DashboardPage() {
 
           {/* Brutalist Button Controls row */}
           <div className="flex flex-wrap gap-3 items-center justify-between pb-4 border-b-2 border-black/10">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsUploadModalOpen(true)}
+                className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2.5 bg-[#4DEEEA] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
+              >
+                <span>📄 Upload Resume (PDF / Image) to Auto-Fill</span>
+              </button>
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center space-x-1.5 text-xs font-black px-5 py-2.5 bg-[#FFE600] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all disabled:opacity-50"
+                className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2.5 bg-[#FFE600] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>{saving ? 'Syncing...' : 'Save Changes 💾'}</span>
+                <span>{saving ? 'Syncing...' : 'Save 💾'}</span>
               </button>
               <button
                 type="button"
                 onClick={loadDemoData}
-                className="inline-flex items-center space-x-1.5 text-xs font-black px-5 py-2.5 bg-[#A8FF78] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
+                className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2.5 bg-[#A8FF78] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
               >
                 <Sparkles className="w-4 h-4 text-slate-800" />
-                <span>Try Demo Profile ★</span>
+                <span>Demo Profile ★</span>
               </button>
             </div>
 
@@ -216,6 +227,9 @@ export default function DashboardPage() {
               </button>
             </div>
           )}
+
+          {/* AI Gap Completer Assistant */}
+          <AIGapCompleter onSwitchTab={(tabId) => setActiveTab(tabId)} />
 
           {/* FOLDER-STYLE TABS */}
           <div className="relative">
@@ -274,6 +288,13 @@ export default function DashboardPage() {
           <span>{toast.message}</span>
         </div>
       )}
+
+      {/* RESUME UPLOAD MODAL */}
+      <ResumeUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onSuccess={applyParsedResume}
+      />
 
     </div>
   );
