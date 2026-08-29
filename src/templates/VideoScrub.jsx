@@ -18,22 +18,37 @@ export default function VideoScrub({ containerRef }) {
     const video = videoRef.current;
     if (!video) return;
 
+    let targetTime = 0;
+    let animationFrameId = null;
+    let trigger = null;
+
+    const lerpLoop = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        const diff = targetTime - video.currentTime;
+        if (Math.abs(diff) > 0.001) {
+          try {
+            video.currentTime += diff * 0.12;
+          } catch (e) {
+            // ignore seek exception
+          }
+        }
+      }
+      animationFrameId = requestAnimationFrame(lerpLoop);
+    };
+
     const initScrollTrigger = () => {
-      ScrollTrigger.create({
+      trigger = ScrollTrigger.create({
         trigger: containerRef?.current || document.body,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.8, // Smooth bidirectional scrubbing on scroll down & rewind up
+        scrub: 0.8,
         onUpdate: (self) => {
           if (video.duration && !isNaN(video.duration)) {
-            try {
-              video.currentTime = self.progress * video.duration;
-            } catch (e) {
-              // ignore seek exception
-            }
+            targetTime = self.progress * video.duration;
           }
         },
       });
+      animationFrameId = requestAnimationFrame(lerpLoop);
     };
 
     if (video.readyState >= 1) {
@@ -43,7 +58,8 @@ export default function VideoScrub({ containerRef }) {
     }
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (trigger) trigger.kill();
     };
   }, [mounted, containerRef, videoSrc]);
 
@@ -64,7 +80,7 @@ export default function VideoScrub({ containerRef }) {
         muted
         playsInline
         preload="auto"
-        className="w-full h-full object-cover object-center md:object-right opacity-80 mix-blend-screen"
+        className="w-full h-full object-cover object-center md:object-right opacity-75 mix-blend-screen"
         onError={handleError}
       />
     </div>

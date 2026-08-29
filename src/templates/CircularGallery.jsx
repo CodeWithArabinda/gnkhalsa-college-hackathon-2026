@@ -23,16 +23,16 @@ function autoBind(instance) {
   });
 }
 
-function createTextTexture(gl, text, font = 'bold 30px monospace', color = 'black') {
+function createTextTexture(gl, text, font = 'bold 24px monospace', color = 'gradient') {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
   context.font = font;
   const metrics = context.measureText(text);
   const textWidth = Math.ceil(metrics.width);
   const sizeMatch = font.match(/(\d+)px/);
-  const fontSize = sizeMatch ? parseInt(sizeMatch[1], 10) : 30;
+  const fontSize = sizeMatch ? parseInt(sizeMatch[1], 10) : 24;
   const textHeight = Math.ceil(fontSize * 1.2);
-  canvas.width = textWidth + 40;
+  canvas.width = textWidth + 60; // extra padding
   canvas.height = textHeight + 20;
   context.font = font;
 
@@ -56,7 +56,7 @@ function createTextTexture(gl, text, font = 'bold 30px monospace', color = 'blac
 }
 
 class Title {
-  constructor({ gl, plane, renderer, text, textColor = '#ffffff', font = '30px sans-serif' }) {
+  constructor({ gl, plane, renderer, text, textColor = 'gradient', font = 'bold 24px monospace' }) {
     autoBind(this);
     this.gl = gl;
     this.plane = plane;
@@ -67,7 +67,11 @@ class Title {
     this.createMesh();
   }
   createMesh() {
-    const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
+    const displayText = (this.text && this.text.length > 20)
+      ? this.text.slice(0, 18) + '...'
+      : (this.text || '');
+
+    const { texture, width, height } = createTextTexture(this.gl, displayText, this.font, this.textColor);
     const geometry = new Plane(this.gl);
     const program = new Program(this.gl, {
       vertex: `
@@ -99,7 +103,7 @@ class Title {
     const textHeight = this.plane.scale.y * 0.15;
     const textWidth = textHeight * aspect;
     this.mesh.scale.set(textWidth, textHeight, 1);
-    this.mesh.position.y = -this.plane.scale.y * 0.5 - 0.12;
+    this.mesh.position.y = -this.plane.scale.y * 0.55 - 0.25;
     this.mesh.setParent(this.plane);
   }
 }
@@ -278,7 +282,7 @@ class Media {
     this.plane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
     this.plane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
     this.plane.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
-    this.padding = 2;
+    this.padding = 3.8; // Increased padding to prevent 3D plane collision
     this.width = this.plane.scale.x + this.padding;
     this.widthTotal = this.width * this.length;
     this.x = this.width * this.index;
@@ -287,8 +291,8 @@ class Media {
 
 class App {
   constructor(container, {
-    items, bend, textColor = '#ffffff', borderRadius = 0,
-    font = 'bold 30px Figtree', scrollSpeed = 2, scrollEase = 0.05,
+    items, bend, textColor = 'gradient', borderRadius = 0,
+    font = 'bold 24px monospace', scrollSpeed = 2, scrollEase = 0.05,
     onItemClick, scaleMultiplier = 1
   } = {}) {
     document.documentElement.classList.remove('no-js');
@@ -472,7 +476,7 @@ export default function CircularGallery({
   bend = 3,
   textColor = 'gradient',
   borderRadius = 0.05,
-  font = 'bold 30px monospace',
+  font = 'bold 24px monospace',
   scrollSpeed = 2,
   scrollEase = 0.05,
   onItemClick,

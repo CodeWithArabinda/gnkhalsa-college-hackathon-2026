@@ -1,8 +1,5 @@
-"use client";
-
+import React, { useEffect, useRef } from 'react';
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
-import { useEffect, useRef } from 'react';
-
 import './CircularGallery.css';
 
 function debounce(func, wait) {
@@ -26,29 +23,29 @@ function autoBind(instance) {
   });
 }
 
-function createTextTexture(gl, text, font = 'bold 30px monospace', color = 'black') {
+function createTextTexture(gl, text, font = 'bold 24px monospace', color = 'gradient') {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
   context.font = font;
   const metrics = context.measureText(text);
   const textWidth = Math.ceil(metrics.width);
   const sizeMatch = font.match(/(\d+)px/);
-  const fontSize = sizeMatch ? parseInt(sizeMatch[1], 10) : 30;
+  const fontSize = sizeMatch ? parseInt(sizeMatch[1], 10) : 24;
   const textHeight = Math.ceil(fontSize * 1.2);
-  canvas.width = textWidth + 40; // extra padding
+  canvas.width = textWidth + 60; // extra padding
   canvas.height = textHeight + 20;
   context.font = font;
-  
+
   if (color === 'gradient') {
     const gradient = context.createLinearGradient(0, 0, canvas.width, 0);
     gradient.addColorStop(0, '#ffffff');
-    gradient.addColorStop(0.5, '#d4d4d4');
-    gradient.addColorStop(1, '#a3a3a3');
+    gradient.addColorStop(0.5, '#ff6b1a');
+    gradient.addColorStop(1, '#ff8a47');
     context.fillStyle = gradient;
   } else {
     context.fillStyle = color;
   }
-  
+
   context.textBaseline = 'middle';
   context.textAlign = 'center';
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -59,7 +56,7 @@ function createTextTexture(gl, text, font = 'bold 30px monospace', color = 'blac
 }
 
 class Title {
-  constructor({ gl, plane, renderer, text, textColor = '#545050', font = '30px sans-serif' }) {
+  constructor({ gl, plane, renderer, text, textColor = 'gradient', font = 'bold 24px monospace' }) {
     autoBind(this);
     this.gl = gl;
     this.plane = plane;
@@ -70,7 +67,11 @@ class Title {
     this.createMesh();
   }
   createMesh() {
-    const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
+    const displayText = (this.text && this.text.length > 20)
+      ? this.text.slice(0, 18) + '...'
+      : (this.text || '');
+
+    const { texture, width, height } = createTextTexture(this.gl, displayText, this.font, this.textColor);
     const geometry = new Plane(this.gl);
     const program = new Program(this.gl, {
       vertex: `
@@ -102,8 +103,7 @@ class Title {
     const textHeight = this.plane.scale.y * 0.15;
     const textWidth = textHeight * aspect;
     this.mesh.scale.set(textWidth, textHeight, 1);
-    // Place text below the card
-    this.mesh.position.y = -this.plane.scale.y * 0.5 - 0.12;
+    this.mesh.position.y = -this.plane.scale.y * 0.55 - 0.25;
     this.mesh.setParent(this.plane);
   }
 }
@@ -194,9 +194,9 @@ class Media {
       },
       transparent: true
     });
-    
+
     this.texture = texture;
-    
+
     if (this.image && (this.image.includes('.mp4') || this.image.includes('.webm') || this.image.includes('.mov'))) {
       const vid = document.createElement('video');
       vid.crossOrigin = 'anonymous';
@@ -282,7 +282,7 @@ class Media {
     this.plane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
     this.plane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
     this.plane.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
-    this.padding = 2;
+    this.padding = 3.8; // Increased padding to prevent 3D plane collision
     this.width = this.plane.scale.x + this.padding;
     this.widthTotal = this.width * this.length;
     this.x = this.width * this.index;
@@ -291,8 +291,8 @@ class Media {
 
 class App {
   constructor(container, {
-    items, bend, textColor = '#ffffff', borderRadius = 0,
-    font = 'bold 30px Figtree', scrollSpeed = 2, scrollEase = 0.05,
+    items, bend, textColor = 'gradient', borderRadius = 0,
+    font = 'bold 24px monospace', scrollSpeed = 2, scrollEase = 0.05,
     onItemClick, scaleMultiplier = 1
   } = {}) {
     document.documentElement.classList.remove('no-js');
@@ -412,7 +412,8 @@ class App {
     this.scroll.target = width * index;
   }
   onResize() {
-    this.screen = { width: this.container.clientWidth, height: this.container.clientHeight };
+    if (!this.container) return;
+    this.screen = { width: this.container.clientWidth || 800, height: this.container.clientHeight || 500 };
     this.renderer.setSize(this.screen.width, this.screen.height);
     this.camera.perspective({ aspect: this.screen.width / this.screen.height });
     const fov = (this.camera.fov * Math.PI) / 180;
@@ -440,29 +441,31 @@ class App {
     this.boundOnTouchMove = this.onTouchMove.bind(this);
     this.boundOnTouchUp   = this.onTouchUp.bind(this);
     window.addEventListener('resize', this.boundOnResize);
-    // Wheel scoped to container — prevents hijacking page scroll
-    this.container.addEventListener('wheel',      this.boundOnWheel, { passive: false });
-    this.container.addEventListener('mousewheel', this.boundOnWheel, { passive: false });
-    // Drag starts on container, continues on window
-    this.container.addEventListener('mousedown',  this.boundOnTouchDown);
+    if (this.container) {
+      this.container.addEventListener('wheel',      this.boundOnWheel, { passive: false });
+      this.container.addEventListener('mousewheel', this.boundOnWheel, { passive: false });
+      this.container.addEventListener('mousedown',  this.boundOnTouchDown);
+      this.container.addEventListener('touchstart', this.boundOnTouchDown, { passive: true });
+    }
     window.addEventListener('mousemove',          this.boundOnTouchMove);
     window.addEventListener('mouseup',            this.boundOnTouchUp);
-    this.container.addEventListener('touchstart', this.boundOnTouchDown, { passive: true });
     window.addEventListener('touchmove',          this.boundOnTouchMove);
     window.addEventListener('touchend',           this.boundOnTouchUp);
   }
   destroy() {
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize',    this.boundOnResize);
-    this.container.removeEventListener('wheel',      this.boundOnWheel);
-    this.container.removeEventListener('mousewheel', this.boundOnWheel);
-    this.container.removeEventListener('mousedown',  this.boundOnTouchDown);
+    if (this.container) {
+      this.container.removeEventListener('wheel',      this.boundOnWheel);
+      this.container.removeEventListener('mousewheel', this.boundOnWheel);
+      this.container.removeEventListener('mousedown',  this.boundOnTouchDown);
+      this.container.removeEventListener('touchstart', this.boundOnTouchDown);
+    }
     window.removeEventListener('mousemove',          this.boundOnTouchMove);
     window.removeEventListener('mouseup',            this.boundOnTouchUp);
-    this.container.removeEventListener('touchstart', this.boundOnTouchDown);
     window.removeEventListener('touchmove',          this.boundOnTouchMove);
     window.removeEventListener('touchend',           this.boundOnTouchUp);
-    if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode) {
+    if (this.renderer && this.renderer.gl && this.renderer.gl.canvas && this.renderer.gl.canvas.parentNode) {
       this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas);
     }
   }
@@ -471,9 +474,9 @@ class App {
 export default function CircularGallery({
   items,
   bend = 3,
-  textColor = '#ffffff',
+  textColor = 'gradient',
   borderRadius = 0.05,
-  font = 'bold 40px "Figtree", sans-serif',
+  font = 'bold 24px monospace',
   scrollSpeed = 2,
   scrollEase = 0.05,
   onItemClick,
@@ -483,22 +486,24 @@ export default function CircularGallery({
 }) {
   const containerRef = useRef(null);
   const appRef = useRef(null);
-  
+
   useEffect(() => {
+    if (!containerRef.current) return;
     const app = new App(containerRef.current, {
       items, bend, textColor, borderRadius, font,
       scrollSpeed, scrollEase, onItemClick, scaleMultiplier
     });
     appRef.current = app;
-    
-    // Initial scroll if activeIndex is provided
+
     if (activeIndex !== undefined) {
       app.scrollToIndex(activeIndex);
     }
-    
+
     return () => {
-      app.destroy();
-      appRef.current = null;
+      if (appRef.current) {
+        appRef.current.destroy();
+        appRef.current = null;
+      }
     };
   }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, onItemClick, scaleMultiplier]);
 
@@ -508,5 +513,5 @@ export default function CircularGallery({
     }
   }, [activeIndex, spinTimestamp]);
 
-  return <div className="circular-gallery" ref={containerRef} />;
+  return <div className="circular-gallery" ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '380px' }} />;
 }

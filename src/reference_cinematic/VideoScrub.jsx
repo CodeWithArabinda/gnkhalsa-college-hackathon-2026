@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export default function VideoScrub({ activeTab = 'overview' }) {
-  const fwdRef = useRef(null);
-  const revRef = useRef(null);
+gsap.registerPlugin(ScrollTrigger);
+
+export default function VideoScrub({ containerRef }) {
+  const videoRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [videoSrc, setVideoSrc] = useState('/optimized.mp4');
 
@@ -11,21 +14,54 @@ export default function VideoScrub({ activeTab = 'overview' }) {
   }, []);
 
   useEffect(() => {
-    if (!fwdRef.current) return;
-    const v = fwdRef.current;
-    if (v.duration) {
-      let targetTime = 0;
-      if (activeTab === 'projects') targetTime = v.duration * 0.33;
-      else if (activeTab === 'about') targetTime = v.duration * 0.66;
-      else if (activeTab === 'contact') targetTime = v.duration * 0.95;
+    if (!mounted) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-      try {
-        v.currentTime = targetTime;
-      } catch (e) {
-        // ignore seek error
+    let targetTime = 0;
+    let animationFrameId = null;
+    let trigger = null;
+
+    const lerpLoop = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        const diff = targetTime - video.currentTime;
+        if (Math.abs(diff) > 0.001) {
+          try {
+            video.currentTime += diff * 0.12;
+          } catch (e) {
+            // ignore seek exception
+          }
+        }
       }
+      animationFrameId = requestAnimationFrame(lerpLoop);
+    };
+
+    const initScrollTrigger = () => {
+      trigger = ScrollTrigger.create({
+        trigger: containerRef?.current || document.body,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.8,
+        onUpdate: (self) => {
+          if (video.duration && !isNaN(video.duration)) {
+            targetTime = self.progress * video.duration;
+          }
+        },
+      });
+      animationFrameId = requestAnimationFrame(lerpLoop);
+    };
+
+    if (video.readyState >= 1) {
+      initScrollTrigger();
+    } else {
+      video.addEventListener('loadedmetadata', initScrollTrigger, { once: true });
     }
-  }, [activeTab]);
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (trigger) trigger.kill();
+    };
+  }, [mounted, containerRef, videoSrc]);
 
   const handleError = () => {
     if (videoSrc === '/optimized.mp4') {
@@ -33,37 +69,19 @@ export default function VideoScrub({ activeTab = 'overview' }) {
     }
   };
 
-  if (!mounted) {
-    return (
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-60 mix-blend-screen overflow-hidden">
-        <div
-          className="w-full h-full bg-cover bg-center"
-          style={{ backgroundImage: "url('/hero.webp')" }}
-        />
-      </div>
-    );
-  }
+  if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 opacity-60 mix-blend-screen overflow-hidden flex items-center justify-center">
+    <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
       <video
-        ref={fwdRef}
+        ref={videoRef}
         src={videoSrc}
         poster="/hero.webp"
-        className="fixed inset-0 w-full h-full object-contain md:object-cover pointer-events-none z-0 opacity-60 mix-blend-screen"
-        autoPlay
         muted
         playsInline
-        loop
+        preload="auto"
+        className="w-full h-full object-cover object-center md:object-right opacity-75 mix-blend-screen"
         onError={handleError}
-      />
-      <video
-        ref={revRef}
-        src="/optimized-rev.mp4"
-        className="hidden"
-        muted
-        playsInline
-        loop
       />
     </div>
   );
