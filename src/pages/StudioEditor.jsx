@@ -34,7 +34,46 @@ export default function StudioEditor() {
     });
   };
 
-  // AI Prompt Processor — calls Gemini 2.5 Flash schema engine
+  // Reorder sections
+  const handleMoveBlock = (index, direction) => {
+    setSchema((prev) => {
+      const blocks = [...prev.blocks];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= blocks.length) return prev;
+      const temp = blocks[index];
+      blocks[index] = blocks[targetIndex];
+      blocks[targetIndex] = temp;
+      return { ...prev, blocks };
+    });
+  };
+
+  // Duplicate section
+  const handleDuplicateBlock = (index) => {
+    setSchema((prev) => {
+      const blocks = [...prev.blocks];
+      const target = blocks[index];
+      const cloned = JSON.parse(JSON.stringify(target));
+      cloned.id = `${cloned.type.toLowerCase()}-${Date.now()}`;
+      blocks.splice(index + 1, 0, cloned);
+      return { ...prev, blocks };
+    });
+  };
+
+  // Delete section
+  const handleDeleteBlock = (index) => {
+    setSchema((prev) => {
+      const blocks = [...prev.blocks];
+      blocks.splice(index, 1);
+      return { ...prev, blocks };
+    });
+  };
+
+  // AI Polish section
+  const handlePolishWithAI = async (block) => {
+    return handleApplyPrompt(`Polish and rewrite the ${block.type} section content to sound impressive and senior.`);
+  };
+
+  // AI Prompt Processor — calls Gemini Flash schema engine
   const handleApplyPrompt = async (promptText) => {
     const result = await processUserPrompt(promptText, schema);
     if (result && result.updatedSchema) {
@@ -71,6 +110,10 @@ export default function StudioEditor() {
           schema={schema}
           deviceMode={deviceMode}
           onUpdateBlock={handleUpdateBlock}
+          onMoveBlock={handleMoveBlock}
+          onDuplicateBlock={handleDuplicateBlock}
+          onDeleteBlock={handleDeleteBlock}
+          onPolishWithAI={handlePolishWithAI}
         />
 
         {/* 30% AI Copilot Panel */}
