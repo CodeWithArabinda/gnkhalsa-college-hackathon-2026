@@ -1,70 +1,56 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 export async function processUserPrompt(userPrompt, currentSchema) {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey || apiKey === "your_gemini_api_key_here") {
-    console.error("Missing or invalid VITE_GEMINI_API_KEY in .env");
-    throw new Error("Missing VITE_GEMINI_API_KEY");
+    throw new Error("Missing VITE_GEMINI_API_KEY in .env");
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
+  const systemPrompt = `You are an expert AI Portfolio Schema Architect.
+You must return ONLY a JSON object strictly following this format:
+{
+  "schema": <complete_mutated_portfolio_schema>,
+  "copilotMessage": "<short 1-sentence confirmation message>"
+}
+Do not wrap output in markdown code blocks or backticks. Always update sections based on user input.`;
 
-  const systemInstruction = `
-You are an expert AI Web Architect. 
-Your job is to mutate and return an updated developer portfolio JSON schema based on the user request.
-
-STRICT INSTRUCTIONS:
-1. Return ONLY valid JSON with this exact structure:
-   {
-     "schema": { ...updated portfolioSchema object... },
-     "copilotMessage": "Short 1-sentence confirmation of changes."
-   }
-2. Never wrap output in markdown codeblocks (no \`\`\`json).
-3. If user requests to change name or headline, update the HeroBlock section content directly.
-4. Keep all existing valid schema fields intact.
-`;
-
-  const promptText = `
-Current Schema:
-${JSON.stringify(currentSchema)}
-
-User Request:
-${userPrompt}
-`;
-
-  const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash"];
-  let lastError = null;
-
-  for (const modelName of modelsToTry) {
-    try {
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction: systemInstruction,
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-        },
-      });
-
-      const response = await model.generateContent(promptText);
-      let rawText = response.response.text().trim();
-
-      // Strip markdown codeblock backticks if present
-      if (rawText.startsWith("```")) {
-        rawText = rawText.replace(/^```(json)?\n?/, "").replace(/```$/, "").trim();
+  const requestBody = {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `${systemPrompt}\n\nCURRENT SCHEMA:\n${JSON.stringify(currentSchema)}\n\nUSER REQUEST:\n${userPrompt}`
+          }
+        ]
       }
-
-      const parsed = JSON.parse(rawText);
-      return {
-        updatedSchema: parsed.schema || parsed,
-        aiMessage: parsed.copilotMessage || "Portfolio schema successfully updated!",
-      };
-    } catch (err) {
-      console.warn(`Attempt with ${modelName} failed:`, err);
-      lastError = err;
+    ],
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.2
     }
+  };
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error?.message || `Gemini API call failed with status ${response.status}`);
   }
 
-  console.error("Detailed Gemini API Execution Error:", lastError);
-  throw lastError || new Error("Gemini API call failed");
+  const data = await response.json();
+  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "{}";
+
+  // Clean potential markdown wrap
+  const cleanedText = rawText.replace(/^```(json)?\n?/, "").replace(/```$/, "").trim();
+  const parsed = JSON.parse(cleanedText);
+
+  return {
+    updatedSchema: parsed.schema || parsed,
+    aiMessage: parsed.copilotMessage || "Portfolio successfully updated!"
+  };
 }
