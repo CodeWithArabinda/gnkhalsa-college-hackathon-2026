@@ -28,7 +28,7 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
     scrollToBottom();
   }, [messages, isGenerating]);
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const query = textToSend || input;
     if (!query.trim() || isGenerating) return;
 
@@ -42,11 +42,10 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
     setInput("");
     setIsGenerating(true);
 
-    // Simulate AI Copilot Schema Mutation
-    setTimeout(() => {
+    try {
       let responseText = "Updated your portfolio schema!";
       if (onApplyPrompt) {
-        responseText = onApplyPrompt(query);
+        responseText = await onApplyPrompt(query);
       }
 
       const botMsg = {
@@ -56,8 +55,14 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
       };
 
       setMessages((prev) => [...prev, botMsg]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { id: `err-${Date.now()}`, role: "assistant", text: "Something went wrong processing your request." }
+      ]);
+    } finally {
       setIsGenerating(false);
-    }, 1000);
+    }
   };
 
   return (

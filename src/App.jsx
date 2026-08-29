@@ -7,6 +7,7 @@ import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import PublicPortfolioPage from './pages/PublicPortfolioPage';
 import StudioEditor from './pages/StudioEditor';
+import CreatePortfolio from './pages/CreatePortfolio';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/create" element={<CreatePortfolio />} />
             <Route path="/studio" element={<StudioEditor />} />
             <Route path="/p/:public_slug" element={<PublicPortfolioPage />} />
           </Routes>
