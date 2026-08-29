@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePortfolio } from '../context/PortfolioContext';
 import useReadiness from '../hooks/useReadiness';
@@ -14,12 +14,22 @@ import LivePreviewContainer from '../components/preview/LivePreviewContainer';
 import ResumeUploadModal from '../components/parser/ResumeUploadModal';
 import AIGapCompleter from '../components/parser/AIGapCompleter';
 
+import OverviewTab from '../components/dashboard/OverviewTab';
+import TemplatesTab from '../components/dashboard/TemplatesTab';
+import AnalyticsTab from '../components/dashboard/AnalyticsTab';
+import SettingsTab from '../components/dashboard/SettingsTab';
+
 import {
+  Home,
+  Edit3,
+  FileText,
+  Palette,
+  BarChart2,
+  Settings,
   LogOut,
   Save,
   Sparkles,
   Copy,
-  Check,
   Globe,
   Loader2,
   User,
@@ -28,7 +38,7 @@ import {
   Code,
   Award,
   BookOpen,
-  X
+  ChevronRight
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -38,17 +48,17 @@ export default function DashboardPage() {
     portfolio,
     loading: portfolioLoading,
     saving,
-    error,
     fetchPortfolio,
     savePortfolio,
     loadDemoData,
     applyParsedResume,
     updateProfileFields,
-    toast,
     showToast
   } = usePortfolio();
 
-  const [activeTab, setActiveTab] = useState('basic');
+  // Navigation State
+  const [activeNav, setActiveNav] = useState('overview'); // 'overview' | 'studio' | 'templates' | 'analytics' | 'settings'
+  const [activeTab, setActiveTab] = useState('basic'); // 2-column editor tabs
   const [copied, setCopied] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
@@ -66,13 +76,11 @@ export default function DashboardPage() {
     }
   }, [user, fetchPortfolio]);
 
-  const { score } = useReadiness(portfolio);
-
   if (authLoading || portfolioLoading || !portfolio) {
     return (
       <div className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center text-white">
         <Loader2 className="w-10 h-10 animate-spin text-[#38BDF8] mb-4" />
-        <p className="text-sm font-mono text-slate-400">Loading your brutal workspace...</p>
+        <p className="text-sm font-mono text-slate-400">Loading your SaaS command center...</p>
       </div>
     );
   }
@@ -80,30 +88,30 @@ export default function DashboardPage() {
   const handleSave = async () => {
     const res = await savePortfolio();
     if (res.success) {
-      showToast('success', 'Changes synced successfully!');
+      showToast('success', 'Changes synced & persisted successfully!');
     } else {
       showToast('error', `Save failed: ${res.error}`);
     }
   };
 
-
   const copyPublicLink = () => {
-    const publicUrl = `${window.location.origin}/p/${portfolio.public_slug}`;
+    const publicUrl = `${window.location.origin}/p/${portfolio.public_slug || 'my-portfolio'}`;
     navigator.clipboard.writeText(publicUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     showToast('success', 'Copied URL to clipboard!');
   };
 
-  const handlePublishToggle = () => {
-    updateProfileFields({ is_published: !portfolio.is_published });
-  };
+  const navItems = [
+    { id: 'overview', label: 'Overview', icon: Home },
+    { id: 'studio', label: 'Portfolio Studio', icon: Edit3 },
+    { id: 'parser', label: 'AI Resume Parser', icon: FileText, isAction: true },
+    { id: 'templates', label: 'Design Templates', icon: Palette },
+    { id: 'analytics', label: 'Recruiter Analytics', icon: BarChart2 },
+    { id: 'settings', label: 'Account Settings', icon: Settings }
+  ];
 
-  const handleTemplateChange = (e) => {
-    updateProfileFields({ selected_template: e.target.value });
-  };
-
-  const tabs = [
+  const editorTabs = [
     { id: 'basic', label: 'Basic Info', icon: User },
     { id: 'experience', label: 'Experience', icon: Briefcase },
     { id: 'education', label: 'Education', icon: GraduationCap },
@@ -112,177 +120,273 @@ export default function DashboardPage() {
     { id: 'achievements', label: 'Certificates', icon: BookOpen }
   ];
 
+  const displayName = portfolio.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Developer';
+  const displayEmail = user?.email || 'guest@stackfolio.demo';
+
   return (
-    <div className="min-h-screen bg-[#FFFDF8] flex flex-col font-sans text-[#0F172A]">
+    <div className="flex h-screen w-full bg-[#FFFDF8] overflow-hidden font-sans text-[#0F172A]">
       
-      {/* HEADER / NAVBAR */}
-      <header className="bg-white border-b-3 border-black px-6 py-4 flex flex-col sm:flex-row gap-4 justify-between items-center z-10 shrink-0">
-        <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 bg-[#FFE600] border-2 border-black rounded-lg flex items-center justify-center font-heading font-black text-xl shadow-[2px_2px_0px_0px_#000]">
-            ⚡
-          </div>
-          <span className="font-heading font-extrabold text-2xl tracking-tight text-[#0F172A]">StackFolio</span>
-        </div>
-
-        {/* Action Center in header */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* View Live Site Button (Opens Public Route in New Tab) */}
-          <button
-            type="button"
-            onClick={() => window.open(`/p/${portfolio.public_slug || 'my-portfolio'}`, '_blank')}
-            className="flex items-center space-x-1.5 bg-[#FFE600] text-black hover:bg-[#ebd300] px-4 py-2 border-2 border-black rounded-lg text-xs font-black shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>View Live Site ↗</span>
-          </button>
-
-          <button
-            onClick={() => signOut().then(() => navigate('/auth'))}
-            className="flex items-center space-x-1.5 text-xs text-[#0F172A] font-extrabold bg-[#FF70A6] border-2 border-black rounded-lg px-3 py-1.5 shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </header>
-
-      {/* DASHBOARD SPLIT WORKSPACE */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      {/* 1. PERSISTENT LEFT SIDEBAR */}
+      <aside className="w-64 border-r-3 border-black bg-white flex flex-col justify-between p-4 shrink-0 shadow-[4px_0px_0px_0px_#000] z-20">
         
-        {/* LEFT COLUMN: SCROLLABLE EDITOR */}
-        <section className="w-full lg:w-[50%] bg-[#FFFDF8] border-r-3 border-black flex flex-col overflow-y-auto p-6 space-y-6">
+        {/* Top Section */}
+        <div className="space-y-6">
           
-          {/* Readiness Checklist indicator */}
-          <ReadinessScoreCard portfolio={portfolio} />
+          {/* Clickable Logo Navigation */}
+          <Link to="/" className="flex items-center space-x-2 px-2 pt-1 group">
+            <div className="w-8 h-8 bg-[#FFE600] border-2 border-black rounded-lg flex items-center justify-center font-heading font-black text-lg shadow-[2px_2px_0px_0px_#000] group-hover:rotate-6 transition-transform">
+              ⚡
+            </div>
+            <span className="font-heading font-extrabold text-xl tracking-tight text-[#0F172A]">StackFolio</span>
+            <span className="bg-[#FF70A6] text-black font-mono font-bold text-[9px] px-1.5 py-0.5 border border-black rounded shadow-[1px_1px_0px_0px_#000] rotate-[-2deg]">
+              BETA
+            </span>
+          </Link>
 
-          {/* Brutalist Button Controls row */}
-          <div className="flex flex-wrap gap-3 items-center justify-between pb-4 border-b-2 border-black/10">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsUploadModalOpen(true)}
-                className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2.5 bg-[#4DEEEA] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
-              >
-                <span>📄 Upload Resume (PDF / Image) to Auto-Fill</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2.5 bg-[#FFE600] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>{saving ? 'Syncing...' : 'Save 💾'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={loadDemoData}
-                className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2.5 bg-[#A8FF78] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
-              >
-                <Sparkles className="w-4 h-4 text-slate-800" />
-                <span>Demo Profile ★</span>
-              </button>
+          {/* Navigation Menu */}
+          <nav className="space-y-1.5">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+
+              if (item.isAction) {
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl border-2 border-black bg-[#FFE600] font-heading font-bold text-xs shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all text-black"
+                  >
+                    <Icon className="w-4 h-4 text-black" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveNav(item.id)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl border-2 font-heading font-bold text-xs transition-all ${
+                    isActive
+                      ? 'bg-black text-white border-black shadow-[2px_2px_0px_0px_#FFE600]'
+                      : 'bg-transparent text-slate-700 border-transparent hover:bg-slate-100 hover:border-black/20'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#FFE600]' : 'text-slate-600'}`} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom User Profile Widget (Wix / Gemini Style Footer) */}
+        <div className="pt-4 border-t-2 border-black/10 space-y-3">
+          <div className="bg-slate-50 border-2 border-black p-3 rounded-xl shadow-[2px_2px_0px_0px_#000] space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 overflow-hidden">
+                <div className="w-7 h-7 rounded-full bg-[#FFE600] border border-black flex items-center justify-center font-extrabold text-xs shrink-0">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className="overflow-hidden">
+                  <h4 className="font-heading font-bold text-xs text-black truncate">{displayName}</h4>
+                  <p className="text-[10px] font-mono text-slate-500 truncate">{displayEmail}</p>
+                </div>
+              </div>
             </div>
 
-            {/* Publishing Slide Toggle widget */}
-            <div className="flex items-center space-x-2.5 bg-white p-2 border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_#000]">
-              <span className="text-[10px] font-black font-mono text-slate-700 uppercase tracking-wider">
-                {portfolio.is_published ? 'Published 🚀' : 'Draft 📝'}
+            <div className="flex items-center justify-between pt-1 border-t border-black/10 text-[10px] font-mono font-bold">
+              <span className="bg-[#4DEEEA] px-1.5 py-0.5 border border-black rounded text-black uppercase">
+                FREE TIER
               </span>
               <button
                 type="button"
-                onClick={handlePublishToggle}
-                className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-black transition-colors duration-200 ease-in-out focus:outline-none ${
-                  portfolio.is_published ? 'bg-[#00FFA3]' : 'bg-slate-300'
-                }`}
+                onClick={() => signOut().then(() => navigate('/auth'))}
+                className="text-red-600 hover:text-red-800 flex items-center gap-0.5"
               >
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white border border-black shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    portfolio.is_published ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
+                <LogOut className="w-3 h-3" />
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Shareable Link Indicator card */}
-          {portfolio.is_published && (
-            <div className="bg-[#4DEEEA] border-2 border-black p-3.5 rounded-xl flex items-center justify-between text-xs shadow-[2px_2px_0px_0px_#000]">
-              <div className="flex items-center space-x-2 text-black">
-                <Globe className="w-4 h-4 shrink-0 text-black" />
-                <span className="font-mono font-bold truncate">
-                  Live at: <span className="underline">{window.location.origin}/p/{portfolio.public_slug}</span>
-                </span>
-              </div>
-              <button
-                onClick={copyPublicLink}
-                className="p-1.5 border border-black bg-white hover:bg-slate-50 rounded-md transition-colors"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
+      </aside>
+
+      {/* 2. MAIN WORKSPACE AREA */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        
+        {/* TOP HEADER BAR */}
+        <header className="bg-white border-b-3 border-black px-6 py-3.5 flex flex-col sm:flex-row gap-3 justify-between items-center z-10 shrink-0">
+          
+          {/* Breadcrumb Navigation */}
+          <div className="flex items-center space-x-2 text-xs font-mono font-bold">
+            <span className="text-slate-400">StackFolio</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-slate-400">Workspace</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-black uppercase font-extrabold bg-[#FFE600] px-2 py-0.5 border border-black rounded shadow-[1px_1px_0px_0px_#000]">
+              {activeNav}
+            </span>
+          </div>
+
+          {/* Center Public Link Pill */}
+          <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1 border-2 border-black rounded-lg text-xs font-mono font-bold">
+            <span className="text-slate-500">Public URL:</span>
+            <span className="text-black">/p/{portfolio.public_slug || 'my-portfolio'}</span>
+            <button
+              onClick={copyPublicLink}
+              className="p-1 hover:bg-slate-200 rounded transition-colors text-slate-600 hover:text-black"
+              title="Copy Public Link"
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Right Header Actions */}
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2 bg-[#A8FF78] text-black border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              <span>{saving ? 'Syncing...' : 'Save Changes 💾'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.open(`/p/${portfolio.public_slug || 'my-portfolio'}`, '_blank')}
+              className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2 bg-[#FFE600] text-black border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>View Live Site ↗</span>
+            </button>
+          </div>
+        </header>
+
+        {/* TABBED VIEW RENDERER */}
+        <main className="flex-1 overflow-hidden relative">
+          
+          {/* NAV TAB 1: OVERVIEW HUB */}
+          {activeNav === 'overview' && (
+            <div className="h-full overflow-y-auto">
+              <OverviewTab
+                onNavigate={(nav, tab) => {
+                  setActiveNav(nav);
+                  if (tab) setActiveTab(tab);
+                }}
+                onOpenUploadModal={() => setIsUploadModalOpen(true)}
+              />
             </div>
           )}
 
-          {/* AI Gap Completer Assistant */}
-          <AIGapCompleter onSwitchTab={(tabId) => setActiveTab(tabId)} />
+          {/* NAV TAB 2: PORTFOLIO STUDIO (2-COLUMN EDITOR) */}
+          {activeNav === 'studio' && (
+            <div className="h-full flex flex-col lg:flex-row overflow-hidden">
+              
+              {/* Left Column: Scrollable Builder Forms */}
+              <section className="w-full lg:w-[50%] bg-[#FFFDF8] border-r-3 border-black flex flex-col overflow-y-auto p-6 space-y-6">
+                
+                {/* Readiness Indicator */}
+                <ReadinessScoreCard portfolio={portfolio} />
 
-          {/* FOLDER-STYLE TABS */}
-          <div className="relative">
-            <nav className="flex flex-wrap border-b-2 border-black gap-1 z-10 relative">
-              {tabs.map(tab => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
+                {/* Quick Controls row */}
+                <div className="flex flex-wrap gap-2 items-center justify-between pb-3 border-b-2 border-black/10">
                   <button
-                    key={tab.id}
                     type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-1.5 px-3.5 py-2.5 border-2 border-black font-heading font-black text-xs rounded-t-xl transition-all active:translate-y-[2px] active:translate-x-[2px] relative -mb-[2px] ${
-                      active
-                        ? 'bg-[#FFE600] border-b-transparent text-black z-20 shadow-none'
-                        : 'bg-white text-slate-500 hover:text-black hover:border-b-black shadow-[2px_2px_0px_0px_#000]'
-                    }`}
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2 bg-[#4DEEEA] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
                   >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{tab.label}</span>
+                    <span>📄 Upload Resume to Auto-Fill</span>
                   </button>
-                );
-              })}
-            </nav>
-          </div>
 
-          {/* FOLDER CONTENT CONTAINER */}
-          <div className="bg-white border-2 border-black p-6 rounded-b-2xl rounded-tr-2xl shadow-brutal flex-1 min-h-[400px]">
-            <div className="animate-fadeIn">
-              {activeTab === 'basic' && <BasicInfoForm />}
-              {activeTab === 'experience' && <ExperiencesForm />}
-              {activeTab === 'education' && <EducationForm />}
-              {activeTab === 'projects' && <ProjectsForm />}
-              {activeTab === 'skills' && <SkillsForm />}
-              {activeTab === 'achievements' && <AchievementsForm />}
+                  <button
+                    type="button"
+                    onClick={loadDemoData}
+                    className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2 bg-[#A8FF78] text-black border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-slate-800" />
+                    <span>Try Demo Profile ★</span>
+                  </button>
+                </div>
+
+                {/* AI Gap Completer */}
+                <AIGapCompleter onSwitchTab={(tabId) => setActiveTab(tabId)} />
+
+                {/* Folder-Style Tabs */}
+                <div className="relative">
+                  <nav className="flex flex-wrap border-b-2 border-black gap-1 z-10 relative">
+                    {editorTabs.map((t) => {
+                      const Icon = t.icon;
+                      const isActive = activeTab === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          onClick={() => setActiveTab(t.id)}
+                          className={`flex items-center space-x-1.5 px-3 py-2 text-xs font-extrabold rounded-t-lg border-2 border-b-0 border-black transition-all ${
+                            isActive
+                              ? 'bg-white text-black font-black translate-y-[2px] shadow-[0px_-2px_0px_0px_#FFE600]'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-black'
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{t.label}</span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+
+                  <div className="bg-white border-2 border-black p-5 rounded-b-xl rounded-tr-xl shadow-[3px_3px_0px_0px_#000]">
+                    {activeTab === 'basic' && <BasicInfoForm />}
+                    {activeTab === 'experience' && <ExperiencesForm />}
+                    {activeTab === 'education' && <EducationForm />}
+                    {activeTab === 'projects' && <ProjectsForm />}
+                    {activeTab === 'skills' && <SkillsForm />}
+                    {activeTab === 'achievements' && <AchievementsForm />}
+                  </div>
+                </div>
+
+              </section>
+
+              {/* Right Column: Live Device Preview */}
+              <section className="w-full lg:w-[50%] bg-[#0F1117] relative flex flex-col h-full overflow-hidden">
+                <LivePreviewContainer
+                  portfolio={portfolio}
+                  onTemplateChange={(e) => updateProfileFields({ selected_template: e.target.value })}
+                />
+              </section>
+
             </div>
-          </div>
+          )}
 
-        </section>
+          {/* NAV TAB 3: DESIGN TEMPLATES */}
+          {activeNav === 'templates' && (
+            <div className="h-full overflow-y-auto">
+              <TemplatesTab />
+            </div>
+          )}
 
-        {/* RIGHT COLUMN: PREVIEW PANEL */}
-        <section className="hidden lg:flex w-[50%] bg-[#0F1117] flex-col items-center justify-center p-6 border-l-3 border-black relative">
-          <LivePreviewContainer
-            portfolio={portfolio}
-            onTemplateChange={handleTemplateChange}
-          />
-        </section>
+          {/* NAV TAB 4: RECRUITER ANALYTICS */}
+          {activeNav === 'analytics' && (
+            <div className="h-full overflow-y-auto">
+              <AnalyticsTab />
+            </div>
+          )}
+
+          {/* NAV TAB 5: ACCOUNT SETTINGS */}
+          {activeNav === 'settings' && (
+            <div className="h-full overflow-y-auto">
+              <SettingsTab />
+            </div>
+          )}
+
+        </main>
 
       </div>
-
-      {/* TOAST SYSTEM (Sticker popup) */}
-      {toast && (
-        <div className={`fixed bottom-6 right-6 px-4 py-3 border-2 border-black rounded-xl shadow-brutal text-black font-heading font-black text-xs z-50 animate-fadeIn ${
-          toast.type === 'success' ? 'bg-[#A8FF78]' : 'bg-[#FF70A6]'
-        }`}>
-          <span>{toast.message}</span>
-        </div>
-      )}
 
       {/* RESUME UPLOAD MODAL */}
       <ResumeUploadModal
