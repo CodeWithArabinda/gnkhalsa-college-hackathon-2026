@@ -31,31 +31,26 @@ export const PortfolioProvider = ({ children }) => {
 
     try {
       if (userId === 'guest-user-id') {
-        const experiences = demoProfile.experiences.map((exp, idx) => ({ ...exp, id: `temp-exp-${idx}` }));
-        const education = demoProfile.education.map((edu, idx) => ({ ...edu, id: `temp-edu-${idx}` }));
-        const projects = demoProfile.projects.map((proj, idx) => ({ ...proj, id: `temp-proj-${idx}` }));
-        const skills = demoProfile.skills.map((skill, idx) => ({ ...skill, id: `temp-skill-${idx}` }));
-        const achievements = demoProfile.achievements.map((ach, idx) => ({ ...ach, id: `temp-ach-${idx}` }));
-
         setPortfolio({
-          id: 'demo-profile-uuid-aarya-shah',
+          id: 'demo-profile-uuid-guest',
           user_id: 'guest-user-id',
-          full_name: demoProfile.full_name,
-          headline: demoProfile.headline,
-          bio: demoProfile.bio,
-          profile_image_url: demoProfile.profile_image_url,
-          location: demoProfile.location,
-          email: demoProfile.email,
-          github_url: demoProfile.github_url,
-          linkedin_url: demoProfile.linkedin_url,
-          selected_template: demoProfile.selected_template,
-          is_published: true,
-          public_slug: 'aarya-shah-r4x9',
-          experiences,
-          education,
-          projects,
-          skills,
-          achievements
+          full_name: '',
+          headline: '',
+          bio: '',
+          profile_image_url: '',
+          avatar_url: '',
+          location: '',
+          email: '',
+          github_url: '',
+          linkedin_url: '',
+          selected_template: 'dark_developer',
+          is_published: false,
+          public_slug: 'my-portfolio',
+          experiences: [],
+          education: [],
+          projects: [],
+          skills: [],
+          achievements: []
         });
         setLoading(false);
         return;
@@ -83,8 +78,11 @@ export const PortfolioProvider = ({ children }) => {
           return [...(arr || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
         };
 
+        const cleanFullName = data.full_name === 'New User' ? '' : data.full_name;
+
         setPortfolio({
           ...data,
+          full_name: cleanFullName,
           experiences: sortByDisplayOrder(data.experiences),
           education: sortByDisplayOrder(data.education),
           projects: sortByDisplayOrder(data.projects),
@@ -92,17 +90,15 @@ export const PortfolioProvider = ({ children }) => {
           achievements: sortByDisplayOrder(data.achievements)
         });
       } else {
-        // 2. Initialize a new profile if none exists
-        // Get user session metadata for default name
+        // 2. Initialize a clean new profile if none exists
         const { data: { user } } = await supabase.auth.getUser();
-        const defaultName = user?.user_metadata?.full_name || 'New User';
-        const slug = generateSlug(defaultName);
+        const slug = generateSlug('my-portfolio');
 
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
           .insert([{
             user_id: userId,
-            full_name: defaultName,
+            full_name: '',
             headline: '',
             bio: '',
             location: '',
@@ -118,6 +114,9 @@ export const PortfolioProvider = ({ children }) => {
 
         setPortfolio({
           ...newProfile,
+          full_name: '',
+          headline: '',
+          bio: '',
           experiences: [],
           education: [],
           projects: [],

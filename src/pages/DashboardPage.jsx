@@ -27,7 +27,8 @@ import {
   GraduationCap,
   Code,
   Award,
-  BookOpen
+  BookOpen,
+  X
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -50,6 +51,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [copied, setCopied] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
   // 1. Route Protection
   useEffect(() => {
@@ -125,21 +127,19 @@ export default function DashboardPage() {
 
         {/* Action Center in header */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* User badge sticker */}
-          <div className="flex items-center space-x-2 bg-white px-3 py-1 border-2 border-black rounded-md text-xs font-bold shadow-[2px_2px_0px_0px_#000]">
-            {portfolio.profile_image_url ? (
-              <img
-                src={portfolio.profile_image_url}
-                alt={portfolio.full_name}
-                className="w-5 h-5 rounded-full object-cover border border-black"
-              />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center border border-black">
-                <User className="w-3 h-3" />
-              </div>
-            )}
-            <span>{portfolio.full_name || 'Owner'}</span>
-          </div>
+          {/* User Account Badge Button */}
+          <button
+            type="button"
+            onClick={() => setIsAccountModalOpen(true)}
+            className="flex items-center space-x-2 bg-white hover:bg-slate-50 px-3.5 py-1.5 border-2 border-black rounded-lg text-xs font-bold font-mono shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all cursor-pointer"
+          >
+            <div className="w-5 h-5 rounded-full bg-[#FFE600] border border-black flex items-center justify-center font-extrabold text-[10px]">
+              {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <span className="font-bold text-black max-w-[140px] truncate">
+              {user?.user_metadata?.full_name || user?.email || 'Account'}
+            </span>
+          </button>
 
           <button
             onClick={() => signOut().then(() => navigate('/auth'))}
@@ -295,6 +295,58 @@ export default function DashboardPage() {
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={applyParsedResume}
       />
+
+      {/* USER ACCOUNT METADATA MODAL */}
+      {isAccountModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#FFFDF8] border-3 border-black p-6 rounded-2xl max-w-md w-full shadow-brutal-lg space-y-5 animate-fadeIn relative">
+            <div className="flex justify-between items-center pb-3 border-b-2 border-black">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-[#FFE600] border-2 border-black flex items-center justify-center font-black text-xs shadow-[1.5px_1.5px_0px_0px_#000]">
+                  👤
+                </div>
+                <h3 className="font-heading font-black text-lg text-black">User Account Metadata</h3>
+              </div>
+              <button
+                onClick={() => setIsAccountModalOpen(false)}
+                className="p-1 text-slate-500 hover:text-black border border-black rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-white border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_0px_#000] space-y-3 font-mono text-xs">
+              <div>
+                <span className="text-slate-500 font-bold block text-[10px] uppercase">Account Email</span>
+                <span className="font-bold text-black text-sm">{user?.email || 'guest@stackfolio.demo'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 font-bold block text-[10px] uppercase">Account ID</span>
+                <span className="font-bold text-slate-700 text-[11px] truncate block">{user?.id || 'guest-user-id'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 font-bold block text-[10px] uppercase">Member Since</span>
+                <span className="font-bold text-black">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Active Demo Session'}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setIsAccountModalOpen(false)}
+                className="px-4 py-2 bg-white border-2 border-black font-bold text-xs rounded-lg shadow-[2px_2px_0px_0px_#000] hover:bg-slate-100"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => signOut().then(() => navigate('/auth'))}
+                className="px-4 py-2 bg-[#FF70A6] text-black border-2 border-black font-bold text-xs rounded-lg shadow-[2px_2px_0px_0px_#000] hover:bg-[#ff5794]"
+              >
+                Sign Out Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

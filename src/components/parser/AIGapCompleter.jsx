@@ -7,20 +7,25 @@ export default function AIGapCompleter({ onSwitchTab }) {
 
   if (!portfolio) return null;
 
+  // Don't show gap completer if the entire portfolio is blank (awaiting initial upload)
+  const isEntirelyBlank = !portfolio.full_name && (!portfolio.projects || portfolio.projects.length === 0) && (!portfolio.experiences || portfolio.experiences.length === 0);
+  if (isEntirelyBlank) return null;
+
   const gaps = [];
 
-  if (!portfolio.profile_image_url) {
+  if (!portfolio.profile_image_url && !portfolio.avatar_url) {
     gaps.push({
       id: 'avatar',
       tab: 'basic',
       title: 'Missing Profile Photo (+15 Pts)',
       desc: 'Recruiters are 70% more likely to view portfolios with professional avatar photos.',
       autoFill: () => {
+        const photoUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400';
         updateProfileFields({
-          profile_image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'
+          profile_image_url: photoUrl,
+          avatar_url: photoUrl
         });
-        showToast && showToast('success', '✨ Added professional avatar photo!');
+        showToast && showToast('success', `✨ Added professional avatar photo for ${portfolio.full_name || 'candidate'}!`);
       }
     });
   }
@@ -32,10 +37,11 @@ export default function AIGapCompleter({ onSwitchTab }) {
       title: 'Short or Missing Bio Summary (+10 Pts)',
       desc: 'Add a concise summary explaining your technical background and career goals.',
       autoFill: () => {
+        const generatedBio = `${portfolio.full_name || 'Software Engineer'} — ${portfolio.headline || 'Developer'}. Experienced in building full-stack web applications, scalable backend microservices, and interactive developer interfaces.`;
         updateProfileFields({
-          bio: 'Passionate software engineer building high-performance web applications with React, Vite, Supabase, and modern UI systems.'
+          bio: generatedBio
         });
-        showToast && showToast('success', '✨ Auto-generated professional bio!');
+        showToast && showToast('success', '✨ Auto-generated professional bio summary!');
       }
     });
   }
@@ -47,9 +53,10 @@ export default function AIGapCompleter({ onSwitchTab }) {
       title: 'Missing GitHub or LinkedIn Handles (+10 Pts)',
       desc: 'Provide social handles so hiring managers can verify open-source code and profile history.',
       autoFill: () => {
+        const cleanName = (portfolio.full_name || 'developer').toLowerCase().replace(/\s+/g, '');
         updateProfileFields({
-          github_url: portfolio.github_url || 'https://github.com/KshitijPilankar',
-          linkedin_url: portfolio.linkedin_url || 'https://linkedin.com/in/kshitijpilankar'
+          github_url: portfolio.github_url || `https://github.com/${cleanName}`,
+          linkedin_url: portfolio.linkedin_url || `https://linkedin.com/in/${cleanName}`
         });
         showToast && showToast('success', '✨ Auto-filled developer social handles!');
       }
@@ -64,13 +71,16 @@ export default function AIGapCompleter({ onSwitchTab }) {
       title: 'Projects Missing Demo/Code Links (+15 Pts)',
       desc: `${projectsWithoutDemos.length} project(s) lack live URL links or repository links.`,
       autoFill: () => {
-        const updatedProjects = (portfolio.projects || []).map(p => ({
-          ...p,
-          github_url: p.github_url || 'https://github.com/CodeWithArabinda/gnkhalsa-college-hackathon-2026',
-          live_url: p.live_url || 'https://stackfolio.demo'
-        }));
+        const updatedProjects = (portfolio.projects || []).map(p => {
+          const slug = (p.title || 'project').toLowerCase().replace(/[^a-z0-9]/g, '');
+          return {
+            ...p,
+            github_url: p.github_url || (portfolio.github_url ? `${portfolio.github_url}/${slug}` : `https://github.com/developer/${slug}`),
+            live_url: p.live_url || `https://${slug}.demo`
+          };
+        });
         updateChildItems('projects', updatedProjects);
-        showToast && showToast('success', '✨ Added live demo URLs to all projects!');
+        showToast && showToast('success', '✨ Added live demo & repo URLs to all projects!');
       }
     });
   }
