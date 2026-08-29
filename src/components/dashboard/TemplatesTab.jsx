@@ -81,7 +81,9 @@ export default function TemplatesTab() {
       {/* Template Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map((template) => {
-          const isActive = portfolio.selected_template === template.id;
+          const activeKey = (portfolio.selected_template || '').replace(/-/g, '_');
+          const tKey = template.id.replace(/-/g, '_');
+          const isActive = activeKey === tKey;
           const badgeColorClass = BADGE_COLORS[template.badge] || 'bg-slate-200 text-black';
 
           return (

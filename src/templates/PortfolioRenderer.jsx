@@ -67,12 +67,12 @@ export const TEMPLATE_REGISTRY = {
   cinematic_space: {
     id: 'cinematic_space',
     component: CinematicSpaceTemplate,
-    name: 'Cinematic Space',
-    archetype: 'DEEP SPACE CINEMATIC',
-    description: 'Deep dark canvas with animated gradient aura orbs, glassmorphic cards, and futuristic tech badges.',
+    name: 'Cinematic Nebula',
+    archetype: 'CINEMATIC NEBULA',
+    description: 'Deep space dark canvas with warm amber/orange glowing radial gradients, 3D avatar glow container, glass navbar, and bento cards.',
     category: 'creative',
-    accent: '#8B5CF6',
-    bgPreview: '#0A0A0F',
+    accent: '#FF5722',
+    bgPreview: '#0B0B0E',
     badge: 'NEW',
     reference: 'https://www.sarang-space.site/',
   },
@@ -144,8 +144,9 @@ export default function PortfolioRenderer({ portfolio }) {
     );
   }
 
-  const templateKey = portfolio.selected_template || 'dark_terminal';
-  const templateEntry = TEMPLATE_REGISTRY[templateKey] || TEMPLATE_REGISTRY['dark_developer'];
+  const rawKey = portfolio.selected_template || 'dark_terminal';
+  const normalizedKey = rawKey.replace(/-/g, '_');
+  const templateEntry = TEMPLATE_REGISTRY[normalizedKey] || TEMPLATE_REGISTRY[rawKey] || TEMPLATE_REGISTRY['dark_developer'];
   const ActiveTemplate = templateEntry.component;
 
   return <ActiveTemplate portfolio={portfolio} />;
