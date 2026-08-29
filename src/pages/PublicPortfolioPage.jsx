@@ -15,6 +15,25 @@ export default function PublicPortfolioPage() {
       setLoading(true);
       setError(null);
       try {
+        // First check if a matching local draft is saved in localStorage
+        const localDraftRaw = localStorage.getItem('stackfolio_active_draft');
+        if (localDraftRaw) {
+          try {
+            const localDraft = JSON.parse(localDraftRaw);
+            if (
+              localDraft &&
+              (localDraft.public_slug === public_slug ||
+                public_slug === 'preview' ||
+                public_slug === 'my-portfolio' ||
+                public_slug === 'aarya-shah-r4x9')
+            ) {
+              setPortfolio(localDraft);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {}
+        }
+
         const { data, error: fetchError } = await supabase
           .from('profiles')
           .select(`

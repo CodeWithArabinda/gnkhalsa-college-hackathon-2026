@@ -5,7 +5,7 @@ import DarkDeveloperTemplate from './DarkDeveloperTemplate';
 export default function TemplateRenderer({ portfolio }) {
   if (!portfolio) return null;
 
-  const isBlank = !portfolio.full_name && (!portfolio.projects || portfolio.projects.length === 0) && (!portfolio.experiences || portfolio.experiences.length === 0);
+  const isBlank = !portfolio.full_name || portfolio.full_name.trim() === '';
 
   if (isBlank) {
     return (
@@ -16,7 +16,7 @@ export default function TemplateRenderer({ portfolio }) {
         <div className="space-y-2">
           <h3 className="font-heading font-extrabold text-2xl text-white">Live Portfolio Canvas</h3>
           <p className="font-hand text-xl md:text-2xl text-slate-300 max-w-md leading-relaxed">
-            ✨ Upload your resume on the left or enter details to build your live portfolio.
+            ⚡ Upload a resume or fill details on the left to see your live portfolio render here.
           </p>
         </div>
         <div className="bg-[#1A1D27] border-2 border-[#38BDF8] px-4 py-2.5 rounded-xl shadow-[3px_3px_0px_0px_#38BDF8] font-mono text-xs text-[#38BDF8]">

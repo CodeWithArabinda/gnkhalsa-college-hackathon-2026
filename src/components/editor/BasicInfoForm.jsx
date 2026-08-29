@@ -134,7 +134,7 @@ export default function BasicInfoForm() {
             name="full_name"
             value={portfolio.full_name || ''}
             onChange={handleChange}
-            placeholder="Aarya Shah"
+            placeholder="e.g. John Doe"
             className="w-full px-3.5 py-2 text-sm bg-white border border-brand-light-border rounded-lg focus:outline-none focus:border-brand-light-secondary transition-colors"
           />
         </div>
@@ -148,7 +148,7 @@ export default function BasicInfoForm() {
             name="headline"
             value={portfolio.headline || ''}
             onChange={handleChange}
-            placeholder="Frontend Engineer & BCA Student | React Specialist"
+            placeholder="e.g. Software Engineer & Full-Stack Developer"
             className="w-full px-3.5 py-2 text-sm bg-white border border-brand-light-border rounded-lg focus:outline-none focus:border-brand-light-secondary transition-colors"
           />
         </div>
@@ -174,7 +174,7 @@ export default function BasicInfoForm() {
             name="email"
             value={portfolio.email || ''}
             onChange={handleChange}
-            placeholder="aarya.shah@email.com"
+            placeholder="e.g. alex@example.com"
             className="w-full px-3.5 py-2 text-sm bg-white border border-brand-light-border rounded-lg focus:outline-none focus:border-brand-light-secondary transition-colors"
           />
         </div>
@@ -188,7 +188,7 @@ export default function BasicInfoForm() {
             name="location"
             value={portfolio.location || ''}
             onChange={handleChange}
-            placeholder="Mumbai, India"
+            placeholder="e.g. San Francisco, CA"
             className="w-full px-3.5 py-2 text-sm bg-white border border-brand-light-border rounded-lg focus:outline-none focus:border-brand-light-secondary transition-colors"
           />
         </div>
