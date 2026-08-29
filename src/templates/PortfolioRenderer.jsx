@@ -76,6 +76,18 @@ export const TEMPLATE_REGISTRY = {
     badge: 'NEW',
     reference: 'https://www.sarang-space.site/',
   },
+  'cinematic-space': {
+    id: 'cinematic-space',
+    component: CinematicSpaceTemplate,
+    name: 'Cinematic Nebula',
+    archetype: 'CINEMATIC NEBULA',
+    description: 'Deep space dark canvas with warm amber/orange glowing radial gradients, 3D avatar glow container, glass navbar, and bento cards.',
+    category: 'creative',
+    accent: '#FF5722',
+    bgPreview: '#0B0B0E',
+    badge: 'NEW',
+    reference: 'https://www.sarang-space.site/',
+  },
   neo_brutalist: {
     id: 'neo_brutalist',
     component: NeoBrutalistTemplate,
