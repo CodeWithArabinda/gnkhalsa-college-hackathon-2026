@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import StudioNavbar from '../components/studio/StudioNavbar';
 import StudioToolbar from '../components/studio/StudioToolbar';
+import LeftSidebarRail from '../components/studio/LeftSidebarRail';
 import CanvasPreview from '../components/studio/CanvasPreview';
 import CopilotChat from '../components/studio/CopilotChat';
 import UserProfileDropup from '../components/studio/UserProfileDropup';
@@ -167,7 +168,7 @@ export default function StudioEditor() {
           id: newBlockId,
           type: 'HeroBlock',
           content: {
-            name: "New Custom Heading",
+            name: "Engineering Digital Excellence",
             headline: "✨ Custom Highlight",
             bio: "Add your customized paragraph content here directly on the interactive studio canvas.",
             ctaText: "Get Started",
@@ -302,11 +303,9 @@ export default function StudioEditor() {
     : {};
 
   return (
-    <div className={`h-screen w-screen flex flex-col font-sans overflow-hidden select-none transition-colors duration-200 ${
-      studioTheme === 'light' ? 'bg-[#f8fafc] text-slate-900' : 'bg-[#0B0B0E] text-white'
-    }`}>
+    <div className="h-screen w-screen flex flex-col font-sans overflow-hidden select-none bg-[#f0f2f5] text-slate-900">
       
-      {/* Top Main Navigation */}
+      {/* Top Main Navigation (Wix Harmony Header) */}
       <StudioNavbar
         deviceMode={deviceMode}
         setDeviceMode={setDeviceMode}
@@ -319,47 +318,57 @@ export default function StudioEditor() {
         onResetDefault={handleResetDefault}
       />
 
-      {/* Top Contextual Studio Action Ribbon */}
-      <StudioToolbar
-        selectedElement={selectedElement}
-        elementStyle={currentSelectedStyle}
-        onUpdateElementStyle={(prop, val) => {
-          if (selectedElement?.key) {
-            handleUpdateElementStyle(selectedElement.key, { [prop]: val });
-          }
-        }}
-        onAddElement={handleAddElement}
-        onAskAria={(elem) => handlePolishWithAI(elem)}
-        onReplaceImage={handleReplaceImage}
-        onAddLink={() => window.prompt("Enter custom link URL:", "https://github.com")}
-        onDeleteSelected={() => {
-          if (selectedElement && selectedElement.blockIndex !== undefined) {
-            handleDeleteBlock(selectedElement.blockIndex);
-            setSelectedElement(null);
-          }
-        }}
-      />
-
-      {/* Main Split-Screen Workspace */}
+      {/* Main Studio Workspace with Left Rail & Top Floating Ribbon */}
       <div className="flex-1 flex overflow-hidden relative">
         
-        {/* Live Canvas Preview */}
-        <CanvasPreview
-          schema={schema}
-          deviceMode={deviceMode}
-          isGenerating={isGenerating}
-          onUpdateBlock={handleUpdateBlock}
-          onMoveBlock={handleMoveBlock}
-          onDuplicateBlock={handleDuplicateBlock}
-          onDeleteBlock={handleDeleteBlock}
-          onPolishWithAI={handlePolishWithAI}
-          onSelectElement={setSelectedElement}
-          selectedElement={selectedElement}
-          onReplaceImage={handleReplaceImage}
-          onUpdateElementStyle={handleUpdateElementStyle}
+        {/* Far-Left Vertical Icon Tool Rail */}
+        <LeftSidebarRail
+          onAddClick={() => handleAddElement('text')}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
-        {/* AI Copilot Panel */}
+        {/* Center Workspace with Floating Capsule Ribbon */}
+        <div className="flex-1 flex flex-col relative overflow-hidden">
+          
+          {/* Floating Action Capsule Ribbon */}
+          <StudioToolbar
+            selectedElement={selectedElement}
+            elementStyle={currentSelectedStyle}
+            onUpdateElementStyle={(prop, val) => {
+              if (selectedElement?.key) {
+                handleUpdateElementStyle(selectedElement.key, { [prop]: val });
+              }
+            }}
+            onAddElement={handleAddElement}
+            onAskAria={(elem) => handlePolishWithAI(elem)}
+            onReplaceImage={handleReplaceImage}
+            onAddLink={() => window.prompt("Enter custom link URL:", "https://github.com")}
+            onDeleteSelected={() => {
+              if (selectedElement && selectedElement.blockIndex !== undefined) {
+                handleDeleteBlock(selectedElement.blockIndex);
+                setSelectedElement(null);
+              }
+            }}
+          />
+
+          {/* Live Canvas Preview */}
+          <CanvasPreview
+            schema={schema}
+            deviceMode={deviceMode}
+            isGenerating={isGenerating}
+            onUpdateBlock={handleUpdateBlock}
+            onMoveBlock={handleMoveBlock}
+            onDuplicateBlock={handleDuplicateBlock}
+            onDeleteBlock={handleDeleteBlock}
+            onPolishWithAI={handlePolishWithAI}
+            onSelectElement={setSelectedElement}
+            selectedElement={selectedElement}
+            onReplaceImage={handleReplaceImage}
+            onUpdateElementStyle={handleUpdateElementStyle}
+          />
+        </div>
+
+        {/* Right Aria AI Copilot Panel (332px Width) */}
         <CopilotChat
           schema={schema}
           onApplyPrompt={handleApplyPrompt}

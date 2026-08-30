@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, MessageSquare, History, X, Plus, Mic, Wand2, User, RefreshCw, Layers, Palette, HelpCircle, Bot } from 'lucide-react';
+import { Send, Sparkles, MessageSquare, History, X, Plus, Mic, Wand2, User, RefreshCw, Palette, HelpCircle } from 'lucide-react';
 import PlanningCard from './PlanningCard';
 
 const QUICK_GRID_ACTIONS = [
@@ -14,11 +14,12 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
     {
       id: "m1",
       role: "assistant",
-      text: "Hey KSHITIJ! I'm Aria, your StackFolio AI Copilot. Ask me to rewrite your bio, change layout themes, add new projects, or update skills!"
+      text: "Hello KSHITIJ! I'm Aria, your StackFolio AI Copilot. Describe what you'd like to change on your site!"
     }
   ]);
   const [input, setInput] = useState("");
   const [internalGenerating, setInternalGenerating] = useState(false);
+  const [activeContextBadge, setActiveContextBadge] = useState("Hero Section");
   const messagesEndRef = useRef(null);
 
   const isGenerating = externalGenerating !== undefined ? externalGenerating : internalGenerating;
@@ -72,10 +73,10 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
   };
 
   return (
-    <aside className="w-full lg:w-[332px] bg-white border-l border-slate-200 flex flex-col h-full shrink-0 text-slate-900 select-none shadow-sm z-30">
+    <aside className="w-full lg:w-[332px] bg-[#f8fafc] border-l border-slate-200 flex flex-col h-full shrink-0 text-slate-900 select-none shadow-sm z-30">
       
-      {/* Wix Aria Top Header */}
-      <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+      {/* Top Header */}
+      <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-white">
         <div className="flex items-center space-x-2">
           <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center font-bold shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
@@ -87,22 +88,20 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
         </div>
 
         <div className="flex items-center space-x-1 text-slate-500">
-          <button type="button" className="p-1 hover:bg-slate-200 rounded-md" title="Chat history">
+          <button type="button" className="p-1 hover:bg-slate-100 rounded-md" title="Chat history">
             <History className="w-4 h-4" />
           </button>
-          <button type="button" className="p-1 hover:bg-slate-200 rounded-md" title="Close Aria">
+          <button type="button" className="p-1 hover:bg-slate-100 rounded-md" title="Close panel">
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Main Scrollable Body */}
+      {/* Scrollable Body */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 font-sans text-xs">
         
-        {/* Mascot Welcome Card (Wix Aria div.fromOpacityEnter-w33Vvr Style) */}
+        {/* Mascot Welcome Card */}
         <div className="bg-gradient-to-b from-[#eef4ff] to-[#dfeaff] border border-blue-100 rounded-2xl p-4 text-center shadow-xs relative overflow-hidden">
-          
-          {/* Mascot Emblem Sphere */}
           <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-md relative">
             <div className="flex items-center space-x-1">
               <span className="w-1.5 h-1.5 bg-[#00FFA3] rounded-full animate-ping" />
@@ -113,7 +112,6 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           <h3 className="text-base font-extrabold text-[#081a5e] tracking-tight mt-2">Hello KSHITIJ</h3>
           <p className="text-xs text-slate-600 font-medium mb-3">What can I help you with?</p>
 
-          {/* 4 Grid Action Pills */}
           <div className="grid grid-cols-2 gap-2">
             {QUICK_GRID_ACTIONS.map((act) => {
               const IconComp = act.icon;
@@ -122,7 +120,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
                   key={act.id}
                   type="button"
                   onClick={() => handleSend(act.prompt)}
-                  className="bg-white/90 hover:bg-white text-slate-800 font-semibold text-xs py-2 px-2.5 rounded-xl border border-blue-200/60 shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow-sm"
+                  className="bg-white/90 hover:bg-white text-slate-800 font-semibold text-xs py-2 px-2.5 rounded-xl border border-blue-200/60 shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow-sm cursor-pointer"
                 >
                   <IconComp className="w-3.5 h-3.5 text-[#0053ff]" />
                   <span>{act.label}</span>
@@ -132,7 +130,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           </div>
         </div>
 
-        {/* Message Feed */}
+        {/* Message History Feed */}
         <div className="space-y-3 pt-1">
           {messages.map((m) => (
             <div
@@ -152,7 +150,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
               <div
                 className={`p-3 rounded-2xl max-w-[88%] leading-relaxed ${
                   m.role === 'assistant'
-                    ? 'bg-slate-100 border border-slate-200 text-slate-800 shadow-xs'
+                    ? 'bg-white border border-slate-200 text-slate-800 shadow-xs'
                     : 'bg-[#0053ff] text-white font-medium shadow-xs'
                 }`}
               >
@@ -161,7 +159,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             </div>
           ))}
 
-          {/* Step-by-Step AI Planning Card */}
+          {/* Progress Planning Card */}
           <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
 
           {isGenerating && (
@@ -169,9 +167,9 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
               <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center">
                 <Sparkles className="w-3 h-3 animate-spin" />
               </div>
-              <div className="bg-slate-100 border border-slate-200 rounded-2xl p-2.5 text-slate-600 font-mono text-[11px] flex items-center gap-2">
+              <div className="bg-white border border-slate-200 rounded-2xl p-2.5 text-slate-600 font-mono text-[11px] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-ping" />
-                Drafting high-impact layout...
+                Updating layout blocks...
               </div>
             </div>
           )}
@@ -182,28 +180,42 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       </div>
 
       {/* Bottom Chat Input Dock */}
-      <div className="p-3 border-t border-slate-200 bg-slate-50 space-y-2">
+      <div className="p-3 border-t border-slate-200 bg-white space-y-2">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="bg-white border border-slate-300 focus-within:border-[#0053ff] rounded-xl p-2 shadow-xs transition-colors space-y-2"
+          className="bg-slate-50 border border-slate-200 focus-within:border-[#0053ff] focus-within:bg-white rounded-xl p-2 shadow-2xs transition-colors space-y-1.5"
         >
+          {/* Active Context Badge */}
+          {activeContextBadge && (
+            <div className="inline-flex items-center gap-1 bg-blue-50 text-[#0053ff] text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
+              <span>{activeContextBadge}</span>
+              <button
+                type="button"
+                onClick={() => setActiveContextBadge(null)}
+                className="hover:text-red-500 ml-0.5"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Describe what you want to change..."
-            className="w-full bg-transparent px-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium"
+            className="w-full bg-transparent px-1 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium"
           />
 
-          <div className="flex items-center justify-between border-t border-slate-100 pt-1.5">
+          <div className="flex items-center justify-between border-t border-slate-200/60 pt-1.5">
             <div className="flex items-center space-x-1 text-slate-400">
-              <button type="button" className="p-1 hover:bg-slate-100 rounded text-slate-500" title="Attach file or context">
+              <button type="button" className="p-1 hover:bg-slate-200 rounded text-slate-500" title="Attach context">
                 <Plus className="w-3.5 h-3.5" />
               </button>
-              <button type="button" className="p-1 hover:bg-slate-100 rounded text-slate-500" title="Voice prompt">
+              <button type="button" className="p-1 hover:bg-slate-200 rounded text-slate-500" title="Voice input">
                 <Mic className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -211,7 +223,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             <button
               type="submit"
               disabled={!input.trim() || isGenerating}
-              className="p-1.5 bg-[#0053ff] hover:bg-[#0043cc] disabled:opacity-40 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+              className="p-1.5 bg-[#0053ff] hover:bg-[#0043cc] disabled:opacity-40 text-white rounded-lg shadow-2xs transition-colors cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
             </button>

@@ -122,7 +122,7 @@ function EditableCanvasItem({
       onMouseDown={handleMouseDown}
       className={`relative cursor-grab active:cursor-grabbing transition-all rounded ${
         isSelected
-          ? 'border-2 border-[#0053ff] ring-2 ring-[#0053ff]/30 z-30 shadow-[0_0_15px_rgba(0,83,255,0.3)]'
+          ? 'border-2 border-[#0053ff] ring-2 ring-[#0053ff]/30 z-30 shadow-[0_0_15px_rgba(0,83,255,0.2)]'
           : isHovered
           ? 'border border-[#0053ff]/50 z-20'
           : ''
@@ -140,17 +140,15 @@ function EditableCanvasItem({
         borderRadius: st.borderRadius ? `${st.borderRadius}px` : undefined
       }}
     >
-      {/* FLOATING ACTION PILL (Sits cleanly ABOVE top border at -top-9 left-0) */}
+      {/* FLOATING ACTION PILL */}
       {(isSelected || isHovered) && (
         <div className="absolute -top-9 left-0 z-50 bg-[#081a5e] border border-blue-400/40 rounded-xl px-2 py-1 shadow-xl flex items-center gap-1.5 text-xs font-sans text-white pointer-events-auto">
-          {/* Badge Tag */}
           <span className="px-2 py-0.5 bg-[#0053ff] text-white font-extrabold text-[9px] rounded uppercase tracking-wider flex items-center gap-1">
             <Move className="w-2.5 h-2.5" /> [ {label} ]
           </span>
 
           <div className="w-px h-3.5 bg-white/20" />
 
-          {/* Action Trigger: Replace Image or Edit Text */}
           {isImageElement ? (
             <button
               type="button"
@@ -177,7 +175,6 @@ function EditableCanvasItem({
             </button>
           )}
 
-          {/* Aria Polish */}
           <button
             type="button"
             onClick={(e) => {
@@ -192,27 +189,13 @@ function EditableCanvasItem({
         </div>
       )}
 
-      {/* 8 ACTIVE ANCHOR DOTS (Wix Studio Bounding Box) */}
+      {/* 8 ACTIVE ANCHOR DOTS */}
       {isSelected && (
         <>
-          {/* 4 Corners */}
-          <div
-            onMouseDown={(e) => handleResizeMouseDown(e, 'tl')}
-            className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nwse-resize z-50 pointer-events-auto"
-          />
-          <div
-            onMouseDown={(e) => handleResizeMouseDown(e, 'tr')}
-            className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nesw-resize z-50 pointer-events-auto"
-          />
-          <div
-            onMouseDown={(e) => handleResizeMouseDown(e, 'bl')}
-            className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nesw-resize z-50 pointer-events-auto"
-          />
-          <div
-            onMouseDown={(e) => handleResizeMouseDown(e, 'br')}
-            className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nwse-resize z-50 pointer-events-auto"
-          />
-          {/* 4 Midpoints */}
+          <div onMouseDown={(e) => handleResizeMouseDown(e, 'tl')} className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nwse-resize z-50 pointer-events-auto" />
+          <div onMouseDown={(e) => handleResizeMouseDown(e, 'tr')} className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nesw-resize z-50 pointer-events-auto" />
+          <div onMouseDown={(e) => handleResizeMouseDown(e, 'bl')} className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nesw-resize z-50 pointer-events-auto" />
+          <div onMouseDown={(e) => handleResizeMouseDown(e, 'br')} className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-[#0053ff] rounded-full shadow-md cursor-nwse-resize z-50 pointer-events-auto" />
           <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border border-[#0053ff] rounded-full z-50" />
           <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border border-[#0053ff] rounded-full z-50" />
           <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-2.5 h-2.5 bg-white border border-[#0053ff] rounded-full z-50" />
@@ -306,34 +289,6 @@ export default function CanvasPreview({
     }
   };
 
-  // Helper to render Full Headline with Dynamic Accent Word Highlighting
-  const renderDynamicHeadline = (headingText, accentColor = "#ff5100") => {
-    if (!headingText) return null;
-    const words = headingText.trim().split(" ");
-    if (words.length <= 1) {
-      return <span className="text-white font-bold">{headingText}</span>;
-    }
-    
-    const lastWord = words[words.length - 1];
-    const firstWords = words.slice(0, -1).join(" ");
-
-    return (
-      <span className="inline-block font-extrabold tracking-tight">
-        <span className="text-white">{firstWords} </span>
-        <span
-          className="inline-block bg-gradient-to-r from-white via-amber-100 bg-clip-text text-transparent"
-          style={{
-            backgroundImage: `linear-gradient(135deg, #ffffff 20%, ${accentColor} 100%)`,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          {lastWord}
-        </span>
-      </span>
-    );
-  };
-
   // Dedicated Context-Aware Schema Edit Payload Generator
   const handleOpenEditModal = (key, label, blockId) => {
     const block = schema.blocks.find(b => b.id === blockId);
@@ -353,41 +308,6 @@ export default function CanvasPreview({
         blockId,
         btnText: block.content?.secondaryCta || 'Contact Me'
       });
-    } else if (key === 'contact-email-btn') {
-      setEditModalData({
-        type: 'button-email',
-        label: 'Email CTA Button',
-        blockId,
-        email: block.content?.email || 'alex@developer.com'
-      });
-    } else if (key.startsWith('project-card-')) {
-      const projId = key.replace('project-card-', '');
-      const item = block.content?.items?.find(it => it.id === projId);
-      if (item) {
-        setEditModalData({
-          type: 'project-card',
-          label: `Project Card: ${item.title}`,
-          blockId,
-          projId,
-          title: item.title || '',
-          description: item.description || '',
-          link: item.link || '',
-          tags: item.tags ? item.tags.join(', ') : ''
-        });
-      }
-    } else if (key.startsWith('skill-cat-')) {
-      const catName = key.replace('skill-cat-', '');
-      const category = block.content?.categories?.find(c => c.name === catName);
-      if (category) {
-        setEditModalData({
-          type: 'skill-category',
-          label: `Skill Category: ${category.name}`,
-          blockId,
-          oldCatName: category.name,
-          name: category.name,
-          skills: category.skills ? category.skills.join(', ') : ''
-        });
-      }
     } else if (key === 'hero-avatar') {
       setEditModalData({
         type: 'avatar',
@@ -404,14 +324,12 @@ export default function CanvasPreview({
         text: block.content?.headline || ''
       });
     } else if (key === 'hero-name') {
-      const rawName = block.content?.name || 'Alex Rivera';
-      const fullHeadline = rawName.includes("I'm") ? rawName : `I'm ${rawName}.`;
       setEditModalData({
         type: 'text-single',
         label: 'Headline Title',
         blockId,
         fieldPath: 'content.name',
-        text: fullHeadline
+        text: block.content?.name || 'Engineering Digital Excellence'
       });
     } else if (key === 'hero-bio') {
       setEditModalData({
@@ -420,30 +338,6 @@ export default function CanvasPreview({
         blockId,
         fieldPath: 'content.bio',
         text: block.content?.bio || ''
-      });
-    } else if (key === 'projects-header') {
-      setEditModalData({
-        type: 'text-pair',
-        label: 'Projects Section Title',
-        blockId,
-        title: block.content?.title || '',
-        subtitle: block.content?.subtitle || ''
-      });
-    } else if (key === 'skills-header') {
-      setEditModalData({
-        type: 'text-single',
-        label: 'Skills Section Title',
-        blockId,
-        fieldPath: 'content.title',
-        text: block.content?.title || ''
-      });
-    } else if (key === 'contact-header') {
-      setEditModalData({
-        type: 'text-pair',
-        label: 'Contact Section Title',
-        blockId,
-        title: block.content?.title || '',
-        subtitle: block.content?.subtitle || ''
       });
     } else {
       setEditModalData({
@@ -456,61 +350,18 @@ export default function CanvasPreview({
     }
   };
 
-  // Precise State Dispatcher
   const handleSaveModal = () => {
     if (!editModalData) return;
-
     const { type, blockId } = editModalData;
 
     if (type === 'button-primary') {
       handleInlineChange(blockId, 'content.ctaText', editModalData.btnText);
     } else if (type === 'button-secondary') {
       handleInlineChange(blockId, 'content.secondaryCta', editModalData.btnText);
-    } else if (type === 'button-email') {
-      handleInlineChange(blockId, 'content.email', editModalData.email);
-    } else if (type === 'project-card') {
-      const block = schema.blocks.find(b => b.id === blockId);
-      if (block && block.content?.items) {
-        const updatedItems = block.content.items.map(it => {
-          if (it.id === editModalData.projId) {
-            return {
-              ...it,
-              title: editModalData.title,
-              description: editModalData.description,
-              link: editModalData.link,
-              tags: typeof editModalData.tags === 'string'
-                ? editModalData.tags.split(',').map(t => t.trim()).filter(Boolean)
-                : editModalData.tags
-            };
-          }
-          return it;
-        });
-        handleInlineChange(blockId, 'content.items', updatedItems);
-      }
-    } else if (type === 'skill-category') {
-      const block = schema.blocks.find(b => b.id === blockId);
-      if (block && block.content?.categories) {
-        const updatedCategories = block.content.categories.map(c => {
-          if (c.name === editModalData.oldCatName) {
-            return {
-              ...c,
-              name: editModalData.name,
-              skills: typeof editModalData.skills === 'string'
-                ? editModalData.skills.split(',').map(s => s.trim()).filter(Boolean)
-                : editModalData.skills
-            };
-          }
-          return c;
-        });
-        handleInlineChange(blockId, 'content.categories', updatedCategories);
-      }
     } else if (type === 'avatar') {
       handleInlineChange(blockId, 'content.avatarUrl', editModalData.url);
     } else if (type === 'text-single' || type === 'text-multi') {
       handleInlineChange(blockId, editModalData.fieldPath, editModalData.text);
-    } else if (type === 'text-pair') {
-      handleInlineChange(blockId, 'content.title', editModalData.title);
-      handleInlineChange(blockId, 'content.subtitle', editModalData.subtitle);
     }
 
     setEditModalData(null);
@@ -530,110 +381,204 @@ export default function CanvasPreview({
         className="hidden"
       />
 
-      {/* Frame Wrapper (Wix Studio Preview Frame) */}
+      {/* Vertical Red Dashed Blueprint Guidelines (Wix Studio) */}
+      <div className="absolute inset-y-0 left-1/2 -translate-x-[600px] w-px border-r border-dashed border-red-300/60 pointer-events-none z-0 hidden lg:block" />
+      <div className="absolute inset-y-0 left-1/2 translate-x-[600px] w-px border-r border-dashed border-red-300/60 pointer-events-none z-0 hidden lg:block" />
+
+      {/* Frame Wrapper (Wix Harmony Light Preview Window) */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`${getFrameWidth()} transition-all duration-300 bg-[#0B0B0E] border border-slate-300 rounded-2xl shadow-xl overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col`}
+        className={`${getFrameWidth()} transition-all duration-300 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col`}
       >
         {/* Frame Top Browser Header */}
-        <div className="bg-[#181A24] border-b border-black px-4 py-2 flex items-center justify-between shrink-0 text-white">
+        <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between shrink-0 text-slate-700">
           <div className="flex items-center space-x-2">
             <span className="w-3 h-3 rounded-full bg-[#FF5F56]" />
             <span className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
             <span className="w-3 h-3 rounded-full bg-[#27C93F]" />
           </div>
 
-          <div className="bg-[#0D0F15] border border-white/10 rounded-md px-3 py-0.5 font-mono text-[11px] text-slate-300 flex items-center gap-1.5">
-            <span className="text-[#00FFA3]">webdevportfolio.io</span>
-            <span className="text-amber-400 font-bold">is available! Connect Domain</span>
+          <div className="bg-white border border-slate-200 rounded-md px-3 py-0.5 font-mono text-[11px] text-slate-800 flex items-center gap-1.5 shadow-2xs">
+            <span className="text-[#0053ff] font-bold">webdevportfolio.io</span>
+            <span className="text-amber-600 font-bold">is available! Connect Domain</span>
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-[10px] text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-[#00FFA3] animate-pulse" />
-            <span className="hidden sm:inline">HARMONY CANVAS</span>
+          <div className="flex items-center gap-2 font-mono text-[10px] text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="hidden sm:inline">WIX HARMONY CANVAS</span>
           </div>
         </div>
 
-        {/* Canvas Render Body */}
-        <div className="flex-1 overflow-y-auto text-white relative">
+        {/* Canvas Render Body (Default Light Theme) */}
+        <div className="flex-1 overflow-y-auto text-slate-900 bg-white relative">
           
-          {/* Real-time AI Generation Experience Overlay */}
+          {/* Real-time AI Generation Overlay */}
           {isGenerating && <CanvasBuildingState />}
 
           {schema.blocks && schema.blocks.length > 0 ? (
             schema.blocks.map((block, index) => {
               return (
-                <div key={block.id} className="relative border-b border-white/5 last:border-b-0 group/section">
+                <div key={block.id} className="relative border-b border-slate-100 last:border-b-0 group/section">
                   
-                  {/* Section Boundary Tag Guide */}
-                  <div className="absolute top-1 left-2 z-10 opacity-0 group-hover/section:opacity-100 transition-opacity pointer-events-none">
-                    <span className="px-2 py-0.5 bg-[#0053ff] text-white text-[9px] font-mono font-bold rounded shadow-xs">
-                      [ {block.type.replace('Block', '')} Section ]
+                  {/* Floating Blue Section Tag Badge */}
+                  <div className="absolute top-2 left-3 z-20">
+                    <span className="px-2 py-0.5 bg-blue-100 text-[#0053ff] text-[11px] font-bold rounded shadow-2xs">
+                      [ {block.type.replace('Block', '')} ]
                     </span>
                   </div>
 
-                  {/* Block 1: HeroBlock */}
+                  {/* Block 1: HeroBlock (Wix Harmony Modern Light Layout) */}
                   {block.type === 'HeroBlock' && (
-                    <section className="p-8 sm:p-14 flex flex-col justify-center space-y-6 min-h-[400px] relative overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/20 via-[#0B0B0E] to-[#0B0B0E]">
+                    <section className="p-8 sm:p-16 flex flex-col justify-center space-y-6 min-h-[460px] relative overflow-hidden bg-gradient-to-b from-blue-50/40 via-white to-white">
                       
-                      {/* 1. Tagline */}
-                      <EditableCanvasItem
-                        elementKey="hero-tagline"
-                        label="Tagline"
-                        schema={schema}
-                        selectedElement={selectedElement}
-                        hoveredElementKey={hoveredElementKey}
-                        setHoveredElementKey={setHoveredElementKey}
-                        onSelectElement={onSelectElement}
-                        onUpdateElementStyle={onUpdateElementStyle}
-                        onPolishWithAI={onPolishWithAI}
-                        onOpenEditModal={handleOpenEditModal}
-                        blockId={block.id}
-                        blockIndex={index}
-                        className="self-start"
-                      >
-                        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-mono text-amber-400">
-                          <Sparkles className="w-3.5 h-3.5 text-[#ff5100]" />
-                          <span
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) => handleInlineChange(block.id, 'content.headline', e.target.innerText)}
-                            className="outline-none"
-                          >
-                            {block.content.headline}
-                          </span>
-                        </div>
-                      </EditableCanvasItem>
-
-                      {/* 2. Hero Title & Avatar Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
+                      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center pt-4">
                         
-                        {/* Name / Headline */}
-                        <EditableCanvasItem
-                          elementKey="hero-name"
-                          label="Headline Title"
-                          schema={schema}
-                          selectedElement={selectedElement}
-                          hoveredElementKey={hoveredElementKey}
-                          setHoveredElementKey={setHoveredElementKey}
-                          onSelectElement={onSelectElement}
-                          onUpdateElementStyle={onUpdateElementStyle}
-                          onPolishWithAI={onPolishWithAI}
-                          onOpenEditModal={handleOpenEditModal}
-                          blockId={block.id}
-                          blockIndex={index}
-                        >
-                          <h1
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
-                            className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight outline-none"
+                        <div className="space-y-4">
+                          {/* 1. Tagline */}
+                          <EditableCanvasItem
+                            elementKey="hero-tagline"
+                            label="Tagline"
+                            schema={schema}
+                            selectedElement={selectedElement}
+                            hoveredElementKey={hoveredElementKey}
+                            setHoveredElementKey={setHoveredElementKey}
+                            onSelectElement={onSelectElement}
+                            onUpdateElementStyle={onUpdateElementStyle}
+                            onPolishWithAI={onPolishWithAI}
+                            onOpenEditModal={handleOpenEditModal}
+                            blockId={block.id}
+                            blockIndex={index}
+                            className="self-start inline-block"
                           >
-                            {renderDynamicHeadline(block.content.name, schema?.metadata?.accentColor || "#ff5100")}
-                          </h1>
-                        </EditableCanvasItem>
+                            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-blue-50 border border-blue-200/60 rounded-full text-xs font-semibold text-[#0053ff]">
+                              <Sparkles className="w-3.5 h-3.5 text-[#ff5100]" />
+                              <span
+                                contentEditable
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleInlineChange(block.id, 'content.headline', e.target.innerText)}
+                                className="outline-none"
+                              >
+                                {block.content.headline}
+                              </span>
+                            </div>
+                          </EditableCanvasItem>
 
-                        {/* Avatar Image Element */}
+                          {/* 2. Headline */}
+                          <EditableCanvasItem
+                            elementKey="hero-name"
+                            label="Headline Title"
+                            schema={schema}
+                            selectedElement={selectedElement}
+                            hoveredElementKey={hoveredElementKey}
+                            setHoveredElementKey={setHoveredElementKey}
+                            onSelectElement={onSelectElement}
+                            onUpdateElementStyle={onUpdateElementStyle}
+                            onPolishWithAI={onPolishWithAI}
+                            onOpenEditModal={handleOpenEditModal}
+                            blockId={block.id}
+                            blockIndex={index}
+                          >
+                            <h1
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
+                              className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 leading-tight outline-none"
+                            >
+                              {block.content.name || "Engineering Digital Excellence"}
+                            </h1>
+                          </EditableCanvasItem>
+
+                          {/* 3. Bio */}
+                          <EditableCanvasItem
+                            elementKey="hero-bio"
+                            label="Bio Paragraph"
+                            schema={schema}
+                            selectedElement={selectedElement}
+                            hoveredElementKey={hoveredElementKey}
+                            setHoveredElementKey={setHoveredElementKey}
+                            onSelectElement={onSelectElement}
+                            onUpdateElementStyle={onUpdateElementStyle}
+                            onPolishWithAI={onPolishWithAI}
+                            onOpenEditModal={handleOpenEditModal}
+                            blockId={block.id}
+                            blockIndex={index}
+                            className="max-w-xl"
+                          >
+                            <p
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => handleInlineChange(block.id, 'content.bio', e.target.innerText)}
+                              className="text-slate-600 font-normal leading-relaxed text-sm sm:text-base outline-none"
+                            >
+                              {block.content.bio}
+                            </p>
+                          </EditableCanvasItem>
+
+                          {/* 4. Primary & Secondary CTA */}
+                          <div className="flex flex-wrap gap-3 pt-3">
+                            <EditableCanvasItem
+                              elementKey="cta-primary"
+                              label="Primary CTA Button"
+                              schema={schema}
+                              selectedElement={selectedElement}
+                              hoveredElementKey={hoveredElementKey}
+                              setHoveredElementKey={setHoveredElementKey}
+                              onSelectElement={onSelectElement}
+                              onUpdateElementStyle={onUpdateElementStyle}
+                              onPolishWithAI={onPolishWithAI}
+                              onOpenEditModal={handleOpenEditModal}
+                              blockId={block.id}
+                              blockIndex={index}
+                            >
+                              <button
+                                type="button"
+                                onClick={scrollToProjects}
+                                className="bg-[#ff5100] hover:bg-[#d64400] text-white font-bold px-6 py-3 rounded-full text-sm shadow-md transition-all cursor-pointer"
+                              >
+                                <span
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onBlur={(e) => handleInlineChange(block.id, 'content.ctaText', e.target.innerText)}
+                                  className="outline-none"
+                                >
+                                  {block.content.ctaText}
+                                </span>
+                              </button>
+                            </EditableCanvasItem>
+
+                            <EditableCanvasItem
+                              elementKey="cta-secondary"
+                              label="Secondary CTA Button"
+                              schema={schema}
+                              selectedElement={selectedElement}
+                              hoveredElementKey={hoveredElementKey}
+                              setHoveredElementKey={setHoveredElementKey}
+                              onSelectElement={onSelectElement}
+                              onUpdateElementStyle={onUpdateElementStyle}
+                              onPolishWithAI={onPolishWithAI}
+                              onOpenEditModal={handleOpenEditModal}
+                              blockId={block.id}
+                              blockIndex={index}
+                            >
+                              <button
+                                type="button"
+                                onClick={scrollToContact}
+                                className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-full transition-all cursor-pointer"
+                              >
+                                <span
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onBlur={(e) => handleInlineChange(block.id, 'content.secondaryCta', e.target.innerText)}
+                                  className="outline-none"
+                                >
+                                  {block.content.secondaryCta}
+                                </span>
+                              </button>
+                            </EditableCanvasItem>
+                          </div>
+                        </div>
+
+                        {/* 5. Avatar Right Container */}
                         <EditableCanvasItem
                           elementKey="hero-avatar"
                           label="Avatar Image"
@@ -650,105 +595,15 @@ export default function CanvasPreview({
                           blockIndex={index}
                         >
                           <div
-                            className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center overflow-hidden shadow-xl transition-all"
+                            className="w-44 h-44 rounded-3xl overflow-hidden shadow-xl border border-slate-100 bg-cover bg-center transition-all"
                             style={{
                               backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})`,
                               width: (schema?.elementStyles?.['hero-avatar']?.width) ? `${schema.elementStyles['hero-avatar'].width}px` : undefined,
-                              height: (schema?.elementStyles?.['hero-avatar']?.height) ? `${schema.elementStyles['hero-avatar'].height}px` : undefined,
-                              borderRadius: (schema?.elementStyles?.['hero-avatar']?.borderRadius) ? `${schema.elementStyles['hero-avatar'].borderRadius}px` : undefined
+                              height: (schema?.elementStyles?.['hero-avatar']?.height) ? `${schema.elementStyles['hero-avatar'].height}px` : undefined
                             }}
                           />
                         </EditableCanvasItem>
 
-                      </div>
-
-                      {/* 3. Bio Paragraph */}
-                      <EditableCanvasItem
-                        elementKey="hero-bio"
-                        label="Bio Paragraph"
-                        schema={schema}
-                        selectedElement={selectedElement}
-                        hoveredElementKey={hoveredElementKey}
-                        setHoveredElementKey={setHoveredElementKey}
-                        onSelectElement={onSelectElement}
-                        onUpdateElementStyle={onUpdateElementStyle}
-                        onPolishWithAI={onPolishWithAI}
-                        onOpenEditModal={handleOpenEditModal}
-                        blockId={block.id}
-                        blockIndex={index}
-                        className="max-w-xl"
-                      >
-                        <p
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.bio', e.target.innerText)}
-                          className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans outline-none"
-                        >
-                          {block.content.bio}
-                        </p>
-                      </EditableCanvasItem>
-
-                      {/* 4. CTA Buttons */}
-                      <div className="flex flex-wrap gap-3 pt-2">
-                        <EditableCanvasItem
-                          elementKey="cta-primary"
-                          label="Primary CTA Button"
-                          schema={schema}
-                          selectedElement={selectedElement}
-                          hoveredElementKey={hoveredElementKey}
-                          setHoveredElementKey={setHoveredElementKey}
-                          onSelectElement={onSelectElement}
-                          onUpdateElementStyle={onUpdateElementStyle}
-                          onPolishWithAI={onPolishWithAI}
-                          onOpenEditModal={handleOpenEditModal}
-                          blockId={block.id}
-                          blockIndex={index}
-                        >
-                          <button
-                            type="button"
-                            onClick={scrollToProjects}
-                            className="px-6 py-3 bg-[#ff5100] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(255,81,0,0.4)] hover:bg-[#d64400] transition-all cursor-pointer"
-                          >
-                            <span
-                              contentEditable
-                              suppressContentEditableWarning
-                              onBlur={(e) => handleInlineChange(block.id, 'content.ctaText', e.target.innerText)}
-                              className="outline-none"
-                            >
-                              {block.content.ctaText}
-                            </span>
-                          </button>
-                        </EditableCanvasItem>
-
-                        <EditableCanvasItem
-                          elementKey="cta-secondary"
-                          label="Secondary CTA Button"
-                          schema={schema}
-                          selectedElement={selectedElement}
-                          hoveredElementKey={hoveredElementKey}
-                          setHoveredElementKey={setHoveredElementKey}
-                          onSelectElement={onSelectElement}
-                          onUpdateElementStyle={onUpdateElementStyle}
-                          onPolishWithAI={onPolishWithAI}
-                          onOpenEditModal={handleOpenEditModal}
-                          blockId={block.id}
-                          blockIndex={index}
-                        >
-                          <button
-                            type="button"
-                            onClick={scrollToContact}
-                            className="px-6 py-3 bg-white/5 border border-white/10 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-white/15 transition-all cursor-pointer"
-                          >
-                            <span
-                              contentEditable
-                              suppressContentEditableWarning
-                              onBlur={(e) => handleInlineChange(block.id, 'content.secondaryCta', e.target.innerText)}
-                              className="outline-none"
-                            >
-                              {block.content.secondaryCta}
-                            </span>
-                          </button>
-                        </EditableCanvasItem>
                       </div>
 
                     </section>
@@ -756,332 +611,81 @@ export default function CanvasPreview({
 
                   {/* Block 2: ProjectGridBlock */}
                   {block.type === 'ProjectGridBlock' && (
-                    <section id="projects-section" ref={projectsRef} className="p-8 sm:p-14 space-y-6">
-                      
-                      {/* Section Title & Subtitle */}
-                      <EditableCanvasItem
-                        elementKey="projects-header"
-                        label="Section Title"
-                        schema={schema}
-                        selectedElement={selectedElement}
-                        hoveredElementKey={hoveredElementKey}
-                        setHoveredElementKey={setHoveredElementKey}
-                        onSelectElement={onSelectElement}
-                        onUpdateElementStyle={onUpdateElementStyle}
-                        onPolishWithAI={onPolishWithAI}
-                        onOpenEditModal={handleOpenEditModal}
-                        blockId={block.id}
-                        blockIndex={index}
-                        className="space-y-1"
-                      >
-                        <h2
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.title', e.target.innerText)}
-                          className="text-2xl font-extrabold text-white outline-none"
-                        >
-                          {block.content.title}
-                        </h2>
-                        <p className="text-xs text-slate-400 font-mono">{block.content.subtitle}</p>
-                      </EditableCanvasItem>
-
-                      {/* Project Cards Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {block.content.items?.map((item) => (
-                          <EditableCanvasItem
-                            key={item.id}
-                            elementKey={`project-card-${item.id}`}
-                            label="Project Card"
-                            schema={schema}
-                            selectedElement={selectedElement}
-                            hoveredElementKey={hoveredElementKey}
-                            setHoveredElementKey={setHoveredElementKey}
-                            onSelectElement={onSelectElement}
-                            onUpdateElementStyle={onUpdateElementStyle}
-                            onPolishWithAI={onPolishWithAI}
-                            onOpenEditModal={handleOpenEditModal}
-                            blockId={block.id}
-                            blockIndex={index}
-                          >
-                            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 space-y-3 hover:border-[#0053ff]/40 transition-colors">
-                              <div className="flex justify-between items-start">
-                                <h3
-                                  contentEditable
-                                  suppressContentEditableWarning
-                                  onBlur={(e) => {
-                                    const updatedItems = block.content.items.map((it) =>
-                                      it.id === item.id ? { ...it, title: e.target.innerText } : it
-                                    );
-                                    handleInlineChange(block.id, 'content.items', updatedItems);
-                                  }}
-                                  className="font-bold text-base text-white outline-none"
-                                >
-                                  {item.title}
-                                </h3>
-                                <a
-                                  href={item.link || '#'}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="p-1 hover:bg-white/10 rounded text-[#0053ff]"
-                                >
-                                  <ExternalLink className="w-4 h-4" />
-                                </a>
-                              </div>
-                              <p
-                                contentEditable
-                                suppressContentEditableWarning
-                                onBlur={(e) => {
-                                  const updatedItems = block.content.items.map((it) =>
-                                    it.id === item.id ? { ...it, description: e.target.innerText } : it
-                                  );
-                                  handleInlineChange(block.id, 'content.items', updatedItems);
-                                }}
-                                className="text-xs text-slate-400 leading-relaxed font-sans outline-none"
-                              >
-                                {item.description}
-                              </p>
-                              <div className="flex flex-wrap gap-1.5 pt-1">
-                                {item.tags?.map((tag) => (
-                                  <span key={tag} className="px-2.5 py-0.5 bg-[#0053ff]/10 text-[#0053ff] text-[10px] font-mono rounded border border-[#0053ff]/20 font-bold">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </EditableCanvasItem>
-                        ))}
+                    <section id="projects-section" ref={projectsRef} className="p-8 sm:p-16 space-y-6 bg-slate-50/50">
+                      <div className="space-y-1 pt-2">
+                        <h2 className="text-2xl font-extrabold text-slate-900">{block.content.title}</h2>
+                        <p className="text-xs text-slate-500 font-mono">{block.content.subtitle}</p>
                       </div>
 
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {block.content.items?.map((item) => (
+                          <div key={item.id} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-xs hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-bold text-base text-slate-900">{item.title}</h3>
+                              <a href={item.link || '#'} target="_blank" rel="noreferrer" className="text-[#0053ff] p-1">
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            </div>
+                            <p className="text-xs text-slate-600 leading-relaxed font-sans">{item.description}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.tags?.map((t) => (
+                                <span key={t} className="px-2 py-0.5 bg-blue-50 text-[#0053ff] text-[10px] font-mono rounded font-bold">
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </section>
                   )}
 
                   {/* Block 3: SkillsBlock */}
                   {block.type === 'SkillsBlock' && (
-                    <section className="p-8 sm:p-14 space-y-6 bg-white/[0.01]">
-                      
-                      <EditableCanvasItem
-                        elementKey="skills-header"
-                        label="Skills Title"
-                        schema={schema}
-                        selectedElement={selectedElement}
-                        hoveredElementKey={hoveredElementKey}
-                        setHoveredElementKey={setHoveredElementKey}
-                        onSelectElement={onSelectElement}
-                        onUpdateElementStyle={onUpdateElementStyle}
-                        onPolishWithAI={onPolishWithAI}
-                        onOpenEditModal={handleOpenEditModal}
-                        blockId={block.id}
-                        blockIndex={index}
-                      >
-                        <h2
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.title', e.target.innerText)}
-                          className="text-2xl font-extrabold text-white outline-none"
-                        >
-                          {block.content.title}
-                        </h2>
-                      </EditableCanvasItem>
-
+                    <section className="p-8 sm:p-16 space-y-6 bg-white">
+                      <h2 className="text-2xl font-extrabold text-slate-900 pt-2">{block.content.title}</h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {block.content.categories?.map((cat) => (
-                          <EditableCanvasItem
-                            key={cat.name}
-                            elementKey={`skill-cat-${cat.name}`}
-                            label="Skill Category"
-                            schema={schema}
-                            selectedElement={selectedElement}
-                            hoveredElementKey={hoveredElementKey}
-                            setHoveredElementKey={setHoveredElementKey}
-                            onSelectElement={onSelectElement}
-                            onUpdateElementStyle={onUpdateElementStyle}
-                            onPolishWithAI={onPolishWithAI}
-                            onOpenEditModal={handleOpenEditModal}
-                            blockId={block.id}
-                            blockIndex={index}
-                          >
-                            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 space-y-3">
-                              <h3 className="text-xs font-mono font-bold text-[#ff5100] uppercase tracking-wider">{cat.name}</h3>
-                              <div className="flex flex-wrap gap-2">
-                                {cat.skills?.map((skill) => (
-                                  <span key={skill} className="px-3 py-1 bg-[#14141D] border border-white/10 rounded-xl text-xs font-medium text-white">
-                                    {skill}
-                                  </span>
-                                ))}
-                              </div>
+                          <div key={cat.name} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
+                            <h3 className="text-xs font-mono font-bold text-[#ff5100] uppercase tracking-wider">{cat.name}</h3>
+                            <div className="flex flex-wrap gap-2">
+                              {cat.skills?.map((s) => (
+                                <span key={s} className="px-3 py-1 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 shadow-2xs">
+                                  {s}
+                                </span>
+                              ))}
                             </div>
-                          </EditableCanvasItem>
+                          </div>
                         ))}
                       </div>
-
                     </section>
                   )}
 
                   {/* Block 4: ContactBlock */}
                   {block.type === 'ContactBlock' && (
-                    <section id="contact-section" ref={contactRef} className="p-8 sm:p-14 text-center space-y-6 bg-gradient-to-r from-[#ff5100]/10 via-amber-900/10 to-[#ff5100]/10">
-                      
-                      <EditableCanvasItem
-                        elementKey="contact-header"
-                        label="Contact Title"
-                        schema={schema}
-                        selectedElement={selectedElement}
-                        hoveredElementKey={hoveredElementKey}
-                        setHoveredElementKey={setHoveredElementKey}
-                        onSelectElement={onSelectElement}
-                        onUpdateElementStyle={onUpdateElementStyle}
-                        onPolishWithAI={onPolishWithAI}
-                        onOpenEditModal={handleOpenEditModal}
-                        blockId={block.id}
-                        blockIndex={index}
-                        className="max-w-md mx-auto space-y-2"
-                      >
-                        <h2
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.title', e.target.innerText)}
-                          className="text-3xl font-extrabold text-white outline-none"
-                        >
-                          {block.content.title}
-                        </h2>
-                        <p
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.subtitle', e.target.innerText)}
-                          className="text-xs text-slate-400 font-sans outline-none"
-                        >
-                          {block.content.subtitle}
-                        </p>
-                      </EditableCanvasItem>
-
+                    <section id="contact-section" ref={contactRef} className="p-8 sm:p-16 text-center space-y-6 bg-blue-50/40">
+                      <div className="max-w-md mx-auto space-y-2 pt-2">
+                        <h2 className="text-3xl font-extrabold text-slate-900">{block.content.title}</h2>
+                        <p className="text-xs text-slate-600">{block.content.subtitle}</p>
+                      </div>
                       {block.content.email && (
-                        <EditableCanvasItem
-                          elementKey="contact-email-btn"
-                          label="Email CTA Button"
-                          schema={schema}
-                          selectedElement={selectedElement}
-                          hoveredElementKey={hoveredElementKey}
-                          setHoveredElementKey={setHoveredElementKey}
-                          onSelectElement={onSelectElement}
-                          onUpdateElementStyle={onUpdateElementStyle}
-                          onPolishWithAI={onPolishWithAI}
-                          onOpenEditModal={handleOpenEditModal}
-                          blockId={block.id}
-                          blockIndex={index}
-                          className="inline-block"
+                        <a
+                          href={`mailto:${block.content.email}`}
+                          className="inline-flex items-center space-x-2 bg-[#ff5100] hover:bg-[#d64400] text-white font-bold text-xs px-6 py-3 rounded-full shadow-md transition-all"
                         >
-                          <a
-                            href={`mailto:${block.content.email}`}
-                            className="inline-flex items-center space-x-2 bg-[#ff5100] text-white font-extrabold text-xs px-6 py-3 rounded-full shadow-[0_0_25px_rgba(255,81,0,0.4)] hover:bg-[#d64400] transition-all"
-                          >
-                            <Mail className="w-4 h-4" />
-                            <span>Email {block.content.email}</span>
-                          </a>
-                        </EditableCanvasItem>
+                          <Mail className="w-4 h-4" />
+                          <span>Email {block.content.email}</span>
+                        </a>
                       )}
-
                     </section>
                   )}
 
                 </div>
               );
             })
-          ) : (
-            <div className="p-12 text-center text-slate-500 font-mono text-xs">
-              No section blocks defined in schema.
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
-
-      {/* DEDICATED CONTEXT-AWARE EDIT MODAL */}
-      {editModalData && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#181A24] border-2 border-black rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 font-sans text-white relative">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="font-heading font-extrabold text-base flex items-center gap-2">
-                <Pencil className="w-4 h-4 text-[#38BDF8]" />
-                <span>{editModalData.label}</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => setEditModalData(null)}
-                className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Dynamic Form Fields */}
-            <div className="space-y-3 font-mono text-xs">
-              {(editModalData.type === 'button-primary' || editModalData.type === 'button-secondary') && (
-                <div>
-                  <label className="block text-slate-400 mb-1">Button Label Text:</label>
-                  <input
-                    type="text"
-                    value={editModalData.btnText}
-                    onChange={(e) => setEditModalData({ ...editModalData, btnText: e.target.value })}
-                    className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0053ff]"
-                  />
-                </div>
-              )}
-
-              {editModalData.type === 'button-email' && (
-                <div>
-                  <label className="block text-slate-400 mb-1">Email Address:</label>
-                  <input
-                    type="email"
-                    value={editModalData.email}
-                    onChange={(e) => setEditModalData({ ...editModalData, email: e.target.value })}
-                    className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0053ff]"
-                  />
-                </div>
-              )}
-
-              {editModalData.type === 'project-card' && (
-                <>
-                  <div>
-                    <label className="block text-slate-400 mb-1">Project Title:</label>
-                    <input
-                      type="text"
-                      value={editModalData.title}
-                      onChange={(e) => setEditModalData({ ...editModalData, title: e.target.value })}
-                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0053ff]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 mb-1">Description:</label>
-                    <textarea
-                      rows={3}
-                      value={editModalData.description}
-                      onChange={(e) => setEditModalData({ ...editModalData, description: e.target.value })}
-                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#0053ff]"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="pt-2 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setEditModalData(null)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveModal}
-                className="px-5 py-2 bg-[#0053ff] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-[#0043cc] transition-colors"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
