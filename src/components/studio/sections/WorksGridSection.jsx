@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, ArrowUpRight } from 'lucide-react';
+import { ExternalLink, ArrowUpRight, GitBranch, Terminal, Shield, Cpu } from 'lucide-react';
 
 export default function WorksGridSection({
   block,
@@ -19,6 +19,71 @@ export default function WorksGridSection({
   const content = block.content || {};
   const items = content.items || [];
   const variant = block.layoutVariant || content.layoutVariant || 'numbered-grid';
+
+  // Variant 3: Cyber Terminal Repositories Layout
+  if (variant === 'terminal-repos' || variant === 'minimal-list') {
+    return (
+      <section id="projects-section" ref={projectsRef} className="p-8 sm:p-20 bg-[#070b14] text-white font-mono border-t border-b border-cyan-500/20">
+        <div className="max-w-6xl mx-auto space-y-8">
+          
+          <div className="flex items-center justify-between border-b border-cyan-500/30 pb-4">
+            <div className="flex items-center gap-3">
+              <Terminal className="w-5 h-5 text-cyan-400" />
+              <div>
+                <h2 className="text-2xl font-black text-white">{content.title || "Production Repositories & Models"}</h2>
+                <p className="text-xs text-cyan-400/80 font-mono mt-0.5">git log --oneline --graph --all</p>
+              </div>
+            </div>
+            <span className="text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-md hidden sm:block">
+              ● REPOS ACTIVE: {items.length || 3}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {items.map((item, pIdx) => {
+              const mockHash = (1234567 + pIdx * 987654).toString(16).slice(0, 7);
+              return (
+                <div key={item.id || pIdx} className="bg-[#0f172a] border border-cyan-500/30 rounded-2xl p-6 space-y-4 shadow-[0_0_20px_rgba(0,245,255,0.08)] hover:border-cyan-400 transition-colors group">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <GitBranch className="w-4 h-4 text-cyan-400" />
+                      <span className="text-xs text-slate-400 font-mono">commit {mockHash}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                      ● master
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-lg text-white group-hover:text-cyan-300 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed font-mono line-clamp-3">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-cyan-500/20 text-xs">
+                    <div className="flex flex-wrap gap-1.5">
+                      {item.tags?.map((t) => (
+                        <span key={t} className="px-2 py-0.5 bg-cyan-500/10 text-cyan-300 text-[10px] font-mono rounded border border-cyan-500/20">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                    <a href={item.link || '#'} target="_blank" rel="noreferrer" className="text-cyan-400 hover:text-white p-1">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+    );
+  }
 
   // Variant 2: Apple Bento Grid (Asymmetrical Layout)
   if (variant === 'apple-bento') {
@@ -108,50 +173,6 @@ export default function WorksGridSection({
               ))}
             </div>
 
-          </div>
-
-        </div>
-      </section>
-    );
-  }
-
-  // Variant 3: Minimal Horizontal List Rows
-  if (variant === 'minimal-list') {
-    return (
-      <section id="projects-section" ref={projectsRef} className="p-8 sm:p-20 bg-white text-slate-900 font-sans border-t border-b border-slate-100">
-        <div className="max-w-6xl mx-auto space-y-8">
-          
-          <div className="border-b border-slate-200 pb-5">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">{content.title || "Selected Works"}</h2>
-            <p className="text-xs text-slate-500 font-mono mt-1">{content.subtitle || "Selected software and design showcases"}</p>
-          </div>
-
-          <div className="divide-y divide-slate-200">
-            {items.map((item, pIdx) => (
-              <div key={item.id || pIdx} className="py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:px-4 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer">
-                <div className="space-y-1 max-w-xl">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-bold text-slate-400">0{pIdx + 1}</span>
-                    <h3 className="text-xl font-bold text-slate-900 group-hover:text-[#0053ff] transition-colors">{item.title}</h3>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed pl-7">{item.description}</p>
-                </div>
-
-                <div className="flex items-center gap-4 pl-7 sm:pl-0">
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.tags?.map((t) => (
-                      <span key={t} className="px-2.5 py-1 bg-slate-100 text-slate-700 text-[10px] font-mono rounded-md font-semibold">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
-                  <a href={item.link || '#'} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-[#0053ff] text-slate-700 group-hover:text-white flex items-center justify-center transition-colors">
-                    <ArrowUpRight className="w-5 h-5" />
-                  </a>
-                </div>
-              </div>
-            ))}
           </div>
 
         </div>

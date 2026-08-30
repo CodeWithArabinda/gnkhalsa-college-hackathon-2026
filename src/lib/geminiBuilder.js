@@ -6,12 +6,12 @@ import { initialPortfolioSchema } from '../types/schema';
 export function determineArchetype(promptText = '', excludedArchetypes = []) {
   const p = promptText.toLowerCase();
 
-  const options = ['cyber-ai', 'bento-minimal', 'editorial-studio', 'neo-brutalist'];
+  const options = ['cyber-terminal', 'bento-minimal', 'editorial-studio', 'neo-brutalist'];
   const available = options.filter(opt => !excludedArchetypes.includes(opt));
   const fallbackChoice = available.length > 0 ? available[0] : 'neo-brutalist';
 
-  if ((p.includes('ai') || p.includes('ml') || p.includes('python') || p.includes('cyber') || p.includes('terminal') || p.includes('torch')) && !excludedArchetypes.includes('cyber-ai')) {
-    return 'cyber-ai';
+  if ((p.includes('ai') || p.includes('ml') || p.includes('python') || p.includes('cyber') || p.includes('terminal') || p.includes('torch')) && !excludedArchetypes.includes('cyber-terminal')) {
+    return 'cyber-terminal';
   }
   if ((p.includes('bento') || p.includes('minimal') || p.includes('apple') || p.includes('vercel') || p.includes('ios')) && !excludedArchetypes.includes('bento-minimal')) {
     return 'bento-minimal';
@@ -52,14 +52,26 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
   // Model-specific Section Depth
   const isPro = resolvedModel === 'gemini-2.5-pro';
 
-  // Randomly vary layout variants per section for maximum visual diversity
-  const heroVariants = ['split-portrait', 'centered-bento', 'cyber-terminal'];
-  const worksVariants = ['numbered-grid', 'apple-bento', 'minimal-list'];
-  const pillarsVariants = ['pastel-cards', 'tech-matrix', 'system-telemetry'];
+  // Explicit Layout Variant Mapping per Archetype
+  let selectedHeroVar = 'split-portrait';
+  let selectedWorksVar = 'numbered-grid';
+  let selectedPillarsVar = 'pastel-cards';
+  let selectedStoryVar = 'editorial-split';
+  let selectedContactVar = 'split-form';
 
-  const selectedHeroVar = archetype === 'cyber-ai' ? 'cyber-terminal' : archetype === 'bento-minimal' ? 'centered-bento' : heroVariants[Math.floor(Math.random() * heroVariants.length)];
-  const selectedWorksVar = archetype === 'bento-minimal' ? 'apple-bento' : worksVariants[Math.floor(Math.random() * worksVariants.length)];
-  const selectedPillarsVar = archetype === 'cyber-ai' ? 'system-telemetry' : pillarsVariants[Math.floor(Math.random() * pillarsVariants.length)];
+  if (archetype === 'cyber-terminal' || archetype === 'cyber-ai') {
+    selectedHeroVar = 'cyber-terminal';
+    selectedWorksVar = 'terminal-repos';
+    selectedPillarsVar = 'system-telemetry';
+    selectedStoryVar = 'timeline-milestones';
+    selectedContactVar = 'cli-terminal-connect';
+  } else if (archetype === 'bento-minimal') {
+    selectedHeroVar = 'centered-bento';
+    selectedWorksVar = 'apple-bento';
+    selectedPillarsVar = 'tech-matrix';
+    selectedStoryVar = 'minimal-manifesto';
+    selectedContactVar = 'floating-dock';
+  }
 
   if (keyToUse && keyToUse !== "your_gemini_api_key_here") {
     try {
@@ -123,7 +135,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
             {
               id: "story",
               type: "story",
-              layoutVariant: "editorial-split",
+              layoutVariant: selectedStoryVar,
               title: "The Architect",
               bio: "Engineering software requires an uncompromised balance between aesthetic precision and technical integrity."
             }
@@ -131,7 +143,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
           {
             id: "contact",
             type: "contact-footer",
-            layoutVariant: "split-form",
+            layoutVariant: selectedContactVar,
             headline: "Let's Build Something Together",
             subtext: "Available for full-time opportunities and creative projects.",
             email: "kshitijpilankar@gmail.com",
@@ -172,7 +184,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
         const parsed = JSON.parse(cleanedText);
 
         if (parsed && (parsed.sections || parsed.blocks)) {
-          return formatSchemaResponse(parsed, userPrompt, archetype, selectedHeroVar, selectedWorksVar, selectedPillarsVar, isPro);
+          return formatSchemaResponse(parsed, userPrompt, archetype, selectedHeroVar, selectedWorksVar, selectedPillarsVar, selectedStoryVar, selectedContactVar, isPro);
         }
       }
     } catch (err) {
@@ -180,7 +192,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
     }
   }
 
-  return synthesizeFallbackSchema(userPrompt, archetype, selectedHeroVar, selectedWorksVar, selectedPillarsVar, isPro);
+  return synthesizeFallbackSchema(userPrompt, archetype, selectedHeroVar, selectedWorksVar, selectedPillarsVar, selectedStoryVar, selectedContactVar, isPro);
 }
 
 /**
@@ -188,9 +200,10 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
  */
 function getThemeForArchetype(archetype) {
   switch (archetype) {
+    case 'cyber-terminal':
     case 'cyber-ai':
       return {
-        preset: "cyber-ai",
+        preset: "cyber-terminal",
         bgStyle: "dark-terminal",
         primaryColor: "#00f5ff",
         accentColor: "#10b981",
@@ -239,7 +252,7 @@ function getThemeForArchetype(archetype) {
 /**
  * Format and synchronize schema response for both sections and block structures.
  */
-function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksVar, pillarsVar, isPro) {
+function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksVar, pillarsVar, storyVar, contactVar, isPro) {
   const archetype = parsed.archetype || archetypeOverride || determineArchetype(prompt);
   const theme = parsed.theme || getThemeForArchetype(archetype);
   const sections = parsed.sections || [];
@@ -247,6 +260,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
   const heroSec = sections.find(s => s.id === 'hero' || s.type === 'hero') || {};
   const projectSec = sections.find(s => s.id === 'projects' || s.type === 'project-grid') || {};
   const skillSec = sections.find(s => s.id === 'skills' || s.type === 'skills-matrix') || {};
+  const storySec = sections.find(s => s.id === 'story' || s.type === 'story') || {};
   const contactSec = sections.find(s => s.id === 'contact' || s.type === 'contact-footer') || {};
 
   const blocks = [
@@ -307,7 +321,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
       {
         id: "block-story",
         type: "StoryBlock",
-        layoutVariant: "editorial-split",
+        layoutVariant: storySec.layoutVariant || storyVar || 'editorial-split',
         content: {
           title: "The Architect",
           bio: "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."
@@ -317,7 +331,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
     {
       id: "block-contact",
       type: "ContactBlock",
-      layoutVariant: "split-form",
+      layoutVariant: contactSec.layoutVariant || contactVar || 'split-form',
       content: {
         title: contactSec.headline || "Let's Build Something Together",
         subtitle: contactSec.subtext || "Available for full-time opportunities, technical leadership roles, and high-impact design system engineering.",
@@ -351,7 +365,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
 /**
  * Synthesize a customized dynamic schema locally if API key is missing or call fails.
  */
-function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsVar, isPro) {
+function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsVar, storyVar, contactVar, isPro) {
   let heroHeadline = "Creative Fullstack Developer & Architect";
   let heroBio = "Building high-impact digital products, scalable systems, and interactive web experiences.";
 
@@ -416,7 +430,7 @@ function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsV
       {
         id: "contact",
         type: "contact-footer",
-        layoutVariant: "split-form",
+        layoutVariant: contactVar,
         headline: "Let's Build Something Together",
         subtext: "Available for full-time opportunities, technical leadership roles, and high-impact design system engineering.",
         email: "kshitijpilankar@gmail.com",
@@ -425,7 +439,7 @@ function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsV
     ]
   };
 
-  return formatSchemaResponse(fallbackData, prompt, archetype, heroVar, worksVar, pillarsVar, isPro);
+  return formatSchemaResponse(fallbackData, prompt, archetype, heroVar, worksVar, pillarsVar, storyVar, contactVar, isPro);
 }
 
 /**
