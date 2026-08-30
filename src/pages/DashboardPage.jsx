@@ -19,9 +19,8 @@ import {
   LogOut,
   Globe,
   Loader2,
-  User,
   ChevronRight,
-  Plus
+  Play
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -31,8 +30,7 @@ export default function DashboardPage() {
     portfolio,
     loading: portfolioLoading,
     fetchPortfolio,
-    applyParsedResume,
-    showToast
+    applyParsedResume
   } = usePortfolio();
 
   const [activeNav, setActiveNav] = useState('overview'); // 'overview' | 'templates' | 'analytics' | 'settings'
@@ -52,9 +50,9 @@ export default function DashboardPage() {
 
   if (authLoading || portfolioLoading || !portfolio) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center text-slate-900 font-sans">
-        <Loader2 className="w-10 h-10 animate-spin text-[#0053ff] mb-4" />
-        <p className="text-sm font-mono font-bold text-slate-500">Loading AI Studio Dashboard...</p>
+      <div className="min-h-screen bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] flex flex-col items-center justify-center text-slate-900 font-sans">
+        <Loader2 className="w-10 h-10 animate-spin text-black mb-4" />
+        <p className="text-sm font-mono font-extrabold text-black uppercase tracking-wider">Loading SaaS Dashboard...</p>
       </div>
     );
   }
@@ -73,25 +71,25 @@ export default function DashboardPage() {
   const userInitials = displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'KP';
 
   return (
-    <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden font-sans text-slate-900 select-none">
+    <div className="flex h-screen w-full bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] overflow-hidden font-sans text-slate-900 select-none">
       
-      {/* 1. PERSISTENT LEFT SIDEBAR (Wix / ChatGPT Light Theme) */}
-      <aside className="w-64 border-r border-slate-200 bg-white flex flex-col justify-between p-4 shrink-0 shadow-2xs z-30">
+      {/* 1. PERSISTENT NEO-BRUTALIST LEFT SIDEBAR */}
+      <aside className="w-[240px] bg-white border-r-[2.5px] border-black flex flex-col justify-between p-4 shrink-0 shadow-[4px_0px_0px_#000000] z-20">
         
         <div className="space-y-6">
-          {/* StackFolio Logo */}
-          <Link to="/" className="flex items-center space-x-2.5 px-2 pt-1 group">
-            <div className="w-8 h-8 rounded-xl bg-[#0053ff] text-white flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
-              SF
+          {/* Logo Header */}
+          <Link to="/" className="flex items-center space-x-2 px-1 pt-1 group">
+            <div className="w-8 h-8 bg-[#FFE600] border-2 border-black rounded-lg flex items-center justify-center font-heading font-black text-sm text-black shadow-[2px_2px_0px_#000000] group-hover:rotate-6 transition-transform">
+              ⚡
             </div>
-            <span className="font-heading font-black text-lg tracking-tight text-slate-900">StackFolio</span>
-            <span className="bg-blue-50 text-[#0053ff] font-mono font-bold text-[9px] px-1.5 py-0.5 border border-blue-200 rounded">
-              AI
+            <span className="font-heading font-black text-lg tracking-tight text-black">StackFolio</span>
+            <span className="bg-pink-400 text-black font-mono font-black text-[9px] px-1.5 py-0.5 border border-black rounded shadow-[1.5px_1.5px_0px_#000000] rotate-[-2deg]">
+              BETA
             </span>
           </Link>
 
           {/* Navigation Items */}
-          <nav className="space-y-1">
+          <nav className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.id;
@@ -102,9 +100,9 @@ export default function DashboardPage() {
                     key={item.id}
                     type="button"
                     onClick={() => setIsUploadModalOpen(true)}
-                    className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 font-bold text-xs shadow-xs transition-all text-slate-900 cursor-pointer"
+                    className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl border-2 border-black bg-[#4DEEEA] font-black text-xs shadow-[3px_3px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-black cursor-pointer"
                   >
-                    <Icon className="w-4 h-4 text-slate-900" />
+                    <Icon className="w-4 h-4 text-black" />
                     <span>{item.label}</span>
                   </button>
                 );
@@ -121,13 +119,13 @@ export default function DashboardPage() {
                       setActiveNav(item.id);
                     }
                   }}
-                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
+                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl border-2 font-black text-xs transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-blue-50 text-[#0053ff] font-bold border-r-2 border-[#0053ff] shadow-2xs'
-                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      ? 'bg-[#FFE600] text-black border-black shadow-[3px_3px_0px_#000000]'
+                      : 'bg-transparent text-slate-800 border-transparent hover:border-black hover:bg-slate-50 hover:shadow-[2px_2px_0px_#000000]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#0053ff]' : 'text-slate-500'}`} />
+                  <Icon className={`w-4 h-4 text-black`} />
                   <span>{item.label}</span>
                 </button>
               );
@@ -135,23 +133,23 @@ export default function DashboardPage() {
           </nav>
         </div>
 
-        {/* Bottom Docked User Profile Card */}
-        <div className="pt-3 border-t border-slate-200">
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer">
+        {/* Bottom User Profile Card */}
+        <div className="pt-3 border-t-2 border-black/10">
+          <div className="border-2 border-black bg-white rounded-xl p-2.5 shadow-[3px_3px_0px_#000000] flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-[#0053ff] text-white font-extrabold flex items-center justify-center text-xs shadow-xs shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FFE600] border-2 border-black font-black text-black flex items-center justify-center text-xs shadow-[1.5px_1.5px_0px_#000000] shrink-0">
                 {userInitials}
               </div>
               <div className="min-w-0">
-                <h4 className="font-bold text-xs text-slate-900 truncate">{displayName}</h4>
-                <p className="text-[10px] text-slate-500 truncate">{displayEmail}</p>
+                <h4 className="font-black text-xs text-black truncate">{displayName}</h4>
+                <p className="text-[10px] font-bold text-slate-600 truncate">Free Tier</p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => signOut().then(() => navigate('/auth'))}
-              className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+              className="p-1 text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
@@ -162,19 +160,19 @@ export default function DashboardPage() {
       </aside>
 
       {/* 2. MAIN WORKSPACE CONTENT */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#f8fafc]">
+      <div className="flex-1 flex flex-col overflow-hidden">
         
         {/* Top Header Bar */}
-        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-10 shrink-0 shadow-2xs">
+        <header className="bg-white border-b-[2.5px] border-black px-6 py-3.5 flex items-center justify-between z-10 shrink-0 shadow-[0px_4px_0px_#000000]">
           
-          {/* Breadcrumb */}
+          {/* Breadcrumb Navigation */}
           <div className="flex items-center space-x-2 text-xs font-mono font-bold">
-            <span className="text-slate-400">StackFolio</span>
+            <span className="text-slate-500">StackFolio</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-400">Workspace</span>
+            <span className="text-slate-500">Workspace</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-[#0053ff] uppercase font-extrabold bg-blue-50 px-2 py-0.5 border border-blue-200 rounded">
-              {activeNav === 'overview' ? 'AI Site Generator' : activeNav}
+            <span className="bg-[#FFE600] text-black border-2 border-black font-black text-xs px-2.5 py-0.5 rounded shadow-[2px_2px_0px_#000000] uppercase">
+              {activeNav === 'overview' ? 'AI SITE GENERATOR' : activeNav}
             </span>
           </div>
 
@@ -183,18 +181,18 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => window.open('/preview', '_blank')}
-              className="inline-flex items-center space-x-1.5 text-xs font-bold px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1.5 text-xs font-black px-3.5 py-2 bg-white text-black border-2 border-black rounded-xl shadow-[2.5px_2.5px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
             >
-              <Globe className="w-3.5 h-3.5 text-[#0053ff]" />
+              <Globe className="w-3.5 h-3.5 text-black" />
               <span>Live Site ↗</span>
             </button>
 
             <button
               type="button"
               onClick={() => navigate('/studio')}
-              className="inline-flex items-center space-x-1.5 text-xs font-extrabold px-4 py-1.5 bg-[#0053ff] hover:bg-[#0043cc] text-white rounded-lg shadow-sm transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1.5 text-xs font-black px-4 py-2 bg-black text-white hover:bg-zinc-800 border-2 border-black rounded-xl shadow-[3px_3px_0px_#FFE600] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
             >
-              <Edit3 className="w-3.5 h-3.5" />
+              <Edit3 className="w-3.5 h-3.5 text-[#FFE600]" />
               <span>Open Studio Editor</span>
             </button>
           </div>
@@ -206,7 +204,7 @@ export default function DashboardPage() {
           
           {/* Unified AI Generator + Template Showcase (Overview & Templates tabs) */}
           {(activeNav === 'overview' || activeNav === 'templates') && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <AriaSiteGenerator />
               <TemplateGallery />
             </div>

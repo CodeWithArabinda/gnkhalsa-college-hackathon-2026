@@ -1,36 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Eye, ArrowRight, Check } from 'lucide-react';
+import { Eye, ArrowRight, Sparkles } from 'lucide-react';
 
 const TEMPLATE_PRESETS = [
   {
     id: 'autono',
     name: 'AUTONO',
     category: 'Developer & Tech',
-    badge: 'WIX HARMONY',
-    description: 'Clean Minimal Editorial Tech theme with white & slate canvas, sharp typography, and high-impact CTA buttons.',
+    badge: 'NEO-BRUTALIST',
+    badgeColor: 'bg-[#FFE600]',
+    description: 'Clean Minimal Editorial Tech theme with off-white canvas, sharp typography, and hard-edge shadow CTA buttons.',
     previewBg: 'bg-gradient-to-b from-slate-100 to-white',
-    accentColor: '#0053ff',
-    textColor: 'text-slate-900'
+    textColor: 'text-black'
   },
   {
     id: 'arian-grand',
     name: 'ARIAN GRAND / DESIGNER CV',
     category: 'Creative Studio',
     badge: 'POPULAR',
+    badgeColor: 'bg-[#93c5fd]',
     description: 'Warm peach-to-orange gradient aesthetic with rich avatar focus, floating tech badges, and social triggers.',
     previewBg: 'bg-gradient-to-tr from-amber-100 via-orange-50 to-pink-100',
-    accentColor: '#ff5100',
-    textColor: 'text-slate-900'
+    textColor: 'text-black'
   },
   {
     id: 'darle-studio',
     name: 'DARLE STUDIO',
     category: 'Creative Studio',
     badge: 'FEATURED',
+    badgeColor: 'bg-[#86efac]',
     description: 'Cobalt royal blue agency showcase with high-contrast project grid and interactive metrics matrix.',
     previewBg: 'bg-gradient-to-b from-blue-900 to-slate-950',
-    accentColor: '#38BDF8',
     textColor: 'text-white'
   },
   {
@@ -38,9 +38,9 @@ const TEMPLATE_PRESETS = [
     name: 'DARK OBSIDIAN / TERMINAL',
     category: 'Developer & Tech',
     badge: 'CYBER',
+    badgeColor: 'bg-[#fca5a5]',
     description: 'Cyber dark mode with monospaced cyan borders, terminal window headers, and neon amber badges.',
     previewBg: 'bg-[#0b0e14]',
-    accentColor: '#00FFA3',
     textColor: 'text-emerald-400'
   },
   {
@@ -48,9 +48,9 @@ const TEMPLATE_PRESETS = [
     name: 'BENTO MODULAR',
     category: 'Bento & Minimal',
     badge: 'VERCEL STYLE',
+    badgeColor: 'bg-[#fef08a]',
     description: 'Apple/Vercel-inspired glassmorphic bento grid cards with dynamic column spans and subtle borders.',
     previewBg: 'bg-slate-900',
-    accentColor: '#A855F7',
     textColor: 'text-white'
   },
   {
@@ -58,9 +58,9 @@ const TEMPLATE_PRESETS = [
     name: 'CINEMATIC NEBULA',
     category: 'Bento & Minimal',
     badge: 'NEW',
+    badgeColor: 'bg-[#c084fc]',
     description: 'Deep space dark canvas with warm amber radial gradients, glass navbar, and floating project cards.',
     previewBg: 'bg-gradient-to-b from-zinc-950 via-zinc-900 to-black',
-    accentColor: '#FF6B1A',
     textColor: 'text-amber-400'
   }
 ];
@@ -89,23 +89,23 @@ export default function TemplateGallery() {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 pt-6 pb-16 font-sans select-none">
       
-      {/* Gallery Title Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200/80 pt-8">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-          Or, start from a template recommended for you.
+      {/* Section Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t-2 border-black/10 pt-8">
+        <h2 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
+          START FROM A CURATED TEMPLATE.
         </h2>
         <button
           type="button"
           onClick={() => setActiveCategory('All (6)')}
-          className="text-xs font-bold text-[#0053ff] hover:underline flex items-center gap-1 cursor-pointer"
+          className="text-xs font-black text-black hover:text-[#0053ff] flex items-center gap-1 cursor-pointer"
         >
-          <span>See All ({TEMPLATE_PRESETS.length})</span>
+          <span>SEE ALL ({TEMPLATE_PRESETS.length})</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {/* Filter Category Pills */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2.5">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat;
           return (
@@ -113,10 +113,10 @@ export default function TemplateGallery() {
               key={cat}
               type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-lg text-xs font-black border-2 border-black transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-black text-white shadow-[2.5px_2.5px_0px_#FFE600]'
+                  : 'bg-white text-black shadow-[2.5px_2.5px_0px_#000000] hover:bg-slate-50'
               }`}
             >
               {cat}
@@ -130,65 +130,64 @@ export default function TemplateGallery() {
         {filteredTemplates.map((tmpl) => (
           <div
             key={tmpl.id}
-            className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group"
+            className="bg-white border-[2.5px] border-black rounded-2xl p-4 shadow-[5px_5px_0px_#000000] flex flex-col justify-between hover:shadow-[7px_7px_0px_#000000] hover:-translate-y-1 transition-all duration-200 group"
           >
-            {/* Top Mockup Preview Frame */}
-            <div className={`h-48 ${tmpl.previewBg} p-4 relative flex flex-col justify-between border-b border-slate-100 overflow-hidden`}>
+            {/* Mockup Window */}
+            <div className={`h-44 ${tmpl.previewBg} p-3 rounded-xl border-2 border-black relative flex flex-col justify-between overflow-hidden shadow-[2px_2px_0px_#000]`}>
               
-              {/* Browser Mac Dots Header */}
+              {/* Browser Header */}
               <div className="flex items-center justify-between z-10">
                 <div className="flex items-center space-x-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 border border-black" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-black" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border border-black" />
                 </div>
-                <span className="text-[9px] font-mono font-bold bg-white/80 dark:bg-black/60 px-2 py-0.5 rounded-full uppercase text-slate-800 dark:text-slate-200">
+                <span className={`${tmpl.badgeColor} text-black border-2 border-black font-black text-[9px] px-2 py-0.5 rounded shadow-[1.5px_1.5px_0px_#000] uppercase`}>
                   {tmpl.badge}
                 </span>
               </div>
 
-              {/* Inner Mini Mockup Content */}
-              <div className="my-auto space-y-2 z-10">
-                <div className="w-24 h-3 bg-slate-900/20 dark:bg-white/20 rounded-full" />
-                <h4 className={`text-lg font-black tracking-tight ${tmpl.textColor}`}>
+              {/* Mockup Title */}
+              <div className="my-auto space-y-1.5 z-10">
+                <h4 className={`text-base font-black tracking-tight ${tmpl.textColor}`}>
                   {tmpl.name}
                 </h4>
                 <div className="flex gap-1.5">
-                  <span className="w-12 h-2 rounded bg-[#0053ff]/40" />
-                  <span className="w-8 h-2 rounded bg-amber-500/40" />
+                  <span className="w-12 h-1.5 rounded bg-black/30" />
+                  <span className="w-8 h-1.5 rounded bg-black/20" />
                 </div>
               </div>
 
-              {/* Hover Overlay Button */}
-              <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-20 backdrop-blur-2xs">
+              {/* Hover Trigger */}
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-2xs">
                 <button
                   type="button"
                   onClick={() => handleSelectTemplate(tmpl.id)}
-                  className="bg-[#0053ff] text-white font-bold text-xs px-4 py-2 rounded-xl shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                  className="bg-[#FFE600] text-black border-2 border-black font-black text-xs px-4 py-2 rounded-xl shadow-[3px_3px_0px_#000] hover:scale-105 transition-transform cursor-pointer"
                 >
-                  Use Template
+                  Use Template ➔
                 </button>
               </div>
 
             </div>
 
-            {/* Card Details & Actions */}
-            <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+            {/* Content & Action Buttons */}
+            <div className="pt-4 space-y-4 flex-1 flex flex-col justify-between">
               <div className="space-y-1.5">
-                <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#0053ff] transition-colors">
+                <h3 className="font-black text-base text-black tracking-tight">
                   {tmpl.name}
                 </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs font-semibold text-slate-700 leading-relaxed">
                   {tmpl.description}
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-2 pt-2 border-t-2 border-black/10">
                 <button
                   type="button"
                   onClick={() => handleSelectTemplate(tmpl.id)}
-                  className="bg-[#0053ff] hover:bg-[#0043cc] text-white font-bold text-xs px-4 py-2 rounded-xl flex-1 text-center shadow-xs transition-colors cursor-pointer"
+                  className="bg-[#FFE600] hover:bg-[#ebd300] text-black border-2 border-black font-black text-xs py-2 px-3 rounded-lg shadow-[2px_2px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex-1 text-center cursor-pointer"
                 >
                   🚀 Open in Studio
                 </button>
@@ -196,10 +195,10 @@ export default function TemplateGallery() {
                 <button
                   type="button"
                   onClick={() => window.open('/preview', '_blank')}
-                  className="border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs px-3 py-2 rounded-xl transition-colors cursor-pointer"
+                  className="bg-white hover:bg-slate-100 text-black border-2 border-black font-bold text-xs p-2 rounded-lg shadow-[2px_2px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
                   title="Preview Template Fullscreen"
                 >
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-4 h-4 text-black" />
                 </button>
               </div>
             </div>
