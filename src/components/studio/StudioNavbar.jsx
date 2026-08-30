@@ -26,7 +26,7 @@ export default function StudioNavbar({
     if (onPublish) onPublish();
   };
 
-  const activeArchetype = schema?.archetype || 'humanist-light';
+  const activeArchetype = schema?.archetype || 'bento-minimal';
 
   return (
     <header className="h-[52px] bg-white border-b-[2.5px] border-black px-4 flex items-center justify-between shrink-0 text-slate-900 text-xs font-sans select-none z-30 shadow-[0_3px_0px_#000000]">
@@ -87,7 +87,7 @@ export default function StudioNavbar({
             type="button"
             onClick={() => onMorphArchetype && onMorphArchetype('warm-editorial')}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              activeArchetype === 'warm-editorial' || activeArchetype === 'humanist-light'
+              activeArchetype === 'warm-editorial'
                 ? 'bg-[#C2410C] text-white border-2 border-black shadow-[1px_1px_0px_#000]'
                 : 'text-slate-700 hover:text-black border-2 border-transparent'
             }`}
