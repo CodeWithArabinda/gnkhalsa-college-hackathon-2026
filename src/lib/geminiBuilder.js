@@ -20,11 +20,16 @@ export function determineArchetype(promptText = '') {
 
 /**
  * Generate a full AI Portfolio Schema based on user prompt using Gemini REST API.
- * Includes a robust fallback mechanism if no API key is set or the fetch fails.
+ * Dynamically routes to auto, gemini-2.5-flash, or gemini-2.5-pro.
  */
-export async function generatePortfolioSchema(userPrompt, apiKey = null) {
+export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiKey = null) {
   const keyToUse = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
   const archetype = determineArchetype(userPrompt);
+
+  let resolvedModel = modelId;
+  if (!modelId || modelId === 'auto') {
+    resolvedModel = userPrompt.length > 300 ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+  }
 
   if (keyToUse && keyToUse !== "your_gemini_api_key_here") {
     try {
@@ -50,7 +55,7 @@ export async function generatePortfolioSchema(userPrompt, apiKey = null) {
           {
             id: "projects",
             type: "project-grid",
-            title: "Featured Works",
+            title: "Selected Works",
             subtitle: "Selected software and design showcases",
             items: [
               {
@@ -84,7 +89,7 @@ export async function generatePortfolioSchema(userPrompt, apiKey = null) {
           {
             id: "contact",
             type: "contact-footer",
-            headline: "Let's Build Something Cool",
+            headline: "Let's Build Something Together",
             subtext: "Available for full-time opportunities and creative projects.",
             email: "kshitijpilankar@gmail.com",
             btnLabel: "Email Me"
@@ -109,7 +114,7 @@ export async function generatePortfolioSchema(userPrompt, apiKey = null) {
         }
       };
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${resolvedModel}:generateContent?key=${keyToUse}`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -128,7 +133,7 @@ export async function generatePortfolioSchema(userPrompt, apiKey = null) {
         }
       }
     } catch (err) {
-      console.warn("Gemini API call error, using synthesized fallback schema:", err.message);
+      console.warn(`Gemini API call error (${resolvedModel}), using synthesized fallback schema:`, err.message);
     }
   }
 
@@ -281,120 +286,33 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride) {
  * Synthesize a customized dynamic schema locally if API key is missing or call fails.
  */
 function synthesizeFallbackSchema(prompt, archetype) {
-  const p = prompt.toLowerCase();
-
   let heroHeadline = "Creative Fullstack Developer & Architect";
   let heroBio = "Building high-impact digital products, scalable systems, and interactive web experiences.";
 
-  let projectItems = [];
-  let skillCategories = [];
+  let projectItems = [
+    {
+      id: "p1",
+      title: "3D Space Canvas",
+      description: "Interactive WebGL portfolio template with real-time video scrubbing.",
+      metrics: "Winner ★ 1st Place",
+      tags: ["React", "WebGL", "GSAP"],
+      demoUrl: "https://github.com"
+    },
+    {
+      id: "p2",
+      title: "StackFolio AI Studio Copilot",
+      description: "Conversational website builder with live preview frame and inline edits.",
+      metrics: "1.2k+ Generated",
+      tags: ["TypeScript", "Tailwind", "AI"],
+      demoUrl: "https://github.com"
+    }
+  ];
 
-  if (archetype === 'cyber-ai') {
-    heroHeadline = "Autonomous AI Systems & ML Engineer";
-    heroBio = "Architecting distributed neural inference pipelines, vector search engines, and real-time streaming LLM agents.";
-    projectItems = [
-      {
-        id: "p1",
-        title: "Autonomous RAG Pipeline Engine",
-        description: "High-throughput vector search pipeline with multi-modal embeddings and streaming response controller.",
-        metrics: "Latency: 14ms • Accuracy: 99.2%",
-        tags: ["Python", "PyTorch", "Pinecone", "LangChain"],
-        demoUrl: "https://github.com"
-      },
-      {
-        id: "p2",
-        title: "Neural Vision Telemetry Dashboard",
-        description: "Real-time object classification and edge anomaly detection for autonomous camera feeds.",
-        metrics: "FPS: 120 • Model: YOLOv8",
-        tags: ["CUDA", "TensorRT", "FastAPI", "React"],
-        demoUrl: "https://github.com"
-      }
-    ];
-    skillCategories = [
-      { name: "AI & ML", skills: ["PyTorch", "TensorFlow", "LangChain", "Pinecone"] },
-      { name: "BACKEND & INFRA", skills: ["Python", "FastAPI", "Docker", "CUDA"] },
-      { name: "FRONTEND", skills: ["React", "TypeScript", "Tailwind CSS", "Recharts"] }
-    ];
-  } else if (archetype === 'bento-minimal') {
-    heroHeadline = "Product Designer & Frontend Engineer";
-    heroBio = "Crafting pixel-perfect iOS design systems, glassmorphic interfaces, and fluid micro-animations.";
-    projectItems = [
-      {
-        id: "p1",
-        title: "Minimalist iOS Design System",
-        description: "Unified design tokens, haptic feedback interactions, and accessible component library.",
-        metrics: "50k+ Installs • 4.9★ Rating",
-        tags: ["SwiftUI", "Figma", "Design Tokens"],
-        demoUrl: "https://github.com"
-      },
-      {
-        id: "p2",
-        title: "Spatial Motion Canvas",
-        description: "Fluid 60fps micro-animations and spatial UI components built with React Three Fiber.",
-        metrics: "60 FPS • WebGL 2.0",
-        tags: ["Three.js", "R3F", "Tailwind"],
-        demoUrl: "https://github.com"
-      }
-    ];
-    skillCategories = [
-      { name: "UI & DESIGN", skills: ["Figma", "Design Systems", "Prototyping", "UX"] },
-      { name: "FRONTEND", skills: ["React 18", "Next.js", "Tailwind CSS", "Framer Motion"] },
-      { name: "MOBILE", skills: ["SwiftUI", "React Native", "Expo"] }
-    ];
-  } else if (archetype === 'editorial-studio') {
-    heroHeadline = "Lead Architect & Creative Director";
-    heroBio = "Leading digital transformations for modern enterprises through high-contrast editorial design and robust engineering.";
-    projectItems = [
-      {
-        id: "p1",
-        title: "Vogue Digital Editorial Showcase",
-        description: "Custom publication platform with dynamic typography scaling and fluid page transitions.",
-        metrics: "1M+ Monthly Views",
-        tags: ["Next.js", "GraphQL", "Tailwind"],
-        demoUrl: "https://github.com"
-      },
-      {
-        id: "p2",
-        title: "Monolith to Microservices Engine",
-        description: "Enterprise backend migration serving 10M+ daily active sessions with zero downtime.",
-        metrics: "99.99% Uptime",
-        tags: ["Go", "Kubernetes", "PostgreSQL"],
-        demoUrl: "https://github.com"
-      }
-    ];
-    skillCategories = [
-      { name: "ARCHITECTURE", skills: ["Microservices", "System Design", "GraphQL"] },
-      { name: "STACK", skills: ["Go", "Node.js", "React", "PostgreSQL"] },
-      { name: "DEPOYMENT", skills: ["Kubernetes", "AWS", "Terraform"] }
-    ];
-  } else {
-    // Neo-Brutalist
-    heroHeadline = "Fullstack Architect & Hackathon Champion";
-    heroBio = "Building bold, high-converting web applications with hard-edge Neo-Brutalist design systems and solid engineering.";
-    projectItems = [
-      {
-        id: "p1",
-        title: "3D Space Canvas",
-        description: "Interactive WebGL portfolio template with real-time video scrubbing.",
-        metrics: "Winner ★ 1st Place",
-        tags: ["React", "WebGL", "GSAP"],
-        demoUrl: "https://github.com"
-      },
-      {
-        id: "p2",
-        title: "StackFolio AI Studio Copilot",
-        description: "Conversational website builder with live preview frame and inline edits.",
-        metrics: "1.2k+ Generated",
-        tags: ["TypeScript", "Tailwind", "AI"],
-        demoUrl: "https://github.com"
-      }
-    ];
-    skillCategories = [
-      { name: "FRONTEND", skills: ["React 18", "Vite", "Tailwind CSS", "GSAP"] },
-      { name: "BACKEND & DB", skills: ["Node.js", "Supabase", "PostgreSQL"] },
-      { name: "TOOLS", skills: ["Git", "Figma", "Docker", "Vercel"] }
-    ];
-  }
+  let skillCategories = [
+    { name: "Frontend Engineering", skills: ["React 18", "Vite", "Tailwind CSS", "GSAP"] },
+    { name: "Backend & Cloud", skills: ["Node.js", "Supabase", "PostgreSQL", "Docker"] },
+    { name: "Full-Stack Architecture", skills: ["System Design", "GraphQL", "CI/CD", "Vercel"] }
+  ];
 
   const fallbackData = {
     archetype,
@@ -416,21 +334,21 @@ function synthesizeFallbackSchema(prompt, archetype) {
       {
         id: "projects",
         type: "project-grid",
-        title: "Featured Works",
+        title: "Selected Works",
         subtitle: "Selected software and design showcases",
         items: projectItems
       },
       {
         id: "skills",
         type: "skills-matrix",
-        title: "Technical Stack",
+        title: "Engineering Excellence",
         categories: skillCategories
       },
       {
         id: "contact",
         type: "contact-footer",
-        headline: "Let's Build Something Cool",
-        subtext: "Available for full-time opportunities and creative projects.",
+        headline: "Let's Build Something Together",
+        subtext: "Available for full-time opportunities, technical leadership roles, and high-impact design system engineering.",
         email: "kshitijpilankar@gmail.com",
         btnLabel: "Email Me"
       }
@@ -443,8 +361,8 @@ function synthesizeFallbackSchema(prompt, archetype) {
 /**
  * Legacy Copilot inline mutation handler.
  */
-export async function processUserPrompt(userPrompt, currentSchema) {
-  const schema = await generatePortfolioSchema(userPrompt);
+export async function processUserPrompt(userPrompt, currentSchema, modelId = 'auto') {
+  const schema = await generatePortfolioSchema(userPrompt, modelId);
   return {
     schema,
     copilotMessage: `Applied requested AI updates (${schema.archetype || 'custom'} style) to live canvas schema!`

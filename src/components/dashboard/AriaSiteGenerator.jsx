@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, ArrowRight, Sparkles, Play, Loader2 } from 'lucide-react';
 import { generatePortfolioSchema } from '../../lib/geminiBuilder';
+import ModelSelectorDropdown from '../common/ModelSelectorDropdown';
 
 export default function AriaSiteGenerator() {
   const [promptText, setPromptText] = useState(
     "Create a modern, high-impact portfolio for a Creative Fullstack Developer showcasing WebGL projects, interactive tech stack matrix, and contact conversion hooks."
   );
+  const [selectedModel, setSelectedModel] = useState(() => localStorage.getItem('stackfolio_selected_model') || 'auto');
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusText, setStatusText] = useState('');
   const navigate = useNavigate();
@@ -28,8 +30,8 @@ export default function AriaSiteGenerator() {
       setStatusText('✦ Assembling Neo-Brutalist layout schema...');
       await new Promise(r => setTimeout(r, 1000));
 
-      // Call Gemini REST API (or fallback engine)
-      const schema = await generatePortfolioSchema(promptText.trim());
+      // Call Gemini REST API with selected model
+      const schema = await generatePortfolioSchema(promptText.trim(), selectedModel);
 
       // Save schema to localStorage for studio hydration
       localStorage.setItem('stackfolio_portfolio_schema', JSON.stringify(schema));
@@ -97,20 +99,28 @@ export default function AriaSiteGenerator() {
           {/* Bottom Dock Actions */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-black/10">
             
-            <button
-              type="button"
-              disabled={isGenerating}
-              onClick={() => {
-                const url = window.prompt("Enter existing portfolio or LinkedIn URL to clone structure:", "https://kshitij.dev");
-                if (url) {
-                  setPromptText(`Generate a sleek fullstack portfolio matching the structure and project highlights of ${url}`);
-                }
-              }}
-              className="border-2 border-black bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-black font-bold text-xs px-3.5 py-2 rounded-lg shadow-[2px_2px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Globe className="w-3.5 h-3.5 text-black" />
-              <span>Create from URL</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Model Selector Dropdown */}
+              <ModelSelectorDropdown
+                selectedModel={selectedModel}
+                onSelect={setSelectedModel}
+              />
+
+              <button
+                type="button"
+                disabled={isGenerating}
+                onClick={() => {
+                  const url = window.prompt("Enter existing portfolio or LinkedIn URL to clone structure:", "https://kshitij.dev");
+                  if (url) {
+                    setPromptText(`Generate a sleek fullstack portfolio matching the structure and project highlights of ${url}`);
+                  }
+                }}
+                className="border-2 border-black bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-black font-bold text-xs px-3 py-2 rounded-lg shadow-[2px_2px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Globe className="w-3.5 h-3.5 text-black" />
+                <span className="hidden sm:inline">Create from URL</span>
+              </button>
+            </div>
 
             <button
               type="button"
@@ -150,19 +160,14 @@ export default function AriaSiteGenerator() {
         </div>
       </div>
 
-      {/* 2. STANDALONE FULL-WIDTH CENTER-BADGE DIVIDER (MATCHING IMAGE 2 1:1) */}
+      {/* 2. STANDALONE FULL-WIDTH CENTER-BADGE DIVIDER */}
       <div className="w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] -mx-6 sm:-mx-10 relative flex items-center justify-center mt-8 mb-10 select-none">
-        
-        {/* Horizontal Black Line */}
         <div className="w-full border-t-[2.5px] border-black absolute left-0 top-1/2 -translate-y-1/2 z-0" />
-
-        {/* Centered Floating Yellow Badge Pill */}
         <div className="relative z-10 bg-[#FFE600] text-black border-2 border-black font-mono font-black text-xs px-4 py-1.5 rounded-md shadow-[2.5px_2.5px_0px_#000000] uppercase tracking-wider flex items-center gap-2">
           <span>✦</span>
           <span>CURATED TEMPLATES REPOSITORY</span>
           <span>✦</span>
         </div>
-
       </div>
 
     </div>

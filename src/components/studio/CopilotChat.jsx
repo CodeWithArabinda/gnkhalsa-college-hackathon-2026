@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, History, X, Plus, Mic, User, RefreshCw, Palette, HelpCircle } from 'lucide-react';
 import PlanningCard from './PlanningCard';
+import ModelSelectorDropdown from '../common/ModelSelectorDropdown';
 
 const QUICK_GRID_ACTIONS = [
   { id: 'generate', label: 'Generate', icon: RefreshCw, prompt: '✨ Generate a new modern hero layout for developer portfolio.' },
@@ -12,6 +13,7 @@ const QUICK_GRID_ACTIONS = [
 export default function CopilotChat({ schema, onApplyPrompt, isGenerating: externalGenerating }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [selectedModel, setSelectedModel] = useState(() => localStorage.getItem('stackfolio_selected_model') || 'auto');
   const [internalGenerating, setInternalGenerating] = useState(false);
   const [activeContextBadge, setActiveContextBadge] = useState("Hero Section");
   const messagesEndRef = useRef(null);
@@ -44,7 +46,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
     try {
       let responseText = "Updated your portfolio schema!";
       if (onApplyPrompt) {
-        responseText = await onApplyPrompt(query);
+        responseText = await onApplyPrompt(query, selectedModel);
       }
 
       const botMsg = {
@@ -95,7 +97,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
         
-        {/* 1. IDLE MODE: Show ONLY Welcome Mascot Card */}
+        {/* 1. IDLE MODE: Welcome Mascot Card */}
         {!isChatActive && !isGenerating && (
           <div className="bg-white border-2 border-black rounded-2xl p-5 text-center shadow-[5px_5px_0px_#000000] relative overflow-hidden">
             <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-[2px_2px_0px_#000000] relative">
@@ -127,7 +129,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           </div>
         )}
 
-        {/* 2. CHAT ACTIVE MODE: Compact Status Chip */}
+        {/* 2. CHAT ACTIVE MODE */}
         {isChatActive && (
           <div className="flex items-center justify-between px-3 py-1.5 bg-[#FFE600] border-2 border-black rounded-xl text-xs font-black text-black shadow-[2px_2px_0px_#000000]">
             <div className="flex items-center gap-2">
@@ -176,7 +178,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           </div>
         )}
 
-        {/* 3. PLANNING MODE: Collapsible Step Checklist */}
+        {/* 3. PLANNING MODE */}
         {isGenerating && (
           <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
         )}
@@ -227,7 +229,14 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           />
 
           <div className="flex items-center justify-between border-t-2 border-black/10 pt-2">
-            <div className="flex items-center space-x-1 text-black">
+            <div className="flex items-center space-x-1.5 text-black">
+              {/* Compact Model Selector Dropdown */}
+              <ModelSelectorDropdown
+                selectedModel={selectedModel}
+                onSelect={setSelectedModel}
+                compact
+              />
+
               <button type="button" className="p-1 hover:bg-slate-100 rounded-lg text-black cursor-pointer" title="Attach context">
                 <Plus className="w-3.5 h-3.5 text-black" />
               </button>
