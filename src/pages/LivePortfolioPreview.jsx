@@ -124,7 +124,7 @@ export default function LivePortfolioPreview() {
               )}
 
               {block.type === 'FooterBlock' && (
-                <FooterSection />
+                <FooterSection archetype={schema?.archetype} theme={schema?.theme} />
               )}
 
             </div>

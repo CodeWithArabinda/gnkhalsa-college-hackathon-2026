@@ -3,7 +3,7 @@ import { initialPortfolioSchema } from '../types/schema';
 /**
  * Step A: Deterministic 2-Stage Intent Classifier
  */
-export function determineArchetype(promptText = '') {
+export function determineArchetype(promptText = '', modelId = 'auto') {
   const p = promptText.toLowerCase();
 
   if (p.includes('apple') || p.includes('bento') || p.includes('minimal') || p.includes('clean') || p.includes('figma') || p.includes('designer') || p.includes('ios') || p.includes('product')) {
@@ -15,12 +15,20 @@ export function determineArchetype(promptText = '') {
   if (p.includes('bold') || p.includes('brutalist') || p.includes('startup') || p.includes('neo') || p.includes('yellow') || p.includes('creative') || p.includes('funky')) {
     return 'neo-brutalist';
   }
-  
-  return 'humanist-light';
+  if (p.includes('warm') || p.includes('editorial') || p.includes('cream') || p.includes('terracotta') || p.includes('magazine') || p.includes('journal')) {
+    return 'warm-editorial';
+  }
+
+  // Model-specific Routing Fallbacks
+  if (modelId === 'gemini-2.5-pro') {
+    return 'neo-brutalist';
+  }
+
+  return 'bento-minimal';
 }
 
 /**
- * Step B: Enforce Strict Variant & Theme Mappings per Archetype
+ * Step B: Enforce 4-Archetype Design Token Presets & Variant Mappings
  */
 export function getArchetypeConfig(archetype) {
   switch (archetype) {
@@ -31,11 +39,12 @@ export function getArchetypeConfig(archetype) {
         theme: {
           preset: "cyber-terminal",
           bgStyle: "dark-terminal",
-          primaryColor: "#00f5ff",
-          accentColor: "#10b981",
-          textColor: "#ffffff",
-          cardBg: "#0f172a",
-          borderColor: "#1e293b",
+          canvasBg: "#090D16",
+          primaryColor: "#00F5FF",
+          accentColor: "#10B981",
+          textColor: "#FFFFFF",
+          cardBg: "#0E1424",
+          borderColor: "rgba(0, 245, 255, 0.2)",
           borderRadius: "rounded-xl"
         },
         variants: {
@@ -53,11 +62,12 @@ export function getArchetypeConfig(archetype) {
         theme: {
           preset: "bento-minimal",
           bgStyle: "bento-slate",
-          primaryColor: "#0f172a",
-          accentColor: "#2563eb",
-          textColor: "#0f172a",
-          cardBg: "#ffffff",
-          borderColor: "#e2e8f0",
+          canvasBg: "#F8FAFC",
+          primaryColor: "#0F172A",
+          accentColor: "#2563EB",
+          textColor: "#0F172A",
+          cardBg: "#FFFFFF",
+          borderColor: "#E2E8F0",
           borderRadius: "rounded-3xl"
         },
         variants: {
@@ -69,20 +79,43 @@ export function getArchetypeConfig(archetype) {
         }
       };
 
-    case 'humanist-light':
-    case 'editorial-studio':
     case 'neo-brutalist':
+      return {
+        archetype: 'neo-brutalist',
+        theme: {
+          preset: "neo-brutalist",
+          bgStyle: "architectural-grid",
+          canvasBg: "#FFFDF5",
+          primaryColor: "#FFE600",
+          accentColor: "#FF5100",
+          textColor: "#000000",
+          cardBg: "#FFFFFF",
+          borderColor: "#000000",
+          borderRadius: "rounded-2xl"
+        },
+        variants: {
+          hero: 'split-portrait',
+          works: 'numbered-grid',
+          pillars: 'pastel-cards',
+          story: 'editorial-split',
+          contact: 'split-form'
+        }
+      };
+
+    case 'warm-editorial':
+    case 'humanist-light':
     default:
       return {
-        archetype: 'humanist-light',
+        archetype: 'warm-editorial',
         theme: {
-          preset: "humanist-light",
-          bgStyle: "clean-white",
-          primaryColor: "#ff5100",
-          accentColor: "#0f172a",
-          textColor: "#0f172a",
-          cardBg: "#ffffff",
-          borderColor: "#e2e8f0",
+          preset: "warm-editorial",
+          bgStyle: "cream-paper",
+          canvasBg: "#FDFBF7",
+          primaryColor: "#C2410C",
+          accentColor: "#2C2621",
+          textColor: "#2C2621",
+          cardBg: "#F7F3EB",
+          borderColor: "#E7DEC8",
           borderRadius: "rounded-2xl"
         },
         variants: {
@@ -128,7 +161,7 @@ export function morphSchemaArchetype(currentSchema, targetArchetype) {
  */
 export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiKey = null) {
   const keyToUse = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
-  const archetype = determineArchetype(userPrompt);
+  const archetype = determineArchetype(userPrompt, modelId);
   const config = getArchetypeConfig(archetype);
 
   let resolvedModel = modelId;
@@ -257,7 +290,6 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
     }
   }
 
-  // Step C: Fallback Preset Engine
   return synthesizePresetFallback(userPrompt, config, isPro);
 }
 
@@ -373,7 +405,7 @@ function formatSchemaResponse(parsed, prompt, config, isPro) {
 }
 
 /**
- * Step C: Multi-Preset Fallback Engine for offline/API-key missing runs
+ * Fallback Presets for offline/API key missing runs
  */
 function synthesizePresetFallback(prompt, config, isPro) {
   let projectItems = [

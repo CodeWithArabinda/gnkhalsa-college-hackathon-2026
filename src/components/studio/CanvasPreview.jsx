@@ -605,7 +605,7 @@ export default function CanvasPreview({
 
                       {/* Block 6: FooterBlock */}
                       {block.type === 'FooterBlock' && (
-                        <FooterSection />
+                        <FooterSection archetype={schema?.archetype} theme={schema?.theme} />
                       )}
 
                 </div>
