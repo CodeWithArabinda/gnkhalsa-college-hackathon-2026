@@ -212,33 +212,53 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride) {
         bio: heroSec.bio || "Building high-impact digital experiences with React, WebGL, and modern design systems.",
         ctaText: heroSec.primaryBtn?.label || "Explore Projects",
         secondaryCta: heroSec.secondaryBtn?.label || "CONTACT ME",
-        avatarUrl: "/photo/Sarang.png"
+        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop"
       }
     },
     {
       id: "block-projects",
       type: "ProjectGridBlock",
       content: {
-        title: projectSec.title || "Featured Works",
+        title: projectSec.title || "Selected Works",
         subtitle: projectSec.subtitle || "Selected software and design showcases",
         items: projectSec.items || []
       }
     },
     {
-      id: "block-skills",
-      type: "SkillsBlock",
+      id: "block-pillars",
+      type: "PillarsBlock",
       content: {
-        title: skillSec.title || "Technical Stack",
-        categories: skillSec.categories || []
+        title: skillSec.title || "Engineering Excellence",
+        categories: skillSec.categories || [
+          { name: "Frontend Engineering", skills: ["React 18", "Vite", "Tailwind CSS", "GSAP"] },
+          { name: "Backend & Cloud", skills: ["Node.js", "Supabase", "PostgreSQL", "Docker"] },
+          { name: "Full-Stack Architecture", skills: ["System Design", "GraphQL", "CI/CD", "Vercel"] }
+        ]
+      }
+    },
+    {
+      id: "block-story",
+      type: "StoryBlock",
+      content: {
+        title: "The Architect",
+        bio: "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."
       }
     },
     {
       id: "block-contact",
       type: "ContactBlock",
       content: {
-        title: contactSec.headline || "Let's Build Something Cool",
-        subtitle: contactSec.subtext || "Available for full-time opportunities and creative projects.",
+        title: contactSec.headline || "Let's Build Something Together",
+        subtitle: contactSec.subtext || "Available for full-time opportunities, technical leadership roles, and high-impact design system engineering.",
         email: contactSec.email || "kshitijpilankar@gmail.com"
+      }
+    },
+    {
+      id: "block-footer",
+      type: "FooterBlock",
+      content: {
+        title: "WebDev Portfolio",
+        copyright: "© 2026 WebDev Portfolio. All rights reserved."
       }
     }
   ];
