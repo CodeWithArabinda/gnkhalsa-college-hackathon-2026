@@ -5,6 +5,7 @@ import LeftSidebar from '../components/studio/LeftSidebar';
 import CanvasPreview from '../components/studio/CanvasPreview';
 import CopilotChat from '../components/studio/CopilotChat';
 import StudioSettingsModal from '../components/studio/StudioSettingsModal';
+import ConnectDomainModal from '../components/studio/ConnectDomainModal';
 import { useStudioTheme } from '../context/ThemeContext';
 import { initialPortfolioSchema } from '../types/schema';
 import { processUserPrompt } from '../lib/geminiBuilder';
@@ -16,6 +17,7 @@ export default function StudioEditor() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [saveStatus, setSaveStatus] = useState('saved');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDomainModalOpen, setIsDomainModalOpen] = useState(false);
 
   // History Stack (past, present, future) with LocalStorage restoration
   const [history, setHistory] = useState(() => {
@@ -116,6 +118,17 @@ export default function StudioEditor() {
 
     return () => clearTimeout(timer);
   }, [schema]);
+
+  // Connect Custom Domain handler
+  const handleConnectDomain = (domain) => {
+    updateSchemaState((prev) => ({
+      ...prev,
+      metadata: {
+        ...(prev.metadata || {}),
+        customDomain: domain
+      }
+    }));
+  };
 
   // Element level property updates
   const handleUpdateElementStyle = (elementKey, newStyle) => {
@@ -370,6 +383,8 @@ export default function StudioEditor() {
             selectedElement={selectedElement}
             onReplaceImage={handleReplaceImage}
             onUpdateElementStyle={handleUpdateElementStyle}
+            onOpenDomainModal={() => setIsDomainModalOpen(true)}
+            customDomain={schema?.metadata?.customDomain}
           />
         </div>
 
@@ -386,6 +401,14 @@ export default function StudioEditor() {
       <StudioSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+
+      {/* Connect Custom Domain Modal */}
+      <ConnectDomainModal
+        isOpen={isDomainModalOpen}
+        onClose={() => setIsDomainModalOpen(false)}
+        connectedDomain={schema?.metadata?.customDomain}
+        onSaveDomain={handleConnectDomain}
       />
 
     </div>

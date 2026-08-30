@@ -222,9 +222,10 @@ export default function CanvasPreview({
   onDeleteBlock,
   onPolishWithAI,
   onSelectElement,
-  selectedElement,
   onReplaceImage,
-  onUpdateElementStyle
+  onUpdateElementStyle,
+  onOpenDomainModal,
+  customDomain
 }) {
   const [hoveredElementKey, setHoveredElementKey] = useState(null);
   const [editModalData, setEditModalData] = useState(null);
@@ -441,10 +442,24 @@ export default function CanvasPreview({
             <span className="w-3 h-3 rounded-full bg-[#27C93F]" />
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-md px-3 py-0.5 font-mono text-[11px] text-slate-800 flex items-center gap-1.5 shadow-2xs">
-            <span className="text-[#0053ff] font-bold">webdevportfolio.io</span>
-            <span className="text-amber-600 font-bold">is available! Connect Domain</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => onOpenDomainModal && onOpenDomainModal()}
+            className="bg-white hover:bg-blue-50 border border-slate-200 rounded-md px-3 py-0.5 font-mono text-[11px] text-slate-800 flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            title="Connect Custom Domain"
+          >
+            {customDomain ? (
+              <>
+                <span className="text-[#0053ff] font-bold">https://{customDomain}</span>
+                <span className="text-emerald-600 font-bold">🟢 Live</span>
+              </>
+            ) : (
+              <>
+                <span className="text-[#0053ff] font-bold">webdevportfolio.io</span>
+                <span className="text-amber-600 font-bold">is available! Connect Domain</span>
+              </>
+            )}
+          </button>
 
           <div className="flex items-center gap-2 font-mono text-[10px] text-slate-500">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

@@ -161,6 +161,17 @@ export default function StudioNavbar({
           )}
         </div>
 
+        {/* Live Site New Tab Trigger */}
+        <button
+          type="button"
+          onClick={() => window.open('/preview', '_blank')}
+          className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-1.5 rounded-md text-xs transition-colors flex items-center gap-1 cursor-pointer"
+          title="Open Fullscreen Live Website in New Tab"
+        >
+          <span>Live Site</span>
+          <ExternalLink className="w-3 h-3 text-[#0053ff]" />
+        </button>
+
         {/* Publish CTA Button */}
         <button
           type="button"
