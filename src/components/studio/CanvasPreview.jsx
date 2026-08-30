@@ -222,6 +222,7 @@ export default function CanvasPreview({
   onDeleteBlock,
   onPolishWithAI,
   onSelectElement,
+  selectedElement,
   onReplaceImage,
   onUpdateElementStyle,
   onOpenDomainModal,
