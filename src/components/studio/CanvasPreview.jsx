@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import {
   Sparkles, Mail, ExternalLink, Edit3, GripVertical, AlignLeft, AlignCenter, AlignRight,
-  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move
+  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move,
+  Bold, Italic, Minus, Plus
 } from 'lucide-react';
 import CanvasBuildingState from './CanvasBuildingState';
 
@@ -16,14 +17,17 @@ export default function CanvasPreview({
   onPolishWithAI,
   onSelectElement,
   selectedElement,
-  onReplaceImage
+  onReplaceImage,
+  onUpdateElementStyle
 }) {
-  const [hoveredElementId, setHoveredElementId] = useState(null);
-  const [dragOffset, setDragOffset] = useState(null);
+  const [hoveredElementKey, setHoveredElementKey] = useState(null);
   const isDragging = useRef(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
+  const activeDragKey = useRef(null);
 
   if (!schema) return null;
+
+  const elementStyles = schema.elementStyles || {};
 
   const getFrameWidth = () => {
     switch (deviceMode) {
@@ -43,27 +47,38 @@ export default function CanvasPreview({
     }
   };
 
-  const isSelected = (id) => selectedElement?.id === id;
-  const isHovered = (id) => hoveredElementId === id;
+  const isSelectedKey = (key) => selectedElement?.key === key;
+  const isHoveredKey = (key) => hoveredElementKey === key;
 
-  const handleMouseDown = (e, id, type, label, blockIndex) => {
+  // Pointer down handler for isolated element dragging
+  const handleElementMouseDown = (e, key, label, blockId, blockIndex) => {
     e.stopPropagation();
-    onSelectElement && onSelectElement({ id, type, label, blockIndex });
+    onSelectElement && onSelectElement({ key, label, blockId, blockIndex });
 
     isDragging.current = true;
+    activeDragKey.current = key;
     dragStartPos.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e) => {
-    if (!isDragging.current) return;
+    if (!isDragging.current || !activeDragKey.current) return;
     const dx = Math.round(e.clientX - dragStartPos.current.x);
     const dy = Math.round(e.clientY - dragStartPos.current.y);
-    setDragOffset({ x: dx, y: dy });
+
+    const currentStyle = elementStyles[activeDragKey.current] || { x: 0, y: 0 };
+    const newX = (currentStyle.x || 0) + dx;
+    const newY = (currentStyle.y || 0) + dy;
+
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+
+    if (onUpdateElementStyle) {
+      onUpdateElementStyle(activeDragKey.current, { ...currentStyle, x: newX, y: newY });
+    }
   };
 
   const handleMouseUp = () => {
     isDragging.current = false;
-    setDragOffset(null);
+    activeDragKey.current = null;
   };
 
   return (
@@ -99,7 +114,7 @@ export default function CanvasPreview({
 
           <div className="flex items-center gap-2 font-mono text-[10px] text-slate-400">
             <span className="w-2 h-2 rounded-full bg-[#00FFA3] animate-pulse" />
-            <span className="hidden sm:inline">DIRECT CANVAS EDITOR</span>
+            <span className="hidden sm:inline">ISOLATED CANVAS EDITOR</span>
           </div>
         </div>
 
@@ -111,146 +126,194 @@ export default function CanvasPreview({
 
           {schema.blocks && schema.blocks.length > 0 ? (
             schema.blocks.map((block, index) => {
-              const blockSelected = isSelected(block.id);
-              const blockHovered = isHovered(block.id);
-
               return (
-                <div
-                  key={block.id}
-                  onMouseEnter={() => setHoveredElementId(block.id)}
-                  onMouseLeave={() => setHoveredElementId(null)}
-                  onMouseDown={(e) => handleMouseDown(e, block.id, block.type, block.type, index)}
-                  className={`relative transition-all ${
-                    blockSelected
-                      ? 'border-2 border-[#FF6B1A] shadow-[0_0_15px_rgba(255,107,26,0.5)] z-20'
-                      : blockHovered
-                      ? 'border-2 border-dashed border-[#FF6B1A]/50 z-10'
-                      : 'border-b border-white/5 last:border-b-0'
-                  }`}
-                  style={
-                    blockSelected && dragOffset
-                      ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` }
-                      : {}
-                  }
-                >
-                  {/* Element Badge Tag (Top-Left) */}
-                  {(blockSelected || blockHovered) && (
-                    <div className="absolute -top-3 left-3 z-40 bg-[#38BDF8] text-black font-mono font-black text-[9px] px-2 py-0.5 rounded border border-black shadow-[1.5px_1.5px_0px_0px_#000] uppercase tracking-wider flex items-center gap-1 pointer-events-none">
-                      <Move className="w-2.5 h-2.5" /> [ {block.type} ]
-                      {dragOffset && ` (x: ${dragOffset.x}px, y: ${dragOffset.y}px)`}
-                    </div>
-                  )}
-
-                  {/* FLOATING MINI CONTEXT MENU (when selected) */}
-                  {blockSelected && (
-                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 bg-[#181A24]/90 backdrop-blur-md border-2 border-black rounded-xl p-1 shadow-2xl flex items-center gap-1 text-xs font-mono text-white animate-in fade-in zoom-in duration-150">
-                      <button
-                        type="button"
-                        onClick={() => onDeleteBlock && onDeleteBlock(index)}
-                        className="p-1.5 hover:bg-white/10 rounded flex items-center gap-1 text-slate-300"
-                        title="Cut Element"
-                      >
-                        <Scissors className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDuplicateBlock && onDuplicateBlock(index)}
-                        className="p-1.5 hover:bg-white/10 rounded flex items-center gap-1 text-slate-300"
-                        title="Duplicate Element"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-
-                      <div className="w-px h-4 bg-white/20" />
-
-                      <button
-                        type="button"
-                        onClick={() => onPolishWithAI && onPolishWithAI(block)}
-                        className="flex items-center gap-1 px-2.5 py-1 bg-[#FFE600] text-black font-extrabold text-[10px] rounded hover:bg-[#ffed4d] border border-black shadow-[1px_1px_0px_0px_#000]"
-                      >
-                        <Wand2 className="w-3 h-3 text-black" /> Ask Aria
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 8 ANCHOR BOUNDING DOTS (4 Corners + 4 Edge Midpoints) */}
-                  {blockSelected && (
-                    <>
-                      {/* Top-Left */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 -left-1.5 z-30 cursor-nwse-resize" />
-                      {/* Top-Center */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 left-1/2 -translate-x-1/2 z-30 cursor-ns-resize" />
-                      {/* Top-Right */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 -right-1.5 z-30 cursor-nesw-resize" />
-                      {/* Left-Center */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute top-1/2 -translate-y-1/2 -left-1.5 z-30 cursor-ew-resize" />
-                      {/* Right-Center */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute top-1/2 -translate-y-1/2 -right-1.5 z-30 cursor-ew-resize" />
-                      {/* Bottom-Left */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-1.5 -left-1.5 z-30 cursor-nesw-resize" />
-                      {/* Bottom-Center */}
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-1.5 left-1/2 -translate-x-1/2 z-30 cursor-ns-resize" />
-                      {/* Bottom-Right (Stretch / Rotate Indicator) */}
-                      <div className="w-4 h-4 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-2 -right-2 z-40 cursor-se-resize flex items-center justify-center text-black shadow-md">
-                        <RotateCw className="w-2.5 h-2.5" />
-                      </div>
-                    </>
-                  )}
-
+                <div key={block.id} className="relative border-b border-white/5 last:border-b-0">
+                  
                   {/* Block 1: HeroBlock */}
                   {block.type === 'HeroBlock' && (
                     <section className="p-8 sm:p-14 flex flex-col justify-center space-y-6 min-h-[400px] relative overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/20 via-[#0B0B0E] to-[#0B0B0E]">
-                      <div className="inline-flex items-center space-x-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-mono text-amber-400 self-start">
-                        <Sparkles className="w-3.5 h-3.5 text-[#FF6B1A]" />
-                        <span
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.headline', e.target.innerText)}
-                          className="outline-none focus:ring-1 focus:ring-[#FF6B1A] rounded px-1"
-                        >
-                          {block.content.headline}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6 items-center">
-                        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                          I'm{' '}
-                          <span
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
-                            className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none focus:ring-2 focus:ring-[#FF6B1A] rounded"
+                      
+                      {/* 1. Tagline Element */}
+                      {(() => {
+                        const key = 'hero-tagline';
+                        const sel = isSelectedKey(key);
+                        const hov = isHoveredKey(key);
+                        const st = elementStyles[key] || {};
+                        return (
+                          <div
+                            onMouseEnter={() => setHoveredElementKey(key)}
+                            onMouseLeave={() => setHoveredElementKey(null)}
+                            onMouseDown={(e) => handleElementMouseDown(e, key, 'Tagline', block.id, index)}
+                            className={`inline-flex items-center space-x-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-mono text-amber-400 self-start relative cursor-grab active:cursor-grabbing transition-all ${
+                              sel ? 'ring-2 ring-[#FF6B1A] ring-offset-2 ring-offset-black z-30' : hov ? 'ring-1 ring-[#FF6B1A]/50 z-20' : ''
+                            }`}
+                            style={{
+                              transform: `translate3d(${st.x || 0}px, ${st.y || 0}px, 0)`,
+                              color: st.color || '#FF6B1A',
+                              fontSize: `${st.fontSize || 12}px`,
+                              fontFamily: st.fontFamily || 'inherit'
+                            }}
                           >
-                            {block.content.name}
-                          </span>
-                          .
-                        </h1>
-
-                        {/* Candidate Avatar Frame */}
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onReplaceImage && onReplaceImage(block);
-                          }}
-                          className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center cursor-pointer hover:border-[#38BDF8] transition-all relative group/img overflow-hidden shadow-xl"
-                          style={{ backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})` }}
-                        >
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-mono text-white gap-1">
-                            <ImageIcon className="w-4 h-4 text-[#38BDF8]" />
-                            <span>Replace Image</span>
+                            {sel && (
+                              <div className="absolute -top-7 left-0 z-40 bg-[#FF6B1A] text-black font-mono font-bold text-[9px] px-2 py-0.5 rounded shadow">
+                                [ Tagline ]
+                              </div>
+                            )}
+                            <Sparkles className="w-3.5 h-3.5 text-[#FF6B1A]" />
+                            <span
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => handleInlineChange(block.id, 'content.headline', e.target.innerText)}
+                              className="outline-none"
+                            >
+                              {block.content.headline}
+                            </span>
                           </div>
-                        </div>
+                        );
+                      })()}
+
+                      {/* 2. Hero Title & Avatar Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6 items-center">
+                        
+                        {/* Name Element */}
+                        {(() => {
+                          const key = 'hero-name';
+                          const sel = isSelectedKey(key);
+                          const hov = isHoveredKey(key);
+                          const st = elementStyles[key] || {};
+                          return (
+                            <div
+                              onMouseEnter={() => setHoveredElementKey(key)}
+                              onMouseLeave={() => setHoveredElementKey(null)}
+                              onMouseDown={(e) => handleElementMouseDown(e, key, 'Headline Title', block.id, index)}
+                              className={`relative cursor-grab active:cursor-grabbing transition-all p-1 rounded ${
+                                sel ? 'ring-2 ring-[#FF6B1A] ring-offset-2 ring-offset-black z-30' : hov ? 'ring-1 ring-[#FF6B1A]/50 z-20' : ''
+                              }`}
+                              style={{
+                                transform: `translate3d(${st.x || 0}px, ${st.y || 0}px, 0)`,
+                                textAlign: st.textAlign || 'left'
+                              }}
+                            >
+                              {/* Inline Floating Text Toolbar (when title selected) */}
+                              {sel && (
+                                <div className="absolute -top-11 left-0 z-50 bg-[#181A24] border-2 border-black rounded-xl px-2 py-1 shadow-2xl flex items-center gap-1.5 text-xs font-mono">
+                                  <span className="text-[10px] font-bold text-[#FF6B1A] uppercase">[ Headline ]</span>
+                                  <div className="w-px h-3.5 bg-white/20" />
+                                  <button type="button" onClick={() => onPolishWithAI && onPolishWithAI(block)} className="px-2 py-0.5 bg-[#FFE600] text-black font-extrabold text-[10px] rounded flex items-center gap-1">
+                                    <Wand2 className="w-3 h-3 text-black" /> Aria Polish
+                                  </button>
+                                </div>
+                              )}
+
+                              <h1
+                                className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight"
+                                style={{
+                                  color: st.color || '#FFFFFF',
+                                  fontSize: st.fontSize ? `${st.fontSize}px` : undefined,
+                                  fontFamily: st.fontFamily || 'inherit',
+                                  fontWeight: st.fontWeight || '900',
+                                  fontStyle: st.fontStyle || 'normal',
+                                  textDecoration: st.textDecoration || 'none'
+                                }}
+                              >
+                                I'm{' '}
+                                <span
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
+                                  className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none"
+                                >
+                                  {block.content.name}
+                                </span>
+                                .
+                              </h1>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Candidate Avatar Element */}
+                        {(() => {
+                          const key = 'hero-avatar';
+                          const sel = isSelectedKey(key);
+                          const hov = isHoveredKey(key);
+                          const st = elementStyles[key] || {};
+                          return (
+                            <div
+                              onMouseEnter={() => setHoveredElementKey(key)}
+                              onMouseLeave={() => setHoveredElementKey(null)}
+                              onMouseDown={(e) => handleElementMouseDown(e, key, 'Avatar Image', block.id, index)}
+                              className={`w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center cursor-pointer hover:border-[#38BDF8] transition-all relative group/img overflow-hidden shadow-xl ${
+                                sel ? 'ring-2 ring-[#FF6B1A] ring-offset-2 ring-offset-black z-30' : hov ? 'ring-1 ring-[#FF6B1A]/50 z-20' : ''
+                              }`}
+                              style={{
+                                transform: `translate3d(${st.x || 0}px, ${st.y || 0}px, 0)`,
+                                borderRadius: st.borderRadius ? `${st.borderRadius}px` : undefined,
+                                backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})`
+                              }}
+                            >
+                              {sel && (
+                                <div className="absolute top-1 left-1 z-40 bg-[#38BDF8] text-black font-mono font-bold text-[9px] px-1.5 py-0.5 rounded shadow">
+                                  [ Image ]
+                                </div>
+                              )}
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onReplaceImage && onReplaceImage(block);
+                                }}
+                                className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-mono text-white gap-1"
+                              >
+                                <ImageIcon className="w-4 h-4 text-[#38BDF8]" />
+                                <span>Replace Image</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                       </div>
 
-                      <p
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) => handleInlineChange(block.id, 'content.bio', e.target.innerText)}
-                        className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl font-sans outline-none focus:ring-1 focus:ring-[#FF6B1A] rounded p-1"
-                      >
-                        {block.content.bio}
-                      </p>
+                      {/* 3. Bio Element */}
+                      {(() => {
+                        const key = 'hero-bio';
+                        const sel = isSelectedKey(key);
+                        const hov = isHoveredKey(key);
+                        const st = elementStyles[key] || {};
+                        return (
+                          <div
+                            onMouseEnter={() => setHoveredElementKey(key)}
+                            onMouseLeave={() => setHoveredElementKey(null)}
+                            onMouseDown={(e) => handleElementMouseDown(e, key, 'Bio Text', block.id, index)}
+                            className={`relative cursor-grab active:cursor-grabbing transition-all p-1 rounded max-w-xl ${
+                              sel ? 'ring-2 ring-[#FF6B1A] ring-offset-2 ring-offset-black z-30' : hov ? 'ring-1 ring-[#FF6B1A]/50 z-20' : ''
+                            }`}
+                            style={{
+                              transform: `translate3d(${st.x || 0}px, ${st.y || 0}px, 0)`,
+                              textAlign: st.textAlign || 'left'
+                            }}
+                          >
+                            {sel && (
+                              <div className="absolute -top-7 left-0 z-40 bg-[#FF6B1A] text-black font-mono font-bold text-[9px] px-2 py-0.5 rounded shadow">
+                                [ Bio Paragraph ]
+                              </div>
+                            )}
+                            <p
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => handleInlineChange(block.id, 'content.bio', e.target.innerText)}
+                              className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans outline-none"
+                              style={{
+                                color: st.color || '#CBD5E1',
+                                fontSize: st.fontSize ? `${st.fontSize}px` : undefined,
+                                fontFamily: st.fontFamily || 'inherit'
+                              }}
+                            >
+                              {block.content.bio}
+                            </p>
+                          </div>
+                        );
+                      })()}
 
+                      {/* CTA Buttons */}
                       <div className="flex flex-wrap gap-3 pt-2">
                         <button type="button" className="px-6 py-3 bg-[#FF6B1A] text-black font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(255,107,26,0.4)]">
                           {block.content.ctaText}

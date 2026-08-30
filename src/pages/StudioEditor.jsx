@@ -37,6 +37,22 @@ export default function StudioEditor() {
     });
   };
 
+  // Handle element-level isolated style & offset mutations
+  const handleUpdateElementStyle = (elementKey, styleUpdates) => {
+    setSchema((prev) => {
+      const prevStyles = prev.elementStyles || {};
+      const targetStyle = prevStyles[elementKey] || {};
+      const updatedStyle = typeof styleUpdates === 'function' ? styleUpdates(targetStyle) : { ...targetStyle, ...styleUpdates };
+      return {
+        ...prev,
+        elementStyles: {
+          ...prevStyles,
+          [elementKey]: updatedStyle
+        }
+      };
+    });
+  };
+
   // Reorder sections
   const handleMoveBlock = (index, direction) => {
     setSchema((prev) => {
@@ -173,6 +189,8 @@ export default function StudioEditor() {
     }));
   };
 
+  const currentSelectedStyle = selectedElement?.key ? (schema.elementStyles || {})[selectedElement.key] : {};
+
   return (
     <div className="h-screen w-screen flex flex-col bg-[#0F1117] overflow-hidden">
       
@@ -187,12 +205,16 @@ export default function StudioEditor() {
       {/* Top Contextual Studio Action Ribbon */}
       <StudioToolbar
         selectedElement={selectedElement}
+        elementStyle={currentSelectedStyle}
+        onUpdateElementStyle={(prop, val) => {
+          if (selectedElement?.key) {
+            handleUpdateElementStyle(selectedElement.key, { [prop]: val });
+          }
+        }}
         onAddElement={handleAddElement}
         onAskAria={(elem) => handlePolishWithAI(elem)}
         onReplaceImage={handleReplaceImage}
         onAddLink={() => window.prompt("Enter custom link URL:", "https://github.com")}
-        onAlignChange={() => {}}
-        onToggleStyle={() => {}}
         onDeleteSelected={() => {
           if (selectedElement && selectedElement.blockIndex !== undefined) {
             handleDeleteBlock(selectedElement.blockIndex);
@@ -217,6 +239,7 @@ export default function StudioEditor() {
           onSelectElement={setSelectedElement}
           selectedElement={selectedElement}
           onReplaceImage={handleReplaceImage}
+          onUpdateElementStyle={handleUpdateElementStyle}
         />
 
         {/* 30% AI Copilot Panel */}

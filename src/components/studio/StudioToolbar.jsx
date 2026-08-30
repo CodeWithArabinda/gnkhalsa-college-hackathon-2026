@@ -1,29 +1,57 @@
 import React, { useState } from 'react';
 import {
-  Plus, Sparkles, Image as ImageIcon, Link as LinkIcon, Eye, Box, Sliders,
-  AlignLeft, AlignCenter, AlignRight, Maximize2, Minimize2, Trash2, ChevronDown,
-  Type, Layers, Grid, Code
+  Plus, Sparkles, Image as ImageIcon, Link as LinkIcon, Palette, Type,
+  Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Box,
+  Trash2, ChevronDown, Minus, Plus as PlusIcon, Code, Grid
 } from 'lucide-react';
+
+const FONTS = [
+  'Inter, sans-serif',
+  'Plus Jakarta Sans, sans-serif',
+  'Outfit, sans-serif',
+  'Space Grotesk, sans-serif',
+  'JetBrains Mono, monospace'
+];
+
+const PRESET_COLORS = [
+  '#FFFFFF', '#FF6B1A', '#FFE600', '#00FFA3', '#38BDF8', '#A855F7', '#000000'
+];
 
 export default function StudioToolbar({
   selectedElement,
+  elementStyle = {},
+  onUpdateElementStyle,
   onAddElement,
   onAskAria,
   onReplaceImage,
   onAddLink,
-  onToggleStyle,
-  onAlignChange,
   onDeleteSelected
 }) {
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showFontMenu, setShowFontMenu] = useState(false);
+  const [showColorMenu, setShowColorMenu] = useState(false);
+
+  const currentFontSize = elementStyle?.fontSize || 16;
+  const currentFontFamily = elementStyle?.fontFamily || 'Space Grotesk, sans-serif';
+  const currentColor = elementStyle?.color || '#FFFFFF';
+  const isBold = elementStyle?.fontWeight === '700' || elementStyle?.fontWeight === '900' || elementStyle?.fontWeight === 'bold';
+  const isItalic = elementStyle?.fontStyle === 'italic';
+  const isUnderline = elementStyle?.textDecoration === 'underline';
+  const textAlign = elementStyle?.textAlign || 'left';
+
+  const updateStyle = (key, val) => {
+    if (onUpdateElementStyle) {
+      onUpdateElementStyle(key, val);
+    }
+  };
 
   return (
     <div className="bg-[#12141D] border-b border-black px-4 py-2 flex items-center justify-between z-30 shrink-0 text-white select-none overflow-x-auto shadow-md">
       
-      {/* Left Action Buttons */}
+      {/* Left Core Actions Ribbon */}
       <div className="flex items-center space-x-2 shrink-0">
         
-        {/* + Add Menu */}
+        {/* + Add */}
         <div className="relative">
           <button
             type="button"
@@ -101,61 +129,151 @@ export default function StudioToolbar({
 
       </div>
 
-      {/* Center Style Quick Tools */}
+      {/* Center Formatting Ribbon */}
       <div className="flex items-center space-x-1 border-x border-white/10 px-3 mx-2 shrink-0">
         
-        {/* Alignment */}
+        {/* Color Picker */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowColorMenu(!showColorMenu)}
+            className="p-1.5 hover:bg-white/10 rounded flex items-center gap-1 text-xs font-mono"
+            title="Text & Accent Color"
+          >
+            <span className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: currentColor }} />
+            <ChevronDown className="w-3 h-3 text-slate-400" />
+          </button>
+
+          {showColorMenu && (
+            <div className="absolute top-full left-0 mt-2 p-2 bg-[#181A24] border-2 border-black rounded-xl shadow-2xl z-50 flex gap-1.5">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => { updateStyle('color', c); setShowColorMenu(false); }}
+                  className="w-5 h-5 rounded-full border border-black hover:scale-125 transition-transform"
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Font Family Dropdown */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowFontMenu(!showFontMenu)}
+            className="flex items-center gap-1 px-2.5 py-1 bg-[#1A1D27] border border-white/10 rounded-lg text-xs font-mono text-slate-200"
+          >
+            <span className="max-w-[80px] truncate">{currentFontFamily.split(',')[0]}</span>
+            <ChevronDown className="w-3 h-3 text-slate-400" />
+          </button>
+
+          {showFontMenu && (
+            <div className="absolute top-full left-0 mt-2 w-44 bg-[#181A24] border-2 border-black rounded-xl p-1 shadow-2xl z-50 space-y-1 font-mono text-xs text-white">
+              {FONTS.map((font) => (
+                <button
+                  key={font}
+                  type="button"
+                  onClick={() => { updateStyle('fontFamily', font); setShowFontMenu(false); }}
+                  className="w-full text-left px-3 py-1.5 hover:bg-white/10 rounded truncate"
+                  style={{ fontFamily: font }}
+                >
+                  {font.split(',')[0]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Font Size Step Controls */}
+        <div className="flex items-center bg-[#1A1D27] border border-white/10 rounded-lg px-1 space-x-1 font-mono text-xs">
+          <button
+            type="button"
+            onClick={() => updateStyle('fontSize', Math.max(10, currentFontSize - 2))}
+            className="p-1 hover:bg-white/10 rounded text-slate-300"
+          >
+            <Minus className="w-3 h-3" />
+          </button>
+          <span className="px-1 font-bold text-white min-w-[28px] text-center">{currentFontSize}px</span>
+          <button
+            type="button"
+            onClick={() => updateStyle('fontSize', Math.min(120, currentFontSize + 2))}
+            className="p-1 hover:bg-white/10 rounded text-slate-300"
+          >
+            <PlusIcon className="w-3 h-3" />
+          </button>
+        </div>
+
+        <div className="w-px h-4 bg-white/10 my-auto" />
+
+        {/* Bold, Italic, Underline */}
         <button
           type="button"
-          onClick={() => onAlignChange && onAlignChange('left')}
-          className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-          title="Align Left"
+          onClick={() => updateStyle('fontWeight', isBold ? '400' : '900')}
+          className={`p-1.5 rounded transition-colors ${isBold ? 'bg-[#FFE600] text-black font-black' : 'hover:bg-white/10 text-slate-300'}`}
+          title="Bold"
         >
-          <AlignLeft className="w-4 h-4" />
+          <Bold className="w-3.5 h-3.5" />
         </button>
+
         <button
           type="button"
-          onClick={() => onAlignChange && onAlignChange('center')}
-          className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-          title="Align Center"
+          onClick={() => updateStyle('fontStyle', isItalic ? 'normal' : 'italic')}
+          className={`p-1.5 rounded transition-colors ${isItalic ? 'bg-[#FFE600] text-black font-black' : 'hover:bg-white/10 text-slate-300'}`}
+          title="Italic"
         >
-          <AlignCenter className="w-4 h-4" />
+          <Italic className="w-3.5 h-3.5" />
         </button>
+
         <button
           type="button"
-          onClick={() => onAlignChange && onAlignChange('right')}
-          className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-          title="Align Right"
+          onClick={() => updateStyle('textDecoration', isUnderline ? 'none' : 'underline')}
+          className={`p-1.5 rounded transition-colors ${isUnderline ? 'bg-[#FFE600] text-black font-black' : 'hover:bg-white/10 text-slate-300'}`}
+          title="Underline"
         >
-          <AlignRight className="w-4 h-4" />
+          <Underline className="w-3.5 h-3.5" />
         </button>
 
         <div className="w-px h-4 bg-white/10 my-auto" />
 
-        {/* Style Toggles */}
+        {/* Text Alignment */}
         <button
           type="button"
-          onClick={() => onToggleStyle && onToggleStyle('border')}
-          className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-          title="Toggle Border"
+          onClick={() => updateStyle('textAlign', 'left')}
+          className={`p-1.5 rounded transition-colors ${textAlign === 'left' ? 'bg-[#38BDF8] text-black font-black' : 'hover:bg-white/10 text-slate-300'}`}
+          title="Align Left"
         >
-          <Box className="w-4 h-4" />
+          <AlignLeft className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
-          onClick={() => onToggleStyle && onToggleStyle('opacity')}
-          className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-          title="Toggle Opacity"
+          onClick={() => updateStyle('textAlign', 'center')}
+          className={`p-1.5 rounded transition-colors ${textAlign === 'center' ? 'bg-[#38BDF8] text-black font-black' : 'hover:bg-white/10 text-slate-300'}`}
+          title="Align Center"
         >
-          <Eye className="w-4 h-4" />
+          <AlignCenter className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
-          onClick={() => onToggleStyle && onToggleStyle('shadow')}
-          className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
-          title="Toggle Drop Shadow"
+          onClick={() => updateStyle('textAlign', 'right')}
+          className={`p-1.5 rounded transition-colors ${textAlign === 'right' ? 'bg-[#38BDF8] text-black font-black' : 'hover:bg-white/10 text-slate-300'}`}
+          title="Align Right"
         >
-          <Sliders className="w-4 h-4" />
+          <AlignRight className="w-3.5 h-3.5" />
+        </button>
+
+        <div className="w-px h-4 bg-white/10 my-auto" />
+
+        {/* Border Radius */}
+        <button
+          type="button"
+          onClick={() => updateStyle('borderRadius', (elementStyle?.borderRadius || 0) === 24 ? 0 : 24)}
+          className="p-1.5 hover:bg-white/10 rounded text-slate-300 flex items-center gap-1 font-mono text-xs"
+          title="Toggle Border Radius"
+        >
+          <Box className="w-3.5 h-3.5 text-[#FF6B1A]" />
         </button>
 
       </div>

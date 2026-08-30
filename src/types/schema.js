@@ -7,6 +7,12 @@ export const initialPortfolioSchema = {
     fontFamily: "Space Grotesk, sans-serif",
     published: false
   },
+  elementStyles: {
+    "hero-tagline": { x: 0, y: 0, fontSize: 12, color: "#FF6B1A", fontFamily: "Space Grotesk, sans-serif", textAlign: "left", fontWeight: "700", fontStyle: "normal", textDecoration: "none" },
+    "hero-name": { x: 0, y: 0, fontSize: 56, color: "#FFFFFF", fontFamily: "Space Grotesk, sans-serif", textAlign: "left", fontWeight: "900", fontStyle: "normal", textDecoration: "none" },
+    "hero-bio": { x: 0, y: 0, fontSize: 15, color: "#CBD5E1", fontFamily: "Inter, sans-serif", textAlign: "left", fontWeight: "400", fontStyle: "normal", textDecoration: "none" },
+    "hero-avatar": { x: 0, y: 0, width: 144, height: 144, borderRadius: 24 }
+  },
   blocks: [
     {
       id: "hero-1",
