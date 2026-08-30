@@ -1,21 +1,8 @@
 import React, { useRef } from 'react';
 import {
   Plus, Sparkles, Image as ImageIcon, Link as LinkIcon, Type,
-  Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Box,
-  Trash2, ChevronDown, Minus, Plus as PlusIcon, Code, Grid, Upload, Sliders, Crop, Settings, Maximize2
+  Bold, AlignLeft, Trash2, ChevronDown, Code, Grid, Upload, Crop, Maximize2
 } from 'lucide-react';
-
-const FONTS = [
-  'Plus Jakarta Sans, sans-serif',
-  'Inter, sans-serif',
-  'Outfit, sans-serif',
-  'Space Grotesk, sans-serif',
-  'JetBrains Mono, monospace'
-];
-
-const PRESET_COLORS = [
-  '#000000', '#0053ff', '#ff5100', '#00FFA3', '#38BDF8', '#A855F7', '#FFFFFF'
-];
 
 export default function StudioToolbar({
   selectedElement,
@@ -28,18 +15,10 @@ export default function StudioToolbar({
   onDeleteSelected
 }) {
   const [showAddMenu, setShowAddMenu] = React.useState(false);
-  const [showFontMenu, setShowFontMenu] = React.useState(false);
-  const [showColorMenu, setShowColorMenu] = React.useState(false);
   const fileInputRef = useRef(null);
 
-  const currentFontSize = elementStyle?.fontSize || 16;
-  const currentFontFamily = elementStyle?.fontFamily || 'Plus Jakarta Sans, sans-serif';
-  const currentColor = elementStyle?.color || '#000000';
   const isBold = elementStyle?.fontWeight === '700' || elementStyle?.fontWeight === '900' || elementStyle?.fontWeight === 'bold';
-  const isItalic = elementStyle?.fontStyle === 'italic';
-  const isUnderline = elementStyle?.textDecoration === 'underline';
   const textAlign = elementStyle?.textAlign || 'left';
-  const isImageElement = selectedElement?.key === 'hero-avatar' || selectedElement?.label?.toLowerCase().includes('image');
 
   const updateStyle = (key, val) => {
     if (onUpdateElementStyle) {
@@ -60,9 +39,9 @@ export default function StudioToolbar({
   };
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-full px-3.5 py-1.5 flex items-center gap-2 text-slate-800 select-none pointer-events-auto">
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-white border-[2.5px] border-black shadow-[5px_5px_0px_#000000] rounded-2xl px-4 py-2 flex items-center gap-2 text-black select-none pointer-events-auto">
       
-      {/* Hidden File Input for Native Image Uploads */}
+      {/* Hidden File Input */}
       <input
         type="file"
         ref={fileInputRef}
@@ -76,42 +55,42 @@ export default function StudioToolbar({
         <button
           type="button"
           onClick={() => setShowAddMenu(!showAddMenu)}
-          className="flex items-center gap-1 bg-[#0053ff] hover:bg-[#0043cc] text-white font-bold text-xs px-3.5 py-1 rounded-full shadow-sm transition-colors cursor-pointer"
+          className="flex items-center gap-1 bg-[#FFE600] hover:bg-[#ebd300] text-black border-2 border-black font-black text-xs px-4 py-1.5 rounded-xl shadow-[2px_2px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer"
         >
-          <Plus className="w-3.5 h-3.5 text-white" />
+          <Plus className="w-4 h-4 text-black" />
           <span>Add</span>
-          <ChevronDown className="w-3 h-3 text-white ml-0.5" />
+          <ChevronDown className="w-3.5 h-3.5 text-black" />
         </button>
 
         {showAddMenu && (
-          <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl p-1.5 shadow-xl z-50 space-y-1 font-sans text-xs text-slate-800">
+          <div className="absolute top-full left-0 mt-2 w-48 bg-white border-2 border-black rounded-xl p-1.5 shadow-[4px_4px_0px_#000000] z-50 space-y-1 font-sans text-xs text-black">
             <button
               type="button"
               onClick={() => { onAddElement('text'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#FFE600] rounded-lg text-left font-bold"
             >
-              <Type className="w-4 h-4 text-[#0053ff]" /> Add Text Block
+              <Type className="w-4 h-4 text-black" /> Add Text Block
             </button>
             <button
               type="button"
               onClick={() => { onAddElement('image'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#FFE600] rounded-lg text-left font-bold"
             >
-              <ImageIcon className="w-4 h-4 text-amber-500" /> Add Image Frame
+              <ImageIcon className="w-4 h-4 text-black" /> Add Image Frame
             </button>
             <button
               type="button"
               onClick={() => { onAddElement('project'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#FFE600] rounded-lg text-left font-bold"
             >
-              <Grid className="w-4 h-4 text-[#ff5100]" /> Add Project Card
+              <Grid className="w-4 h-4 text-black" /> Add Project Card
             </button>
             <button
               type="button"
               onClick={() => { onAddElement('skill'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#FFE600] rounded-lg text-left font-bold"
             >
-              <Code className="w-4 h-4 text-emerald-600" /> Add Skill Badge
+              <Code className="w-4 h-4 text-black" /> Add Skill Badge
             </button>
           </div>
         )}
@@ -121,9 +100,9 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => onAskAria && onAskAria(selectedElement)}
-        className="text-slate-700 hover:text-slate-950 font-semibold text-xs px-2.5 py-1 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+        className="text-black hover:bg-slate-100 border-2 border-transparent hover:border-black font-bold text-xs px-2.5 py-1 rounded-xl hover:shadow-[1.5px_1.5px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer"
       >
-        <Sparkles className="w-3.5 h-3.5 text-[#0053ff]" />
+        <Sparkles className="w-3.5 h-3.5 text-black" />
         <span>Ask Aria</span>
       </button>
 
@@ -131,9 +110,9 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => fileInputRef.current && fileInputRef.current.click()}
-        className="text-slate-700 hover:text-slate-950 font-semibold text-xs px-2.5 py-1 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+        className="text-black hover:bg-slate-100 border-2 border-transparent hover:border-black font-bold text-xs px-2.5 py-1 rounded-xl hover:shadow-[1.5px_1.5px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer"
       >
-        <Upload className="w-3.5 h-3.5 text-amber-600" />
+        <Upload className="w-3.5 h-3.5 text-black" />
         <span>Replace Image</span>
       </button>
 
@@ -141,30 +120,24 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => onAddLink && onAddLink(selectedElement)}
-        className="text-slate-700 hover:text-slate-950 font-semibold text-xs px-2.5 py-1 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-1.5"
+        className="text-black hover:bg-slate-100 border-2 border-transparent hover:border-black font-bold text-xs px-2.5 py-1 rounded-xl hover:shadow-[1.5px_1.5px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer"
       >
-        <LinkIcon className="w-3.5 h-3.5 text-emerald-600" />
+        <LinkIcon className="w-3.5 h-3.5 text-black" />
         <span>Link</span>
       </button>
 
       {/* Divider */}
-      <div className="h-4 w-[1px] bg-slate-200" />
+      <div className="h-4 w-[2px] bg-black/20" />
 
-      {/* Image Specific Formatting Pill */}
-      {isImageElement && (
-        <div className="flex items-center space-x-1 bg-slate-100 px-2 py-0.5 rounded-full font-sans text-xs">
-          <span className="text-[10px] text-[#0053ff] font-bold uppercase">Size:</span>
-          <button type="button" onClick={() => { updateStyle('width', 144); updateStyle('height', 144); }} className="px-1.5 py-0.5 hover:bg-white rounded font-bold">S</button>
-          <button type="button" onClick={() => { updateStyle('width', 240); updateStyle('height', 240); }} className="px-1.5 py-0.5 hover:bg-white rounded font-bold">M</button>
-          <button type="button" onClick={() => { updateStyle('width', 360); updateStyle('height', 360); }} className="px-1.5 py-0.5 hover:bg-white rounded font-bold">L</button>
-        </div>
-      )}
-
-      {/* Utility Icons */}
+      {/* Utility Formatting Buttons */}
       <button
         type="button"
         onClick={() => updateStyle('fontWeight', isBold ? '400' : '900')}
-        className={`p-1.5 rounded-full transition-colors ${isBold ? 'bg-[#0053ff] text-white' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+        className={`p-1.5 border-2 rounded-xl transition-all cursor-pointer ${
+          isBold
+            ? 'bg-[#FFE600] text-black border-black shadow-[1.5px_1.5px_0px_#000000]'
+            : 'border-transparent text-slate-700 hover:border-black hover:bg-slate-100'
+        }`}
         title="Bold"
       >
         <Bold className="w-3.5 h-3.5" />
@@ -173,7 +146,7 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => updateStyle('textAlign', textAlign === 'left' ? 'center' : 'left')}
-        className="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+        className="text-slate-700 hover:text-black border-2 border-transparent hover:border-black p-1.5 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
         title="Align Text"
       >
         <AlignLeft className="w-3.5 h-3.5" />
@@ -181,7 +154,7 @@ export default function StudioToolbar({
 
       <button
         type="button"
-        className="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+        className="text-slate-700 hover:text-black border-2 border-transparent hover:border-black p-1.5 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
         title="Crop Image / Mask"
       >
         <Crop className="w-3.5 h-3.5" />
@@ -189,7 +162,7 @@ export default function StudioToolbar({
 
       <button
         type="button"
-        className="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+        className="text-slate-700 hover:text-black border-2 border-transparent hover:border-black p-1.5 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
         title="Stretch Element Width"
       >
         <Maximize2 className="w-3.5 h-3.5" />
@@ -200,7 +173,7 @@ export default function StudioToolbar({
         type="button"
         onClick={() => onDeleteSelected && onDeleteSelected(selectedElement)}
         disabled={!selectedElement}
-        className="text-red-500 hover:text-red-700 p-1.5 rounded-full hover:bg-red-50 disabled:opacity-30 transition-colors"
+        className="text-red-600 hover:text-red-800 border-2 border-transparent hover:border-black p-1.5 rounded-xl hover:bg-red-50 disabled:opacity-30 transition-all cursor-pointer"
         title="Delete Selected Element"
       >
         <Trash2 className="w-3.5 h-3.5" />

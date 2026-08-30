@@ -419,7 +419,7 @@ export default function CanvasPreview({
   return (
     <div
       onClick={() => onSelectElement && onSelectElement(null)}
-      className="flex-1 bg-[#f0f2f5] overflow-y-auto pt-20 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
+      className="flex-1 bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] overflow-y-auto pt-20 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
     >
       {/* Hidden Native File Input */}
       <input
@@ -430,41 +430,41 @@ export default function CanvasPreview({
         className="hidden"
       />
 
-      {/* Frame Wrapper (Wix Harmony Light Preview Window) */}
+      {/* Frame Wrapper (Neo-Brutalist Preview Window) */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`${getFrameWidth()} transition-all duration-300 ease-in-out bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col`}
+        className={`${getFrameWidth()} transition-all duration-300 ease-in-out bg-white border-[2.5px] border-black rounded-2xl shadow-[8px_8px_0px_#000000] overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col mb-12`}
       >
         {/* Frame Top Browser Header */}
-        <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between shrink-0 text-slate-700">
+        <div className="bg-white border-b-2 border-black px-4 py-2 flex items-center justify-between shrink-0 text-black">
           <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-            <span className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-            <span className="w-3 h-3 rounded-full bg-[#27C93F]" />
+            <span className="w-3 h-3 rounded-full bg-[#FF5F56] border border-black" />
+            <span className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-black" />
+            <span className="w-3 h-3 rounded-full bg-[#27C93F] border border-black" />
           </div>
 
           <button
             type="button"
             onClick={() => onOpenDomainModal && onOpenDomainModal()}
-            className="bg-white hover:bg-blue-50 border border-slate-200 rounded-md px-3 py-0.5 font-mono text-[11px] text-slate-800 flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            className="bg-[#FFE600] border-2 border-black rounded-full px-3 py-0.5 font-mono text-[11px] text-black font-black flex items-center gap-1.5 shadow-[1.5px_1.5px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer"
             title="Connect Custom Domain"
           >
             {customDomain ? (
               <>
-                <span className="text-[#0053ff] font-bold">https://{customDomain}</span>
-                <span className="text-emerald-600 font-bold">🟢 Live</span>
+                <span className="font-bold">https://{customDomain}</span>
+                <span className="text-emerald-700 font-black">🟢 Live</span>
               </>
             ) : (
               <>
-                <span className="text-[#0053ff] font-bold">webdevportfolio.io</span>
-                <span className="text-amber-600 font-bold">is available! Connect Domain</span>
+                <span className="font-bold">webdevportfolio.io</span>
+                <span className="text-black font-black">is available! Connect Domain</span>
               </>
             )}
           </button>
 
-          <div className="flex items-center gap-2 font-mono text-[10px] text-slate-500">
+          <div className="flex items-center gap-2 font-mono text-[10px] font-black text-black">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="hidden sm:inline">WIX HARMONY CANVAS</span>
+            <span className="hidden sm:inline">STACKFOLIO CANVAS</span>
           </div>
         </div>
 

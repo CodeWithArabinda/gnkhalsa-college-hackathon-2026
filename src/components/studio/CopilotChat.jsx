@@ -68,45 +68,45 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
   };
 
   return (
-    <aside className="w-full lg:w-[332px] bg-[#f8fafc] border-l border-slate-200 flex flex-col h-full shrink-0 text-slate-900 select-none shadow-sm z-30">
+    <aside className="w-full lg:w-[332px] bg-white border-l-[2.5px] border-black flex flex-col h-full shrink-0 text-slate-900 select-none shadow-[-4px_0px_0px_#000000] z-30 font-sans">
       
       {/* Top Header */}
-      <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+      <div className="p-3.5 border-b-2 border-black flex items-center justify-between bg-white shrink-0">
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center font-bold shadow-xs">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="w-6 h-6 rounded-lg bg-[#FFE600] border-2 border-black text-black flex items-center justify-center font-black shadow-[1.5px_1.5px_0px_#000000]">
+            <Sparkles className="w-3.5 h-3.5 text-black" />
           </div>
-          <span className="font-heading font-extrabold text-sm text-slate-900 tracking-tight">Aria</span>
-          <span className="text-[10px] font-mono bg-blue-50 text-[#0053ff] px-1.5 py-0.2 rounded border border-blue-200 font-bold">
+          <span className="font-heading font-black text-sm text-black tracking-tight">Aria</span>
+          <span className="text-[10px] font-mono bg-sky-300 text-black px-1.5 py-0.2 rounded border border-black font-black shadow-[1px_1px_0px_#000000]">
             Copilot
           </span>
         </div>
 
-        <div className="flex items-center space-x-1 text-slate-500">
-          <button type="button" className="p-1 hover:bg-slate-100 rounded-md" title="Chat history">
+        <div className="flex items-center space-x-1 text-black">
+          <button type="button" className="p-1 hover:bg-slate-100 rounded-md cursor-pointer" title="Chat history">
             <History className="w-4 h-4" />
           </button>
-          <button type="button" className="p-1 hover:bg-slate-100 rounded-md" title="Close panel">
+          <button type="button" className="p-1 hover:bg-slate-100 rounded-md cursor-pointer" title="Close panel">
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 font-sans text-xs">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
         
         {/* 1. IDLE MODE: Show ONLY Welcome Mascot Card */}
         {!isChatActive && !isGenerating && (
-          <div className="bg-gradient-to-b from-[#eef4ff] to-[#dfeaff] border border-blue-100 rounded-2xl p-4 text-center shadow-xs relative overflow-hidden animate-in fade-in duration-200">
-            <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-md relative">
+          <div className="bg-white border-2 border-black rounded-2xl p-5 text-center shadow-[5px_5px_0px_#000000] relative overflow-hidden">
+            <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-[2px_2px_0px_#000000] relative">
               <div className="flex items-center space-x-1">
                 <span className="w-1.5 h-1.5 bg-[#00FFA3] rounded-full animate-ping" />
                 <span className="w-1.5 h-1.5 bg-[#38BDF8] rounded-full animate-pulse" />
               </div>
             </div>
 
-            <h3 className="text-base font-extrabold text-[#081a5e] tracking-tight mt-2">Hello KSHITIJ</h3>
-            <p className="text-xs text-slate-600 font-medium mb-3">What can I help you with?</p>
+            <h3 className="text-xl font-black text-black tracking-tight mt-2.5">Hello KSHITIJ</h3>
+            <p className="text-xs font-bold text-slate-600 mb-4">What can I help you with?</p>
 
             <div className="grid grid-cols-2 gap-2">
               {QUICK_GRID_ACTIONS.map((act) => {
@@ -116,9 +116,9 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
                     key={act.id}
                     type="button"
                     onClick={() => handleSend(act.prompt)}
-                    className="bg-white/90 hover:bg-white text-slate-800 font-semibold text-xs py-2 px-2.5 rounded-xl border border-blue-200/60 shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow-sm cursor-pointer"
+                    className="bg-white hover:bg-slate-50 text-black font-black text-xs py-2 px-2.5 rounded-xl border-2 border-black shadow-[2.5px_2.5px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <IconComp className="w-3.5 h-3.5 text-[#0053ff]" />
+                    <IconComp className="w-3.5 h-3.5 text-black" />
                     <span>{act.label}</span>
                   </button>
                 );
@@ -127,17 +127,17 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           </div>
         )}
 
-        {/* 2. CHAT / PLANNING MODE: Compact Top Status Chip Header */}
+        {/* 2. CHAT ACTIVE MODE: Compact Status Chip */}
         {isChatActive && (
-          <div className="flex items-center justify-between px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-xl text-xs font-semibold text-[#0053ff] animate-in fade-in duration-150">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-[#FFE600] border-2 border-black rounded-xl text-xs font-black text-black shadow-[2px_2px_0px_#000000]">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
               <span>Aria Assistant Active</span>
             </div>
             <button
               type="button"
               onClick={() => setMessages([])}
-              className="text-[10px] text-slate-500 hover:text-slate-900 underline"
+              className="text-[10px] font-bold text-black underline hover:text-slate-800"
             >
               Reset Chat
             </button>
@@ -153,20 +153,20 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
                 className={`flex items-start space-x-2 ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
               >
                 <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs ${
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs border-2 border-black font-black ${
                     m.role === 'assistant'
-                      ? 'bg-[#0053ff] text-white shadow-xs'
-                      : 'bg-slate-200 text-slate-800 border border-slate-300'
+                      ? 'bg-[#FFE600] text-black shadow-[1.5px_1.5px_0px_#000]'
+                      : 'bg-black text-white shadow-[1.5px_1.5px_0px_#000]'
                   }`}
                 >
-                  {m.role === 'assistant' ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                  {m.role === 'assistant' ? <Sparkles className="w-3 h-3 text-black" /> : <User className="w-3 h-3 text-white" />}
                 </div>
 
                 <div
-                  className={`p-3 rounded-2xl max-w-[88%] leading-relaxed ${
+                  className={`p-3 rounded-2xl max-w-[88%] leading-relaxed border-2 border-black shadow-[3px_3px_0px_#000000] ${
                     m.role === 'assistant'
-                      ? 'bg-white border border-slate-200 text-slate-800 shadow-xs'
-                      : 'bg-[#0053ff] text-white font-medium shadow-xs'
+                      ? 'bg-white text-black font-semibold'
+                      : 'bg-[#FFE600] text-black font-extrabold'
                   }`}
                 >
                   {m.text}
@@ -183,11 +183,11 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
 
         {isGenerating && (
           <div className="flex items-center space-x-2 pt-1">
-            <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center">
-              <Sparkles className="w-3 h-3 animate-spin" />
+            <div className="w-6 h-6 rounded-lg bg-[#FFE600] border-2 border-black text-black flex items-center justify-center shadow-[1.5px_1.5px_0px_#000]">
+              <Sparkles className="w-3.5 h-3.5 text-black animate-spin" />
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-2.5 text-slate-600 font-mono text-[11px] flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-ping" />
+            <div className="bg-white border-2 border-black rounded-xl p-2.5 text-black font-mono text-[11px] font-bold shadow-[2px_2px_0px_#000] flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-black animate-ping" />
               Updating layout blocks...
             </div>
           </div>
@@ -197,21 +197,21 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       </div>
 
       {/* Bottom Chat Input Dock */}
-      <div className="p-3 border-t border-slate-200 bg-white space-y-2 shrink-0">
+      <div className="p-3 border-t-2 border-black bg-white space-y-2 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="bg-slate-50 border border-slate-200 focus-within:border-[#0053ff] focus-within:bg-white rounded-xl p-2 shadow-2xs transition-colors space-y-1.5"
+          className="border-2 border-black bg-white rounded-2xl p-2.5 shadow-[4px_4px_0px_#000000] space-y-2"
         >
           {activeContextBadge && (
-            <div className="inline-flex items-center gap-1 bg-blue-50 text-[#0053ff] text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
+            <div className="inline-flex items-center gap-1 bg-[#FFE600] border border-black text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-[1px_1px_0px_#000]">
               <span>{activeContextBadge}</span>
               <button
                 type="button"
                 onClick={() => setActiveContextBadge(null)}
-                className="hover:text-red-500 ml-0.5"
+                className="hover:text-red-600 ml-0.5 cursor-pointer font-black"
               >
                 ✕
               </button>
@@ -223,31 +223,31 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Describe what you want to change..."
-            className="w-full bg-transparent px-1 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium"
+            className="w-full bg-transparent px-1 text-xs text-black placeholder:text-slate-400 focus:outline-none font-bold"
           />
 
-          <div className="flex items-center justify-between border-t border-slate-200/60 pt-1.5">
-            <div className="flex items-center space-x-1 text-slate-400">
-              <button type="button" className="p-1 hover:bg-slate-200 rounded text-slate-500" title="Attach context">
-                <Plus className="w-3.5 h-3.5" />
+          <div className="flex items-center justify-between border-t-2 border-black/10 pt-2">
+            <div className="flex items-center space-x-1 text-black">
+              <button type="button" className="p-1 hover:bg-slate-100 rounded-lg text-black cursor-pointer" title="Attach context">
+                <Plus className="w-3.5 h-3.5 text-black" />
               </button>
-              <button type="button" className="p-1 hover:bg-slate-200 rounded text-slate-500" title="Voice input">
-                <Mic className="w-3.5 h-3.5" />
+              <button type="button" className="p-1 hover:bg-slate-100 rounded-lg text-black cursor-pointer" title="Voice input">
+                <Mic className="w-3.5 h-3.5 text-black" />
               </button>
             </div>
 
             <button
               type="submit"
               disabled={!input.trim() || isGenerating}
-              className="p-1.5 bg-[#0053ff] hover:bg-[#0043cc] disabled:opacity-40 text-white rounded-lg shadow-2xs transition-colors cursor-pointer"
+              className="p-2 bg-[#FFE600] hover:bg-[#ebd300] disabled:opacity-40 text-black border-2 border-black rounded-xl shadow-[2px_2px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all cursor-pointer"
             >
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-3.5 h-3.5 text-black" />
             </button>
           </div>
         </form>
 
-        <p className="text-[10px] text-center text-slate-400 font-sans">
-          AI can make mistakes. Always double-check the results.
+        <p className="text-[10px] text-center text-slate-500 font-mono font-bold">
+          AI can make mistakes. Always double-check results.
         </p>
       </div>
 

@@ -15,7 +15,7 @@ export default function AriaSiteGenerator() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pt-2 pb-8 font-sans select-none">
+    <div className="w-full max-w-5xl mx-auto pt-2 pb-4 font-sans select-none">
       
       {/* Top Sticker Tagline */}
       <div className="text-center">
@@ -81,9 +81,28 @@ export default function AriaSiteGenerator() {
 
       </div>
 
-      <p className="text-[11px] font-mono font-bold text-slate-500 text-center block">
+      <p className="text-[11px] font-mono font-bold text-slate-500 text-center block mt-3">
         AI can make mistakes. Always double-check the results.
       </p>
+
+      {/* Signature Full-Width Neo-Brutalist Marquee Divider */}
+      <div className="w-full border-y-[2.5px] border-black bg-white py-2.5 my-10 overflow-hidden flex items-center relative select-none shadow-[2px_2px_0px_#000000]">
+        
+        {/* Floating Centered Badge Pill */}
+        <div className="bg-[#FFE600] text-black border-2 border-black font-mono font-black text-xs px-4 py-1 rounded-md shadow-[2.5px_2.5px_0px_#000000] absolute left-1/2 -translate-x-1/2 z-10 uppercase tracking-wider flex items-center gap-1.5">
+          <span>✦</span>
+          <span>CURATED TEMPLATES REPOSITORY</span>
+          <span>✦</span>
+        </div>
+
+        {/* Marquee Ticker Track */}
+        <div className="animate-marquee whitespace-nowrap flex gap-4 text-xs font-mono font-bold text-slate-800 uppercase tracking-widest opacity-90">
+          <span>✦ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE • 1-CLICK AI GAP COMPLETER ✦</span>
+          <span>✦ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE • 1-CLICK AI GAP COMPLETER ✦</span>
+          <span>✦ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE • 1-CLICK AI GAP COMPLETER ✦</span>
+        </div>
+
+      </div>
 
     </div>
   );
