@@ -13,11 +13,9 @@ export function fileToBase64(file) {
     reader.readAsDataURL(file);
     reader.onload = () => {
       const result = reader.result;
-      const base64Data = result.split(',')[1];
-      resolve({
-        base64Data,
-        mimeType: file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/png')
-      });
+      const base64Data = result.includes(',') ? result.split(',')[1] : result;
+      const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+      resolve({ base64Data, mimeType });
     };
     reader.onerror = (error) => reject(error);
   });
@@ -60,140 +58,102 @@ export async function parseResumeWithGemini(file, apiKey = null) {
   const keyToUse = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
   if (!file) throw new Error('No resume file provided for OCR extraction.');
 
-  // Convert file to base64 inlineData format for Gemini API
+  // Convert file to base64 data format for Gemini API
   const { base64Data, mimeType } = await fileToBase64(file);
 
-  const promptText = `
-You are an expert AI Resume OCR and Entity Extraction Parser.
-Extract all relevant candidate details from this resume document and return ONLY a valid, parseable JSON object matching this exact structure:
+  const extractionPrompt = `You are a precision OCR and document intelligence engine.
+Analyze this resume document image/PDF directly. 
+Extract the EXACT candidate information written on the document text. 
+DO NOT use the file name as the candidate's name.
 
+Return ONLY a raw JSON object (no markdown fences) matching this structure:
 {
   "hero": {
-    "name": "Full Name",
-    "title": "Role / Headline",
-    "bio": "Short 2-3 sentence professional bio summarizing background and goals",
+    "name": "Exact Name written at top of resume (e.g. SRIHARSH ADITYA)",
+    "title": "Exact Role or Headline (e.g. Software Engineering Intern / Full Stack Developer)",
+    "bio": "2-sentence professional bio synthesized from their experience",
     "avatarUrl": ""
   },
-  "skills": ["Skill 1", "Skill 2", "Skill 3", "Skill 4"],
+  "skills": ["Array of skills found, e.g. Node.js, ExpressJS, MongoDB, React, C++, JavaScript"],
   "projects": [
     {
-      "title": "Project Name",
-      "description": "Project summary with key features and metrics",
-      "techStack": ["React", "Node.js"],
+      "title": "Exact Project Name (e.g. BUY-N-SELL)",
+      "description": "Project summary with achievements",
+      "techStack": ["NodeJS", "MongoDB", "ExpressJS"],
       "demoUrl": "",
       "githubUrl": ""
     }
   ],
   "experience": [
     {
-      "role": "Job Title",
-      "company": "Company Name",
-      "period": "2024 - 2026",
-      "description": "Key responsibilities and achievements"
+      "role": "Exact Role (e.g. SOFTWARE ENGINEERING INTERN)",
+      "company": "Exact Company (e.g. PUDLE)",
+      "period": "FEB 2021 - PRESENT",
+      "description": "Key bullet achievements"
     }
   ],
   "contact": {
-    "email": "user@example.com",
+    "email": "Email address from resume or ''",
     "socialLinks": {
-      "github": "",
-      "linkedin": "",
+      "github": "Github URL or username from resume",
+      "linkedin": "Linkedin URL or username from resume",
       "twitter": ""
     }
   }
-}
-
-CRITICAL RULES:
-1. Do NOT include markdown text outside the JSON object.
-2. If candidate name or title is absent, leave them as empty strings so our Gap Engine can detect missing fields.
-3. Extract real projects, tech stack, and skills present in the resume.
-`;
-
-  // Fallback default structure if API key missing or offline
-  const fallbackStructure = {
-    hero: {
-      name: file.name.split('.')[0].replace(/[-_]/g, ' '),
-      title: "Full Stack Software Engineer",
-      bio: "Passionate developer building modern web applications and scalable digital experiences.",
-      avatarUrl: ""
-    },
-    skills: ["JavaScript", "React", "Node.js", "Tailwind CSS", "Git"],
-    projects: [
-      {
-        title: "Full Stack Web Application",
-        description: "Built responsive frontend architecture and REST API microservices.",
-        techStack: ["React", "Node.js", "Express"],
-        demoUrl: "",
-        githubUrl: ""
-      }
-    ],
-    experience: [
-      {
-        role: "Software Engineering Intern",
-        company: "Tech Solutions",
-        period: "2024 - Present",
-        description: "Developed frontend user interfaces and optimized API payload response times."
-      }
-    ],
-    contact: {
-      email: "developer@example.com",
-      socialLinks: {
-        github: "https://github.com",
-        linkedin: "https://linkedin.com",
-        twitter: ""
-      }
-    }
-  };
+}`;
 
   if (!keyToUse || keyToUse === "your_gemini_api_key_here") {
-    console.warn("No Gemini API key provided. Returning fallback OCR extracted resume structure.");
-    return fallbackStructure;
-  }
-
-  try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`;
-    
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: promptText },
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: base64Data
-              }
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 2048
-      }
+    console.warn("No Gemini API key provided. Returning unpopulated structure for Gap Engine resolution.");
+    return {
+      hero: { name: "", title: "", bio: "", avatarUrl: "" },
+      skills: [],
+      projects: [],
+      experience: [],
+      contact: { email: "", socialLinks: { github: "", linkedin: "", twitter: "" } }
     };
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.warn("Gemini 2.5 Flash API error:", response.status, errText);
-      return fallbackStructure;
-    }
-
-    const data = await response.json();
-    const rawContent = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    const parsedJson = cleanJsonOutput(rawContent);
-
-    if (parsedJson && parsedJson.hero) {
-      return parsedJson;
-    }
-    return fallbackStructure;
-  } catch (err) {
-    console.error("Gemini OCR parsing exception:", err);
-    return fallbackStructure;
   }
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`;
+
+  const requestBody = {
+    contents: [
+      {
+        parts: [
+          { text: extractionPrompt },
+          {
+            inline_data: {
+              mime_type: mimeType,
+              data: base64Data,
+            },
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      response_mime_type: "application/json",
+      temperature: 0.1,
+    },
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error("Gemini 2.5 Flash API error:", response.status, errText);
+    throw new Error(`Gemini Multimodal OCR Error (${response.status}): ${errText}`);
+  }
+
+  const result = await response.json();
+  const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+  const parsed = cleanJsonOutput(rawText);
+
+  if (!parsed || !parsed.hero) {
+    throw new Error("Failed to parse valid candidate JSON from resume document OCR.");
+  }
+
+  return parsed;
 }
