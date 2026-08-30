@@ -1,9 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Monitor, Tablet, Smartphone, ExternalLink, Rocket, Sparkles, ChevronLeft } from 'lucide-react';
+import { Monitor, Tablet, Smartphone, ExternalLink, Rocket, ChevronLeft, RotateCcw, RotateCw, RefreshCw, Check } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export default function StudioNavbar({ deviceMode, setDeviceMode, schema, onPublish }) {
+export default function StudioNavbar({
+  deviceMode,
+  setDeviceMode,
+  schema,
+  onPublish,
+  onUndo,
+  canUndo,
+  onRedo,
+  canRedo,
+  saveStatus = 'saved',
+  onResetDefault
+}) {
   const handlePublish = () => {
     confetti({
       particleCount: 80,
@@ -32,47 +43,100 @@ export default function StudioNavbar({ deviceMode, setDeviceMode, schema, onPubl
         </div>
       </div>
 
-      {/* Center Device Switcher */}
-      <div className="flex items-center bg-[#1A1D27] border border-white/10 rounded-xl p-1 space-x-1 shadow-inner">
-        <button
-          type="button"
-          onClick={() => setDeviceMode('desktop')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-            deviceMode === 'desktop' ? 'bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_#000]' : 'text-slate-400 hover:text-white'
-          }`}
-          title="Desktop (1280px)"
-        >
-          <Monitor className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Desktop</span>
-        </button>
+      {/* Center Device Switcher & Undo/Redo */}
+      <div className="flex items-center space-x-3">
+        
+        {/* Undo / Redo */}
+        <div className="flex items-center bg-[#1A1D27] border border-white/10 rounded-xl p-1 space-x-1 shadow-inner">
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+            title="Undo (Ctrl+Z)"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+            title="Redo (Ctrl+Y)"
+          >
+            <RotateCw className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => setDeviceMode('tablet')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-            deviceMode === 'tablet' ? 'bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_#000]' : 'text-slate-400 hover:text-white'
-          }`}
-          title="Tablet (768px)"
-        >
-          <Tablet className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Tablet</span>
-        </button>
+        {/* Viewport Device Switcher */}
+        <div className="flex items-center bg-[#1A1D27] border border-white/10 rounded-xl p-1 space-x-1 shadow-inner">
+          <button
+            type="button"
+            onClick={() => setDeviceMode('desktop')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+              deviceMode === 'desktop' ? 'bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_#000]' : 'text-slate-400 hover:text-white'
+            }`}
+            title="Desktop (1280px)"
+          >
+            <Monitor className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Desktop</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setDeviceMode('mobile')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-            deviceMode === 'mobile' ? 'bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_#000]' : 'text-slate-400 hover:text-white'
-          }`}
-          title="Mobile (390px)"
-        >
-          <Smartphone className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Mobile</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setDeviceMode('tablet')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+              deviceMode === 'tablet' ? 'bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_#000]' : 'text-slate-400 hover:text-white'
+            }`}
+            title="Tablet (768px)"
+          >
+            <Tablet className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Tablet</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setDeviceMode('mobile')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+              deviceMode === 'mobile' ? 'bg-[#FFE600] text-black shadow-[2px_2px_0px_0px_#000]' : 'text-slate-400 hover:text-white'
+            }`}
+            title="Mobile (390px)"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Mobile</span>
+          </button>
+        </div>
+
       </div>
 
-      {/* Right Controls */}
+      {/* Right Controls & Autosave Status */}
       <div className="flex items-center space-x-3">
+        
+        {/* Live Autosave Status Indicator */}
+        <div className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-full font-mono text-[10px]">
+          {saveStatus === 'saving' ? (
+            <>
+              <RefreshCw className="w-3 h-3 text-amber-400 animate-spin" />
+              <span className="text-amber-400 font-bold">Saving...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-[#00FFA3]" />
+              <span className="text-slate-300">Saved</span>
+            </>
+          )}
+        </div>
+
+        {/* Reset Draft */}
+        <button
+          type="button"
+          onClick={onResetDefault}
+          className="hidden md:inline-flex text-[10px] font-mono text-slate-400 hover:text-white transition-colors"
+          title="Reset to initial draft"
+        >
+          Reset
+        </button>
+
         {schema?.metadata?.slug && (
           <Link
             to={`/p/${schema.metadata.slug}`}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StudioNavbar from '../components/studio/StudioNavbar';
 import StudioToolbar from '../components/studio/StudioToolbar';
 import CanvasPreview from '../components/studio/CanvasPreview';
@@ -7,14 +7,112 @@ import { initialPortfolioSchema } from '../types/schema';
 import { processUserPrompt } from '../lib/geminiBuilder';
 
 export default function StudioEditor() {
-  const [schema, setSchema] = useState(initialPortfolioSchema);
   const [deviceMode, setDeviceMode] = useState('desktop');
   const [selectedElement, setSelectedElement] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('saved');
+
+  // History Stack (past, present, future) with LocalStorage restoration
+  const [history, setHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem('stackfolio_studio_draft');
+      if (saved) {
+        return { past: [], present: JSON.parse(saved), future: [] };
+      }
+    } catch (e) {}
+    return { past: [], present: initialPortfolioSchema, future: [] };
+  });
+
+  const schema = history.present;
+
+  // Push new state snapshot to history stack
+  const updateSchemaState = (newSchemaOrFn) => {
+    setSaveStatus('saving');
+    setHistory((prev) => {
+      const nextPresent = typeof newSchemaOrFn === 'function' ? newSchemaOrFn(prev.present) : newSchemaOrFn;
+      const updatedPast = [...prev.past, prev.present].slice(-30);
+      return {
+        past: updatedPast,
+        present: nextPresent,
+        future: []
+      };
+    });
+  };
+
+  // Undo
+  const handleUndo = () => {
+    setHistory((prev) => {
+      if (prev.past.length === 0) return prev;
+      const previous = prev.past[prev.past.length - 1];
+      const newPast = prev.past.slice(0, prev.past.length - 1);
+      return {
+        past: newPast,
+        present: previous,
+        future: [prev.present, ...prev.future]
+      };
+    });
+  };
+
+  // Redo
+  const handleRedo = () => {
+    setHistory((prev) => {
+      if (prev.future.length === 0) return prev;
+      const next = prev.future[0];
+      const newFuture = prev.future.slice(1);
+      return {
+        past: [...prev.past, prev.present],
+        present: next,
+        future: newFuture
+      };
+    });
+  };
+
+  // Reset to default
+  const handleResetDefault = () => {
+    if (window.confirm("Reset portfolio draft to default? This will clear local edits.")) {
+      updateSchemaState(initialPortfolioSchema);
+      localStorage.removeItem('stackfolio_studio_draft');
+    }
+  };
+
+  // Keyboard Shortcuts (Ctrl+Z / Cmd+Z, Ctrl+Y / Cmd+Shift+Z)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if (e.shiftKey) {
+          e.preventDefault();
+          handleRedo();
+        } else {
+          e.preventDefault();
+          handleUndo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [history]);
+
+  // Debounced Autosave to localStorage
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('stackfolio_studio_draft', JSON.stringify(schema));
+        setSaveStatus('saved');
+      } catch (e) {}
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [schema]);
 
   // Handle inline contentEditable changes from CanvasPreview
   const handleUpdateBlock = (blockId, fieldPath, value) => {
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const updatedBlocks = prev.blocks.map((block) => {
         if (block.id !== blockId) return block;
 
@@ -39,7 +137,7 @@ export default function StudioEditor() {
 
   // Handle element-level isolated style & offset mutations
   const handleUpdateElementStyle = (elementKey, styleUpdates) => {
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const prevStyles = prev.elementStyles || {};
       const targetStyle = prevStyles[elementKey] || {};
       const updatedStyle = typeof styleUpdates === 'function' ? styleUpdates(targetStyle) : { ...targetStyle, ...styleUpdates };
@@ -55,7 +153,7 @@ export default function StudioEditor() {
 
   // Reorder sections
   const handleMoveBlock = (index, direction) => {
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const blocks = [...prev.blocks];
       const targetIndex = direction === 'up' ? index - 1 : index + 1;
       if (targetIndex < 0 || targetIndex >= blocks.length) return prev;
@@ -68,7 +166,7 @@ export default function StudioEditor() {
 
   // Duplicate section
   const handleDuplicateBlock = (index) => {
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const blocks = [...prev.blocks];
       const target = blocks[index];
       const cloned = JSON.parse(JSON.stringify(target));
@@ -80,7 +178,7 @@ export default function StudioEditor() {
 
   // Delete section
   const handleDeleteBlock = (index) => {
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const blocks = [...prev.blocks];
       blocks.splice(index, 1);
       return { ...prev, blocks };
@@ -89,7 +187,7 @@ export default function StudioEditor() {
 
   // Add new element block from + Add Menu
   const handleAddElement = (elementType) => {
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const blocks = [...prev.blocks];
       if (elementType === 'project') {
         const newProjectBlock = {
@@ -145,7 +243,7 @@ export default function StudioEditor() {
     const newUrl = window.prompt("Enter new Image URL (or paste image link):", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80");
     if (!newUrl) return;
 
-    setSchema((prev) => {
+    updateSchemaState((prev) => {
       const blocks = prev.blocks.map((b) => {
         if (b.type === 'HeroBlock') {
           return {
@@ -170,9 +268,9 @@ export default function StudioEditor() {
     try {
       const result = await processUserPrompt(promptText, schema);
       if (result && result.updatedSchema) {
-        setSchema(result.updatedSchema);
+        updateSchemaState(result.updatedSchema);
       } else if (result && result.schema) {
-        setSchema(result.schema);
+        updateSchemaState(result.schema);
       }
       return result.aiMessage || result.message || "Portfolio successfully updated!";
     } catch (err) {
@@ -183,7 +281,7 @@ export default function StudioEditor() {
   };
 
   const handlePublish = () => {
-    setSchema((prev) => ({
+    updateSchemaState((prev) => ({
       ...prev,
       metadata: { ...prev.metadata, published: true }
     }));
@@ -200,6 +298,12 @@ export default function StudioEditor() {
         setDeviceMode={setDeviceMode}
         schema={schema}
         onPublish={handlePublish}
+        onUndo={handleUndo}
+        canUndo={history.past.length > 0}
+        onRedo={handleRedo}
+        canRedo={history.future.length > 0}
+        saveStatus={saveStatus}
+        onResetDefault={handleResetDefault}
       />
 
       {/* Top Contextual Studio Action Ribbon */}
