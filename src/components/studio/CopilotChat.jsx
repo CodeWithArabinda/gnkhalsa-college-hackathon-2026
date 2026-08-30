@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Bot, User, RefreshCw, Wand2, ArrowRight } from 'lucide-react';
 import PlanningCard from './PlanningCard';
+import { useStudioTheme } from '../../context/ThemeContext';
 
 const QUICK_PROMPTS = [
   "✨ Make theme Dark Cinematic",
@@ -10,6 +11,7 @@ const QUICK_PROMPTS = [
 ];
 
 export default function CopilotChat({ schema, onApplyPrompt, isGenerating: externalGenerating }) {
+  const { isLight } = useStudioTheme();
   const [messages, setMessages] = useState([
     {
       id: "m1",
@@ -72,23 +74,29 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
   };
 
   return (
-    <aside className="w-full lg:w-96 bg-[#12141D] border-l-2 border-black flex flex-col h-full shrink-0 text-white select-none">
+    <aside className={`w-full lg:w-96 flex flex-col h-full shrink-0 select-none transition-colors duration-200 ${
+      isLight ? 'bg-white border-l-2 border-slate-200 text-slate-900 shadow-xl' : 'bg-[#12141D] border-l-2 border-black text-white'
+    }`}>
       
       {/* Copilot Header */}
-      <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#181A24]">
+      <div className={`p-4 border-b flex items-center justify-between transition-colors ${
+        isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#181A24] border-white/10'
+      }`}>
         <div className="flex items-center space-x-2.5">
           <div className="w-8 h-8 rounded-xl bg-[#FFE600] border border-black flex items-center justify-center text-black shadow-[2px_2px_0px_0px_#000]">
             <Bot className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-heading font-extrabold text-sm text-white">AI Copilot</h3>
+            <h3 className={`font-heading font-extrabold text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>AI Copilot</h3>
             <p className="font-mono text-[10px] text-[#00FFA3] flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00FFA3] animate-pulse" /> Active & Ready
             </p>
           </div>
         </div>
 
-        <div className="text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded-lg px-2 py-1">
+        <div className={`text-[10px] font-mono rounded-lg px-2 py-1 ${
+          isLight ? 'bg-slate-200 text-slate-700 border border-slate-300' : 'text-slate-400 bg-white/5 border border-white/10'
+        }`}>
           v2.4
         </div>
       </div>
@@ -104,7 +112,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
               className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                 m.role === 'assistant'
                   ? 'bg-[#FF6B1A] text-black border border-black'
-                  : 'bg-white/10 text-white border border-white/20'
+                  : isLight ? 'bg-slate-200 text-slate-800 border border-slate-300' : 'bg-white/10 text-white border border-white/20'
               }`}
             >
               {m.role === 'assistant' ? <Wand2 className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
@@ -113,7 +121,9 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             <div
               className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
                 m.role === 'assistant'
-                  ? 'bg-[#1D202D] border border-white/10 text-slate-200 shadow-md'
+                  ? isLight
+                    ? 'bg-slate-100 border border-slate-300 text-slate-800 shadow-sm'
+                    : 'bg-[#1D202D] border border-white/10 text-slate-200 shadow-md'
                   : 'bg-[#FFE600] text-black font-medium border border-black shadow-[2px_2px_0px_0px_#000]'
               }`}
             >
@@ -130,7 +140,9 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             <div className="w-7 h-7 rounded-lg bg-[#FF6B1A] text-black border border-black flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 animate-spin" />
             </div>
-            <div className="bg-[#1D202D] border border-white/10 rounded-2xl p-3 text-slate-400 font-mono text-[11px] flex items-center gap-2">
+            <div className={`rounded-2xl p-3 font-mono text-[11px] flex items-center gap-2 ${
+              isLight ? 'bg-slate-100 border border-slate-300 text-slate-700' : 'bg-[#1D202D] border border-white/10 text-slate-400'
+            }`}>
               <span className="w-2 h-2 rounded-full bg-[#FF6B1A] animate-ping" />
               Updating schema & layout blocks...
             </div>
@@ -141,8 +153,12 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       </div>
 
       {/* Quick Prompt Pills */}
-      <div className="p-3 border-t border-white/10 bg-[#161822] space-y-2">
-        <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+      <div className={`p-3 border-t space-y-2 ${
+        isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#161822] border-white/10'
+      }`}>
+        <p className={`text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 ${
+          isLight ? 'text-slate-600' : 'text-slate-400'
+        }`}>
           <Sparkles className="w-3 h-3 text-[#FFE600]" /> Quick Prompt Actions
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -151,7 +167,11 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
               key={prompt}
               type="button"
               onClick={() => handleSend(prompt)}
-              className="text-[10px] font-mono bg-white/5 hover:bg-[#FFE600] hover:text-black border border-white/10 rounded-lg px-2.5 py-1 text-slate-300 transition-all text-left"
+              className={`text-[10px] font-mono border rounded-lg px-2.5 py-1 transition-all text-left ${
+                isLight
+                  ? 'bg-white hover:bg-[#FFE600] border-slate-300 text-slate-800 hover:text-black'
+                  : 'bg-white/5 hover:bg-[#FFE600] border-white/10 text-slate-300 hover:text-black'
+              }`}
             >
               {prompt}
             </button>
@@ -160,20 +180,26 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       </div>
 
       {/* Input Box */}
-      <div className="p-3 border-t border-black bg-[#0F1117]">
+      <div className={`p-3 border-t ${
+        isLight ? 'bg-slate-100 border-slate-300' : 'bg-[#0F1117] border-black'
+      }`}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center space-x-2 bg-[#1A1D27] border border-white/15 rounded-xl p-1.5 focus-within:border-[#FFE600] transition-colors"
+          className={`flex items-center space-x-2 border rounded-xl p-1.5 focus-within:border-[#FFE600] transition-colors ${
+            isLight ? 'bg-white border-slate-300' : 'bg-[#1A1D27] border-white/15'
+          }`}
         >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask AI Copilot to edit portfolio..."
-            className="flex-1 bg-transparent px-3 text-xs text-white placeholder-slate-500 focus:outline-none"
+            className={`flex-1 bg-transparent px-3 text-xs focus:outline-none ${
+              isLight ? 'text-slate-900 placeholder-slate-400' : 'text-white placeholder-slate-500'
+            }`}
           />
 
           <button
