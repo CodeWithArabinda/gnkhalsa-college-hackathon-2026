@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, ArrowRight, Sparkles } from 'lucide-react';
+import { Eye, ArrowRight, Sparkles, Upload } from 'lucide-react';
 import { getArchetypeConfig } from '../../lib/geminiBuilder';
 
 const TEMPLATE_PRESETS = [
@@ -81,7 +81,28 @@ const CATEGORIES = [
 
 export default function TemplateGallery({ onSelectArchetype }) {
   const [activeCategory, setActiveCategory] = useState('All (6)');
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  const handleCustomUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed) {
+          localStorage.setItem('stackfolio_portfolio_schema', JSON.stringify(parsed));
+          localStorage.setItem('stackfolio_studio_draft', JSON.stringify(parsed));
+          navigate('/studio');
+        }
+      } catch (err) {
+        alert("Invalid JSON template file. Please upload a valid StackFolio schema file.");
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const filteredTemplates = TEMPLATE_PRESETS.filter(t => {
     if (activeCategory.startsWith('All')) return true;
@@ -213,25 +234,46 @@ export default function TemplateGallery({ onSelectArchetype }) {
         </button>
       </div>
 
-      {/* Filter Category Pills */}
-      <div className="flex flex-wrap gap-2.5">
-        {CATEGORIES.map((cat) => {
-          const isActive = activeCategory === cat;
-          return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-black border-2 border-black transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-black text-white shadow-[2.5px_2.5px_0px_#FFE600]'
-                  : 'bg-white text-black shadow-[2.5px_2.5px_0px_#000000] hover:bg-slate-50'
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
+      {/* Filter Category Pills & Custom Upload Action */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2.5">
+          {CATEGORIES.map((cat) => {
+            const isActive = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-black border-2 border-black transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-black text-white shadow-[2.5px_2.5px_0px_#FFE600]'
+                    : 'bg-white text-black shadow-[2.5px_2.5px_0px_#000000] hover:bg-slate-50'
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Upload Custom Template Action Button */}
+        <div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="border-2 border-black bg-white hover:bg-neutral-100 font-black shadow-[2.5px_2.5px_0px_#000000] px-4 py-1.5 rounded-lg text-xs transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5 text-black"
+          >
+            <Upload className="w-3.5 h-3.5 text-black" />
+            <span>Upload Custom Template</span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleCustomUpload}
+          />
+        </div>
       </div>
 
       {/* Template Cards Grid */}

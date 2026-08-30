@@ -138,42 +138,6 @@ export default function AriaSiteGenerator({ onTriggerResumeUpload }) {
                 selectedModel={selectedModel}
                 onSelect={setSelectedModel}
               />
-
-              {/* Upload Custom Template Button */}
-              <button
-                type="button"
-                disabled={isGenerating}
-                onClick={() => templateInputRef.current?.click()}
-                className="border-2 border-black bg-white hover:bg-slate-100 disabled:opacity-50 text-black font-bold text-xs px-3 py-2 rounded-lg shadow-[2px_2px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
-                title="Upload Custom JSON Template Schema"
-              >
-                <Upload className="w-3.5 h-3.5 text-black" />
-                <span className="hidden sm:inline">Upload Template</span>
-              </button>
-
-              <input
-                ref={templateInputRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleTemplateUpload}
-              />
-
-              {/* Create from URL Button */}
-              <button
-                type="button"
-                disabled={isGenerating}
-                onClick={() => {
-                  const url = window.prompt("Enter existing portfolio or LinkedIn URL to clone structure:", "https://kshitij.dev");
-                  if (url) {
-                    setPromptText(`Generate a sleek fullstack portfolio matching the structure and project highlights of ${url}`);
-                  }
-                }}
-                className="border-2 border-black bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-black font-bold text-xs px-3 py-2 rounded-lg shadow-[2px_2px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer"
-              >
-                <Globe className="w-3.5 h-3.5 text-black" />
-                <span className="hidden sm:inline">Create from URL</span>
-              </button>
             </div>
 
             {/* Generate Site Trigger */}
