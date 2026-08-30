@@ -20,6 +20,7 @@ function EditableCanvasItem({
   onUpdateElementStyle,
   onPolishWithAI,
   onOpenEditModal,
+  onTriggerUpload,
   children,
   className = '',
   blockId,
@@ -29,6 +30,7 @@ function EditableCanvasItem({
   const isHovered = hoveredElementKey === elementKey;
   const elementStyles = schema?.elementStyles || {};
   const st = elementStyles[elementKey] || {};
+  const isImageElement = elementKey === 'hero-avatar' || label.toLowerCase().includes('image');
 
   const isDragging = useRef(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -148,18 +150,32 @@ function EditableCanvasItem({
 
           <div className="w-px h-3.5 bg-white/20" />
 
-          {/* Quick Edit Pencil Trigger */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenEditModal && onOpenEditModal(elementKey, label, blockId);
-            }}
-            className="px-2 py-0.5 bg-[#38BDF8] text-black font-extrabold text-[10px] rounded flex items-center gap-1 hover:bg-[#60a5fa] transition-colors"
-            title="Edit Text & Fields"
-          >
-            <Pencil className="w-3 h-3 text-black" /> Edit Text
-          </button>
+          {/* Action Trigger: Replace Image or Edit Text */}
+          {isImageElement ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onTriggerUpload && onTriggerUpload(blockId);
+              }}
+              className="px-2 py-0.5 bg-[#38BDF8] text-black font-extrabold text-[10px] rounded flex items-center gap-1 hover:bg-[#60a5fa] transition-colors"
+              title="Upload / Replace Image File"
+            >
+              <ImageIcon className="w-3 h-3 text-black" /> Replace Image
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenEditModal && onOpenEditModal(elementKey, label, blockId);
+              }}
+              className="px-2 py-0.5 bg-[#38BDF8] text-black font-extrabold text-[10px] rounded flex items-center gap-1 hover:bg-[#60a5fa] transition-colors"
+              title="Edit Text & Fields"
+            >
+              <Pencil className="w-3 h-3 text-black" /> Edit Text
+            </button>
+          )}
 
           {/* Aria Polish */}
           <button
@@ -618,7 +634,7 @@ export default function CanvasPreview({
                           </h1>
                         </EditableCanvasItem>
 
-                        {/* Avatar Image */}
+                        {/* Avatar Image Element (Clean image frame with zero internal dark overlay) */}
                         <EditableCanvasItem
                           elementKey="hero-avatar"
                           label="Avatar Image"
@@ -630,27 +646,19 @@ export default function CanvasPreview({
                           onUpdateElementStyle={onUpdateElementStyle}
                           onPolishWithAI={onPolishWithAI}
                           onOpenEditModal={handleOpenEditModal}
+                          onTriggerUpload={triggerFileUpload}
                           blockId={block.id}
                           blockIndex={index}
                         >
                           <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              triggerFileUpload(block.id);
-                            }}
-                            className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center cursor-pointer hover:border-[#38BDF8] transition-all relative group/img overflow-hidden shadow-xl"
+                            className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center overflow-hidden shadow-xl transition-all"
                             style={{
                               backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})`,
                               width: (schema?.elementStyles?.['hero-avatar']?.width) ? `${schema.elementStyles['hero-avatar'].width}px` : undefined,
                               height: (schema?.elementStyles?.['hero-avatar']?.height) ? `${schema.elementStyles['hero-avatar'].height}px` : undefined,
                               borderRadius: (schema?.elementStyles?.['hero-avatar']?.borderRadius) ? `${schema.elementStyles['hero-avatar'].borderRadius}px` : undefined
                             }}
-                          >
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-mono text-white gap-1">
-                              <Upload className="w-5 h-5 text-[#38BDF8]" />
-                              <span>Upload Image</span>
-                            </div>
-                          </div>
+                          />
                         </EditableCanvasItem>
 
                       </div>
