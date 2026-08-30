@@ -118,29 +118,9 @@ export default function OverviewTab({ onNavigate, onOpenUploadModal }) {
         </div>
       </div>
 
-      {/* Quick Action Grid (3 Cards) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Quick Action Grid (2 Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Card 1: Resume Parser */}
-        <div
-          onClick={onOpenUploadModal}
-          className="bg-[#FFE600] border-3 border-black p-6 rounded-2xl shadow-brutal hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer space-y-3 relative overflow-hidden group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-black font-black shadow-[2px_2px_0px_0px_#000]">
-            📄
-          </div>
-          <div>
-            <h3 className="font-heading font-black text-lg text-black">AI Resume Parser</h3>
-            <p className="font-hand text-base text-black/90 leading-tight mt-1">
-              Upload PDF or image resume to auto-fill portfolio tabs in seconds.
-            </p>
-          </div>
-          <div className="pt-2 flex items-center text-xs font-mono font-bold text-black group-hover:translate-x-1 transition-transform">
-            <span>Parse File Now</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </div>
-        </div>
-
         {/* Card 2: Portfolio Studio */}
         <div
           onClick={() => onNavigate('studio')}

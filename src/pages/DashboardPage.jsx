@@ -74,6 +74,10 @@ export default function DashboardPage() {
   const handleResumeSuccess = (data) => {
     if (data?.blocks) {
       localStorage.setItem('stackfolio_studio_schema', JSON.stringify(data));
+      localStorage.setItem('stackfolio_studio_draft', JSON.stringify(data));
+      localStorage.setItem('stackfolio_portfolio_schema', JSON.stringify(data));
+      localStorage.setItem('stackfolio_just_generated', 'true');
+      
       const heroBlock = data.blocks.find(b => b.type === 'HeroBlock');
       const contactBlock = data.blocks.find(b => b.type === 'ContactBlock');
       applyParsedResume({
@@ -176,6 +180,22 @@ export default function DashboardPage() {
 
           {/* Right Header Triggers */}
           <div className="flex items-center space-x-3">
+            {/* Model Status Badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-lg text-xs font-mono text-cyan-400 select-none">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              ⚡ Gemini 2.5 Flash
+            </div>
+
+            {/* Relocated Resume Upload Button */}
+            <button
+              type="button"
+              onClick={() => setIsUploadModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-1.5 bg-[#FFE600] text-black border-2 border-black font-mono text-xs font-bold rounded-lg shadow-[2px_2px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
+            >
+              <span>📄</span>
+              <span>Ingest Resume</span>
+            </button>
+
             <button
               type="button"
               onClick={() => window.open('/preview', '_blank')}
