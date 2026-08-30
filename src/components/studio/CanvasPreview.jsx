@@ -370,7 +370,7 @@ export default function CanvasPreview({
   return (
     <div
       onClick={() => onSelectElement && onSelectElement(null)}
-      className="flex-1 bg-[#f0f2f5] overflow-y-auto p-4 sm:p-8 pb-24 flex flex-col items-center justify-start relative select-none transition-colors duration-200"
+      className="flex-1 bg-[#f0f2f5] overflow-y-auto pt-20 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200"
     >
       {/* Hidden Native File Input */}
       <input
