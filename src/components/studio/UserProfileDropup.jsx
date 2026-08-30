@@ -22,11 +22,11 @@ export default function UserProfileDropup({ onOpenSettings }) {
   }, []);
 
   return (
-    <div ref={dropupRef} className="relative w-full p-2 border-t-2 border-black/10 bg-white select-none">
+    <div ref={dropupRef} className="relative w-full pt-3 mt-auto border-t-2 border-black flex justify-center items-center select-none">
       
-      {/* Neo-Brutalist Expandable Menu Popover */}
+      {/* Docked Neo-Brutalist Popover Menu */}
       {isOpen && (
-        <div className="absolute bottom-16 left-2 w-[220px] bg-white border-[2.5px] border-black shadow-[6px_6px_0px_#000000] rounded-2xl p-2.5 z-50 space-y-1 font-sans text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="absolute bottom-16 left-3 w-[214px] bg-white border-[2.5px] border-black shadow-[6px_6px_0px_#000000] rounded-2xl p-2.5 z-50 space-y-1 font-sans text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
           
           {/* Header Info */}
           <div className="p-2 bg-slate-50 border-2 border-black rounded-xl shadow-[2px_2px_0px_#000000] flex items-center gap-2.5">
@@ -34,7 +34,7 @@ export default function UserProfileDropup({ onOpenSettings }) {
               {userInitials}
             </div>
             <div className="min-w-0 flex-1 font-sans">
-              <p className="font-black text-black text-xs truncate">{userName}</p>
+              <p className="font-black text-black text-xs truncate tracking-tight">{userName}</p>
               <p className="text-[10px] font-mono font-bold text-slate-600 truncate">{userEmail}</p>
             </div>
           </div>
@@ -88,22 +88,24 @@ export default function UserProfileDropup({ onOpenSettings }) {
         </div>
       )}
 
-      {/* Docked Profile Trigger Button */}
+      {/* Standardized Full-Width Profile Trigger Button (52px height) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0px_#000000] hover:bg-slate-50 cursor-pointer transition-all text-black"
+        className="w-full h-[52px] px-3 py-2 bg-white border-2 border-black shadow-[3px_3px_0px_#000000] rounded-xl flex items-center justify-between hover:bg-slate-50 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1.5px_1.5px_0px_#000000] transition-all cursor-pointer select-none"
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#FFE600] border-2 border-black text-black font-black text-xs flex items-center justify-center shadow-[1.5px_1.5px_0px_#000000] shrink-0">
+        <div className="flex items-center min-w-0">
+          {/* Avatar Box */}
+          <div className="w-8 h-8 rounded-lg bg-[#FFE600] border-2 border-black font-black text-black text-xs flex items-center justify-center shadow-[1.5px_1.5px_0px_#000000] shrink-0 mr-2.5">
             {userInitials}
           </div>
 
-          <div className="text-left font-sans min-w-0">
-            <p className="text-xs font-black text-black truncate block text-left leading-tight">
+          {/* Text Column */}
+          <div className="flex flex-col text-left overflow-hidden leading-tight">
+            <p className="text-xs font-black text-black truncate tracking-tight">
               {userName}
             </p>
-            <p className="text-[10px] font-bold text-slate-600 block text-left leading-tight">
+            <p className="text-[10px] font-bold text-slate-600 truncate">
               Free Plan
             </p>
           </div>

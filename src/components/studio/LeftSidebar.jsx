@@ -57,7 +57,7 @@ export default function LeftSidebar({
         className="w-[240px] bg-white border-r-[2.5px] border-black flex flex-col justify-between h-full z-30 select-none shrink-0 shadow-[4px_0px_0px_#000000]"
       >
         {/* Top Navigation Items */}
-        <div className="p-3.5 space-y-3 overflow-y-auto font-sans text-xs">
+        <div className="space-y-3 overflow-y-auto font-sans text-xs">
           
           {/* Prominent Section Header */}
           <p className="text-xs font-mono font-black tracking-widest text-black uppercase mb-3 px-1.5 flex items-center gap-1.5 opacity-90">
