@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import StudioNavbar from '../components/studio/StudioNavbar';
 import StudioToolbar from '../components/studio/StudioToolbar';
-import LeftSidebarRail from '../components/studio/LeftSidebarRail';
+import LeftSidebar from '../components/studio/LeftSidebar';
 import CanvasPreview from '../components/studio/CanvasPreview';
 import CopilotChat from '../components/studio/CopilotChat';
-import UserProfileDropup from '../components/studio/UserProfileDropup';
 import StudioSettingsModal from '../components/studio/StudioSettingsModal';
 import { useStudioTheme } from '../context/ThemeContext';
 import { initialPortfolioSchema } from '../types/schema';
@@ -318,16 +317,22 @@ export default function StudioEditor() {
         onResetDefault={handleResetDefault}
       />
 
-      {/* Main Studio Workspace with Left Rail & Top Floating Ribbon */}
+      {/* Main Studio Workspace: 230px Left Sidebar + Center Canvas + 332px Right Copilot */}
       <div className="flex-1 flex overflow-hidden relative">
         
-        {/* Far-Left Vertical Icon Tool Rail */}
-        <LeftSidebarRail
-          onAddClick={() => handleAddElement('text')}
+        {/* Gemini / ChatGPT Style 230px Labeled Left Sidebar with Docked Profile Bottom Card */}
+        <LeftSidebar
+          schema={schema}
+          onAddElement={handleAddElement}
+          onReplaceImage={handleReplaceImage}
+          onMoveBlock={handleMoveBlock}
+          onDuplicateBlock={handleDuplicateBlock}
+          onDeleteBlock={handleDeleteBlock}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          selectedElement={selectedElement}
         />
 
-        {/* Center Workspace with Floating Capsule Ribbon */}
+        {/* Center Canvas Workspace with Floating Action Capsule Ribbon */}
         <div className="flex-1 flex flex-col relative overflow-hidden">
           
           {/* Floating Action Capsule Ribbon */}
@@ -374,9 +379,6 @@ export default function StudioEditor() {
           onApplyPrompt={handleApplyPrompt}
           isGenerating={isGenerating}
         />
-
-        {/* Bottom-Left ChatGPT Style User Profile Dropup */}
-        <UserProfileDropup onOpenSettings={() => setIsSettingsOpen(true)} />
 
       </div>
 
