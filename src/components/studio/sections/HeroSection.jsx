@@ -203,22 +203,24 @@ export default function HeroSection({
           </div>
 
           <div className="lg:col-span-5">
-            <div className="bg-[#0f172a] border border-cyan-500/30 rounded-2xl p-5 shadow-[0_0_25px_rgba(0,245,255,0.1)] space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2">
-                <span className="text-cyan-400 font-bold">SYSTEM TELEMETRY</span>
-                <span className="text-emerald-400 text-[10px] bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">STATUS: ONLINE</span>
-              </div>
-              <div className="space-y-2 text-slate-300 pt-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Inference Latency:</span>
-                  <span className="text-cyan-300 font-bold">12.4ms</span>
+            {renderItem('hero-telemetry', 'System Telemetry Card', (
+              <div className="bg-[#0f172a] border border-cyan-500/30 rounded-2xl p-5 shadow-[0_0_25px_rgba(0,245,255,0.1)] space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between border-b border-cyan-500/20 pb-2">
+                  <span className="text-cyan-400 font-bold">SYSTEM TELEMETRY</span>
+                  <span className="text-emerald-400 text-[10px] bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">STATUS: ONLINE</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Model Accuracy:</span>
-                  <span className="text-emerald-300 font-bold">99.4%</span>
+                <div className="space-y-2 text-slate-300 pt-1">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Inference Latency:</span>
+                    <span className="text-cyan-300 font-bold">12.4ms</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Model Accuracy:</span>
+                    <span className="text-emerald-300 font-bold">99.4%</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
