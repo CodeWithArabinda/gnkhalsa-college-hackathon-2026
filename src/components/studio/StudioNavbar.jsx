@@ -47,53 +47,54 @@ export default function StudioNavbar({
 
         {/* 1-CLICK ARCHETYPE SWITCHER PILL SEGMENT */}
         <div className="hidden xl:flex items-center bg-slate-100 p-0.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000000]">
-          <button
-            type="button"
-            onClick={() => onMorphArchetype && onMorphArchetype('bento-minimal')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              activeArchetype === 'bento-minimal'
-                ? 'bg-slate-900 text-white border-2 border-black shadow-[1px_1px_0px_#000]'
-                : 'text-slate-700 hover:text-black border-2 border-transparent'
-            }`}
-          >
-            🍏 Bento Minimal
-          </button>
+          {[
+            {
+              id: 'bento-minimal',
+              label: 'Bento Minimal',
+              icon: '🍏',
+              activeClass: 'bg-slate-900 text-white border-2 border-black shadow-[1px_1px_0px_#000]',
+            },
+            {
+              id: 'cyber-terminal',
+              label: 'Cyber Terminal',
+              icon: '⚡',
+              activeClass: 'bg-[#00f5ff] text-black border-2 border-black shadow-[1px_1px_0px_#000]',
+            },
+            {
+              id: 'neo-brutalist',
+              label: 'Neo Brutalist',
+              icon: '💛',
+              activeClass: 'bg-[#FFE600] text-black border-2 border-black shadow-[1px_1px_0px_#000]',
+            },
+            {
+              id: 'warm-editorial',
+              label: 'Warm Editorial',
+              icon: '📖',
+              activeClass: 'bg-[#C2410C] text-white border-2 border-black shadow-[1px_1px_0px_#000]',
+            },
+          ].map((theme) => {
+            const currentRaw = (schema?.archetype || 'bento-minimal').toLowerCase().replace(/_/g, '-');
+            const isSelected =
+              currentRaw === theme.id ||
+              (theme.id === 'cyber-terminal' && currentRaw === 'cyber-ai') ||
+              (theme.id === 'warm-editorial' && currentRaw === 'humanist-light');
 
-          <button
-            type="button"
-            onClick={() => onMorphArchetype && onMorphArchetype('cyber-terminal')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              activeArchetype === 'cyber-terminal' || activeArchetype === 'cyber-ai'
-                ? 'bg-[#00f5ff] text-black border-2 border-black shadow-[1px_1px_0px_#000]'
-                : 'text-slate-700 hover:text-black border-2 border-transparent'
-            }`}
-          >
-            ⚡ Cyber Terminal
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onMorphArchetype && onMorphArchetype('neo-brutalist')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              activeArchetype === 'neo-brutalist'
-                ? 'bg-[#FFE600] text-black border-2 border-black shadow-[1px_1px_0px_#000]'
-                : 'text-slate-700 hover:text-black border-2 border-transparent'
-            }`}
-          >
-            💛 Neo Brutalist
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onMorphArchetype && onMorphArchetype('warm-editorial')}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              activeArchetype === 'warm-editorial'
-                ? 'bg-[#C2410C] text-white border-2 border-black shadow-[1px_1px_0px_#000]'
-                : 'text-slate-700 hover:text-black border-2 border-transparent'
-            }`}
-          >
-            📖 Warm Editorial
-          </button>
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => onMorphArchetype && onMorphArchetype(theme.id)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                  isSelected
+                    ? theme.activeClass
+                    : 'text-slate-700 hover:text-black border-2 border-transparent hover:bg-slate-200/50'
+                }`}
+              >
+                <span>{theme.icon}</span>
+                <span>{theme.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
