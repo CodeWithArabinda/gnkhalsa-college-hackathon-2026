@@ -20,10 +20,7 @@ const About = () => {
       </motion.p>
 
       {/* Stat Cards Row */}
-      <motion.div
-        variants={fadeIn("up", "tween", 0.2, 0.75)}
-        className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6"
-      >
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
           <div
             key={`stat-${idx}`}
@@ -37,7 +34,7 @@ const About = () => {
             </p>
           </div>
         ))}
-      </motion.div>
+      </div>
     </>
   );
 };

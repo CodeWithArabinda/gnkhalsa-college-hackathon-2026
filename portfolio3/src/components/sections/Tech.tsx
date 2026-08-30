@@ -12,10 +12,9 @@ const Tech = () => {
 
       {/* Categorized Skill Badges Grid */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-        {skillCategories.map((cat, idx) => (
-          <motion.div
+        {skillCategories.map((cat) => (
+          <div
             key={cat.category}
-            variants={fadeIn("up", "spring", idx * 0.2, 0.75)}
             className="bg-tertiary border border-white/10 rounded-2xl p-6 hover:border-[#915EFF]/40 transition-all shadow-card"
           >
             <h3 className="text-[#915EFF] font-bold text-lg mb-4 tracking-wider">
@@ -37,7 +36,7 @@ const Tech = () => {
                 </span>
               ))}
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </>
