@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, History, X, Plus, Mic, User, RefreshCw, Palette, HelpCircle, Bot } from 'lucide-react';
+import { Send, Sparkles, History, X, Plus, Mic, User, RefreshCw, Palette, HelpCircle } from 'lucide-react';
 import PlanningCard from './PlanningCard';
 
 const QUICK_GRID_ACTIONS = [
@@ -10,23 +10,14 @@ const QUICK_GRID_ACTIONS = [
 ];
 
 export default function CopilotChat({ schema, onApplyPrompt, isGenerating: externalGenerating }) {
-  const [messages, setMessages] = useState([
-    {
-      id: "m1",
-      role: "assistant",
-      text: "Hello KSHITIJ! I'm Aria, your StackFolio AI Copilot. Describe what you'd like to change on your site!"
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [internalGenerating, setInternalGenerating] = useState(false);
   const [activeContextBadge, setActiveContextBadge] = useState("Hero Section");
   const messagesEndRef = useRef(null);
 
   const isGenerating = externalGenerating !== undefined ? externalGenerating : internalGenerating;
-
-  // View state calculation: 'idle' | 'planning' | 'chat'
-  const isChatActive = messages.length > 1;
-  const viewMode = isGenerating ? 'planning' : isChatActive ? 'chat' : 'idle';
+  const isChatActive = messages.length > 0;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,10 +93,10 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 font-sans text-xs">
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 font-sans text-xs">
         
-        {/* 1. IDLE MODE: Full Mascot Welcome Card */}
-        {viewMode === 'idle' && (
+        {/* 1. IDLE MODE: Show ONLY Welcome Mascot Card */}
+        {!isChatActive && !isGenerating && (
           <div className="bg-gradient-to-b from-[#eef4ff] to-[#dfeaff] border border-blue-100 rounded-2xl p-4 text-center shadow-xs relative overflow-hidden animate-in fade-in duration-200">
             <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-md relative">
               <div className="flex items-center space-x-1">
@@ -136,8 +127,8 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           </div>
         )}
 
-        {/* 2. CHAT / PLANNING MODE: Compact Top Chip Header */}
-        {viewMode !== 'idle' && (
+        {/* 2. CHAT / PLANNING MODE: Compact Top Status Chip Header */}
+        {isChatActive && (
           <div className="flex items-center justify-between px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-xl text-xs font-semibold text-[#0053ff] animate-in fade-in duration-150">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-pulse" />
@@ -145,7 +136,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             </div>
             <button
               type="button"
-              onClick={() => setMessages([messages[0]])}
+              onClick={() => setMessages([])}
               className="text-[10px] text-slate-500 hover:text-slate-900 underline"
             >
               Reset Chat
@@ -153,55 +144,56 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           </div>
         )}
 
-        {/* Message Stream */}
-        <div className="space-y-3 pt-1">
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex items-start space-x-2 ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
-            >
+        {/* Active Message Stream */}
+        {isChatActive && (
+          <div className="space-y-3 pt-1">
+            {messages.map((m) => (
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs ${
-                  m.role === 'assistant'
-                    ? 'bg-[#0053ff] text-white shadow-xs'
-                    : 'bg-slate-200 text-slate-800 border border-slate-300'
-                }`}
+                key={m.id}
+                className={`flex items-start space-x-2 ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
               >
-                {m.role === 'assistant' ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
-              </div>
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs ${
+                    m.role === 'assistant'
+                      ? 'bg-[#0053ff] text-white shadow-xs'
+                      : 'bg-slate-200 text-slate-800 border border-slate-300'
+                  }`}
+                >
+                  {m.role === 'assistant' ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                </div>
 
-              <div
-                className={`p-3 rounded-2xl max-w-[88%] leading-relaxed ${
-                  m.role === 'assistant'
-                    ? 'bg-white border border-slate-200 text-slate-800 shadow-xs'
-                    : 'bg-[#0053ff] text-white font-medium shadow-xs'
-                }`}
-              >
-                {m.text}
+                <div
+                  className={`p-3 rounded-2xl max-w-[88%] leading-relaxed ${
+                    m.role === 'assistant'
+                      ? 'bg-white border border-slate-200 text-slate-800 shadow-xs'
+                      : 'bg-[#0053ff] text-white font-medium shadow-xs'
+                  }`}
+                >
+                  {m.text}
+                </div>
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* 3. PLANNING MODE: Collapsible Step Checklist */}
+        {isGenerating && (
+          <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
+        )}
+
+        {isGenerating && (
+          <div className="flex items-center space-x-2 pt-1">
+            <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center">
+              <Sparkles className="w-3 h-3 animate-spin" />
             </div>
-          ))}
-
-          {/* 3. PLANNING MODE: Collapsible Animated Step Checklist */}
-          {isGenerating && (
-            <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
-          )}
-
-          {isGenerating && (
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center">
-                <Sparkles className="w-3 h-3 animate-spin" />
-              </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-2.5 text-slate-600 font-mono text-[11px] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-ping" />
-                Updating layout blocks...
-              </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-2.5 text-slate-600 font-mono text-[11px] flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-ping" />
+              Updating layout blocks...
             </div>
-          )}
+          </div>
+        )}
 
-          <div ref={messagesEndRef} />
-        </div>
-
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Bottom Chat Input Dock */}

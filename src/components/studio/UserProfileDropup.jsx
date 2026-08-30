@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useStudioTheme } from '../../context/ThemeContext';
 
 export default function UserProfileDropup({ onOpenSettings }) {
-  const { isLight } = useStudioTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropupRef = useRef(null);
   const navigate = useNavigate();
@@ -24,15 +22,15 @@ export default function UserProfileDropup({ onOpenSettings }) {
   }, []);
 
   return (
-    <div ref={dropupRef} className="relative w-full p-2 border-t border-slate-200 dark:border-zinc-800 select-none">
+    <div ref={dropupRef} className="relative w-full p-2 border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121216] select-none">
       
       {/* Expandable Menu Popover (Expands Upwards above Sidebar Trigger) */}
       {isOpen && (
-        <div className="absolute bottom-14 left-2 w-[210px] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-2xl rounded-2xl p-2 z-50 space-y-1 font-sans text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="absolute bottom-16 left-2 w-[210px] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-2xl rounded-2xl p-2 z-50 space-y-1 font-sans text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
           
           {/* Header Info */}
           <div className="px-2.5 py-2 border-b border-slate-100 dark:border-zinc-800 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-[#0053ff] text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-xs">
               {userInitials}
             </div>
             <div className="min-w-0 flex-1">
@@ -82,28 +80,28 @@ export default function UserProfileDropup({ onOpenSettings }) {
         </div>
       )}
 
-      {/* Docked Sidebar Profile Card Trigger */}
+      {/* High Contrast Docked Profile Card Trigger */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800/80 cursor-pointer transition-colors text-left"
+        className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer text-left"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-slate-900 dark:bg-zinc-700 text-white font-extrabold flex items-center justify-center text-xs shadow-xs shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#0053ff] text-white font-bold text-xs flex items-center justify-center shadow-sm shrink-0">
             {userInitials}
           </div>
 
           <div className="text-left font-sans min-w-0">
-            <p className="text-xs font-bold text-slate-900 dark:text-white truncate leading-tight">
+            <p className="text-xs font-bold text-slate-900 dark:text-white truncate block text-left leading-tight">
               {userName}
             </p>
-            <p className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 truncate leading-tight">
+            <p className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block text-left leading-tight">
               Free Plan
             </p>
           </div>
         </div>
 
-        <Settings className="w-4 h-4 text-slate-400 hover:text-slate-700 dark:hover:text-white shrink-0 transition-colors" />
+        <Settings className="w-4 h-4 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white shrink-0 transition-colors" />
       </button>
 
     </div>

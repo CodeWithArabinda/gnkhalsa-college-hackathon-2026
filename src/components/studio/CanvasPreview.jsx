@@ -370,7 +370,7 @@ export default function CanvasPreview({
   return (
     <div
       onClick={() => onSelectElement && onSelectElement(null)}
-      className="flex-1 bg-[#f0f2f5] overflow-y-auto pt-20 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200"
+      className="flex-1 bg-[#f0f2f5] overflow-y-auto pt-20 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
     >
       {/* Hidden Native File Input */}
       <input
@@ -380,10 +380,6 @@ export default function CanvasPreview({
         onChange={handleFileChange}
         className="hidden"
       />
-
-      {/* Vertical Red Dashed Blueprint Guidelines (Wix Studio) */}
-      <div className="absolute inset-y-0 left-1/2 -translate-x-[600px] w-px border-r border-dashed border-red-300/60 pointer-events-none z-0 hidden lg:block" />
-      <div className="absolute inset-y-0 left-1/2 translate-x-[600px] w-px border-r border-dashed border-red-300/60 pointer-events-none z-0 hidden lg:block" />
 
       {/* Frame Wrapper (Wix Harmony Light Preview Window) */}
       <div
