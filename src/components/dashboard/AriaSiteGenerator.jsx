@@ -1,50 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, ArrowRight, Sparkles, Play, Loader2 } from 'lucide-react';
-import { generatePortfolioSchema } from '../../lib/geminiBuilder';
+import { Globe, ArrowRight, Sparkles, Play, Loader2, Upload, FileCode } from 'lucide-react';
+import { generatePortfolioSchema, getArchetypeConfig } from '../../lib/geminiBuilder';
 import ModelSelectorDropdown from '../common/ModelSelectorDropdown';
 
-export default function AriaSiteGenerator() {
+export default function AriaSiteGenerator({ onTriggerResumeUpload }) {
   const [promptText, setPromptText] = useState(
     "Create a modern, high-impact portfolio for a Creative Fullstack Developer showcasing WebGL projects, interactive tech stack matrix, and contact conversion hooks."
   );
   const [selectedModel, setSelectedModel] = useState(() => localStorage.getItem('stackfolio_selected_model') || 'auto');
+  
+  // Ingestion State Architecture
+  const [selectedArchetype, setSelectedArchetype] = useState('warm-editorial');
+  const [customTemplateSchema, setCustomTemplateSchema] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [isParsingResume, setIsParsingResume] = useState(false);
+  const [gapResolutionModalOpen, setGapResolutionModalOpen] = useState(false);
+  const [parsedData, setParsedData] = useState(null);
+  const [missingFields, setMissingFields] = useState([]);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusText, setStatusText] = useState('');
+  
+  const templateInputRef = useRef(null);
   const navigate = useNavigate();
 
   const handleGenerate = async () => {
     if (!promptText.trim() || isGenerating) return;
+
+    // If resume is missing, optionally trigger resume modal
+    if (!resumeFile && onTriggerResumeUpload) {
+      // Allow proceeding with AI prompt generation
+    }
+
     setIsGenerating(true);
 
     try {
-      // Step 1: Status feedback
       setStatusText('✦ Analyzing design intent & persona...');
+      await new Promise(r => setTimeout(r, 600));
+
+      setStatusText('✦ Generating custom project case studies & copy...');
       await new Promise(r => setTimeout(r, 800));
 
-      // Step 2: Content generation
-      setStatusText('✦ Generating custom project case studies & copy...');
-      await new Promise(r => setTimeout(r, 1200));
+      setStatusText('✦ Assembling layout schema...');
+      await new Promise(r => setTimeout(r, 600));
 
-      // Step 3: Schema assembly
-      setStatusText('✦ Assembling Neo-Brutalist layout schema...');
-      await new Promise(r => setTimeout(r, 1000));
-
-      // Call Gemini REST API with selected model
       const schema = await generatePortfolioSchema(promptText.trim(), selectedModel);
 
-      // Save schema to localStorage for studio hydration
       localStorage.setItem('stackfolio_portfolio_schema', JSON.stringify(schema));
       localStorage.setItem('stackfolio_studio_draft', JSON.stringify(schema));
       localStorage.setItem('stackfolio_latest_prompt', promptText.trim());
       localStorage.setItem('stackfolio_just_generated', 'true');
 
-      // Navigate to Studio Editor
       navigate('/studio');
     } catch (err) {
       console.error("Site generation error:", err);
       setIsGenerating(false);
     }
+  };
+
+  const handleTemplateUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed) {
+          setCustomTemplateSchema(parsed);
+          localStorage.setItem('stackfolio_portfolio_schema', JSON.stringify(parsed));
+          localStorage.setItem('stackfolio_studio_draft', JSON.stringify(parsed));
+          navigate('/studio');
+        }
+      } catch (err) {
+        alert("Invalid JSON template file. Please upload a valid StackFolio schema file.");
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -106,6 +139,27 @@ export default function AriaSiteGenerator() {
                 onSelect={setSelectedModel}
               />
 
+              {/* Upload Custom Template Button */}
+              <button
+                type="button"
+                disabled={isGenerating}
+                onClick={() => templateInputRef.current?.click()}
+                className="border-2 border-black bg-white hover:bg-slate-100 disabled:opacity-50 text-black font-bold text-xs px-3 py-2 rounded-lg shadow-[2px_2px_0px_#000000] transition-all flex items-center gap-1.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+                title="Upload Custom JSON Template Schema"
+              >
+                <Upload className="w-3.5 h-3.5 text-black" />
+                <span className="hidden sm:inline">Upload Template</span>
+              </button>
+
+              <input
+                ref={templateInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleTemplateUpload}
+              />
+
+              {/* Create from URL Button */}
               <button
                 type="button"
                 disabled={isGenerating}
@@ -122,6 +176,7 @@ export default function AriaSiteGenerator() {
               </button>
             </div>
 
+            {/* Generate Site Trigger */}
             <button
               type="button"
               disabled={isGenerating || !promptText.trim()}
@@ -151,7 +206,7 @@ export default function AriaSiteGenerator() {
 
       </div>
 
-      {/* 1. FULL-WIDTH MARQUEE TICKER BAR (EDGE-TO-EDGE) */}
+      {/* 1. FULL-WIDTH MARQUEE TICKER BAR */}
       <div className="w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] -mx-6 sm:-mx-10 border-y-[2.5px] border-black bg-white py-3 my-8 overflow-hidden select-none shadow-[2px_2px_0px_#000000]">
         <div className="animate-marquee whitespace-nowrap flex gap-4 text-xs font-mono font-black text-black uppercase tracking-widest opacity-95">
           <span>✦ AI RESUME PARSER • DUAL NEO-BRUTALIST TEMPLATES • RECRUITER READINESS ENGINE • PERMANENT PUBLIC SLUG • 100% MANUAL OVERRIDE • 1-CLICK AI GAP COMPLETER ✦</span>
@@ -160,7 +215,7 @@ export default function AriaSiteGenerator() {
         </div>
       </div>
 
-      {/* 2. STANDALONE FULL-WIDTH CENTER-BADGE DIVIDER */}
+      {/* 2. STANDALONE CENTER-BADGE DIVIDER */}
       <div className="w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] -mx-6 sm:-mx-10 relative flex items-center justify-center mt-8 mb-10 select-none">
         <div className="w-full border-t-[2.5px] border-black absolute left-0 top-1/2 -translate-y-1/2 z-0" />
         <div className="relative z-10 bg-[#FFE600] text-black border-2 border-black font-mono font-black text-xs px-4 py-1.5 rounded-md shadow-[2.5px_2.5px_0px_#000000] uppercase tracking-wider flex items-center gap-2">
