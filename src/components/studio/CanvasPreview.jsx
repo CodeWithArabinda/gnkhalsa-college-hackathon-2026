@@ -477,18 +477,19 @@ export default function CanvasPreview({
 
         {/* Canvas Render Body (Dynamic Multi-Archetype Renderer) */}
         {(() => {
-          const archetype = schema.archetype || 'bento-minimal';
-          const isCyber = archetype === 'cyber-terminal' || archetype === 'cyber-ai';
-          const isBento = archetype === 'bento-minimal';
-          const isBrutalist = archetype === 'neo-brutalist';
-          const isWarm = archetype === 'warm-editorial' || archetype === 'editorial-studio';
+          const activeArchetype = schema?.archetype || 'humanist-light';
+          const isBento = activeArchetype === 'bento-minimal';
+          const isCyber = activeArchetype === 'cyber-terminal' || activeArchetype === 'cyber-ai';
+          const isBrutalist = activeArchetype === 'neo-brutalist';
+          const isEditorial = activeArchetype === 'warm-editorial' || activeArchetype === 'editorial-studio';
+          const isHumanist = activeArchetype === 'humanist-light';
 
           return (
             <div className={`flex-1 overflow-y-auto relative transition-colors duration-300 ${
               isCyber ? 'bg-[#090D16] text-white font-mono' :
               isBento ? 'bg-[#F8FAFC] text-slate-900 font-sans' :
               isBrutalist ? 'bg-[#FFFDF5] text-black font-sans' :
-              isWarm ? 'bg-[#FDFBF7] text-[#2C2621] font-serif' :
+              isEditorial ? 'bg-[#FDFBF7] text-[#2C2621] font-serif' :
               'bg-white text-slate-900 font-sans'
             }`}>
               
@@ -507,7 +508,7 @@ export default function CanvasPreview({
                 schema.blocks.map((block, index) => {
                   return (
                     <div key={block.id} className={`relative border-b last:border-b-0 group/section ${
-                      isCyber ? 'border-cyan-500/20' : isEditorial ? 'border-zinc-200' : 'border-slate-100'
+                      isCyber ? 'border-cyan-500/20' : isEditorial ? 'border-[#E7DEC8]' : isBrutalist ? 'border-black' : 'border-slate-100'
                     }`}>
 
                       {/* Block 1: HeroBlock */}
