@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+
 import OriginalHero from './components/Hero';
 import SplineTechStack from './components/SplineTechStack';
 import ExperienceSection from './components/Experience';
 import ProjectsSection from './components/Projects';
 import ContactSection from './components/Contact';
 import defaultData from './demoData';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function Portfolio1Template(props) {
   // Support both unified portfolio schema object and headless props
@@ -31,6 +39,43 @@ export default function Portfolio1Template(props) {
     linkedin: p.linkedin_url || defaultData.contact.linkedin,
     twitter: p.twitter_url || defaultData.contact.twitter
   };
+
+  // Active Lenis Smooth Scroll & GSAP ScrollTrigger Lifecycles
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+
+    // Kinetic entrance animation for sections
+    gsap.fromTo(
+      ".portfolio1-root-container section",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: "power2.out" }
+    );
+
+    return () => {
+      lenis.destroy();
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
 
   return (
     <div className="portfolio1-root-container bg-[#0A0A0A] text-white min-h-screen overflow-x-hidden selection:bg-[#FFE600] selection:text-black">
