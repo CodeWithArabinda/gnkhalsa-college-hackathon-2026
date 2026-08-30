@@ -41,6 +41,10 @@ import {
 
 export const navLinks: TNavLink[] = [
   {
+    id: "home",
+    title: "Home",
+  },
+  {
     id: "about",
     title: "About",
   },

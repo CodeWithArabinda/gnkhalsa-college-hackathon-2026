@@ -6,7 +6,7 @@ import { socialLinks } from "../../constants";
 
 const Hero = () => {
   return (
-    <section className={`relative mx-auto min-h-screen w-full flex flex-col justify-between overflow-hidden pb-8 pt-[90px] sm:pt-[110px]`}>
+    <section id="home" className={`relative mx-auto min-h-screen w-full flex flex-col justify-between overflow-hidden pb-8 pt-[90px] sm:pt-[110px]`}>
       <div
         className={`mx-auto max-w-7xl w-full ${styles.paddingX} flex flex-col lg:flex-row items-center justify-between gap-8 z-10 my-auto`}
       >
