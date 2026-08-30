@@ -200,7 +200,7 @@ export default function DashboardPage() {
         </header>
 
         {/* Dynamic Viewport */}
-        <main className="flex-1 overflow-y-auto p-6 sm:p-10">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-10">
           
           {/* Unified AI Generator + Template Showcase (Overview & Templates tabs) */}
           {(activeNav === 'overview' || activeNav === 'templates') && (
