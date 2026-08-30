@@ -12,15 +12,15 @@ export function ThemeProvider({ children }) {
   });
 
   useEffect(() => {
-    localStorage.setItem('stackfolio_studio_theme', studioTheme);
     const root = document.documentElement;
     if (studioTheme === 'light') {
-      root.classList.add('light-studio');
       root.classList.remove('dark');
+      root.classList.add('light');
     } else {
-      root.classList.remove('light-studio');
+      root.classList.remove('light');
       root.classList.add('dark');
     }
+    localStorage.setItem('stackfolio_studio_theme', studioTheme);
   }, [studioTheme]);
 
   const setStudioTheme = (theme) => {

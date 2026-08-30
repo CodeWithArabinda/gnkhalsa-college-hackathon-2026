@@ -28,25 +28,25 @@ export default function UserProfileDropup({ onOpenSettings }) {
       
       {/* ANIMATED EXPANDABLE FLYOUT MENU (Expands Upwards) */}
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-3 w-64 bg-[#181A24] border-2 border-black rounded-2xl p-2 shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 text-white space-y-1 font-mono text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="absolute bottom-full left-0 mb-3 w-72 bg-[#181A24] border-2 border-black rounded-2xl p-2.5 shadow-[0_15px_35px_rgba(0,0,0,0.9)] z-50 text-white space-y-1 font-sans text-xs animate-in fade-in slide-in-from-bottom-2 duration-150">
           
           {/* Header Info */}
-          <div className="px-3 py-2.5 border-b border-white/10 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF6B1A] to-amber-300 text-black font-extrabold flex items-center justify-center text-xs shrink-0 shadow-md">
+          <div className="px-3 py-2.5 border-b border-white/10 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF6B1A] via-amber-400 to-amber-300 text-black font-extrabold flex items-center justify-center text-sm shrink-0 shadow-md">
               {userInitials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-bold text-white text-xs truncate">{userName}</p>
-              <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+              <p className="font-bold text-white text-sm truncate">{userName}</p>
+              <p className="text-xs text-slate-400 truncate">{userEmail}</p>
             </div>
           </div>
 
           {/* Menu Items */}
-          <div className="pt-1 space-y-0.5">
+          <div className="pt-1.5 space-y-1 font-mono">
             <button
               type="button"
               onClick={() => { setIsOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-white/10 rounded-xl text-left text-amber-400 font-bold transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/10 rounded-xl text-left text-amber-400 font-bold transition-colors text-xs"
             >
               <Sparkles className="w-4 h-4 text-[#FF6B1A]" /> Upgrade Plan
               <span className="ml-auto text-[9px] bg-[#FF6B1A] text-black px-1.5 py-0.5 rounded uppercase font-black">Pro</span>
@@ -55,7 +55,7 @@ export default function UserProfileDropup({ onOpenSettings }) {
             <button
               type="button"
               onClick={() => { setIsOpen(false); navigate('/dashboard'); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-white/10 rounded-xl text-left text-slate-200 hover:text-white transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/10 rounded-xl text-left text-slate-200 hover:text-white transition-colors text-xs"
             >
               <User className="w-4 h-4 text-[#38BDF8]" /> Account Profile
             </button>
@@ -63,7 +63,7 @@ export default function UserProfileDropup({ onOpenSettings }) {
             <button
               type="button"
               onClick={() => { setIsOpen(false); onOpenSettings && onOpenSettings(); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-white/10 rounded-xl text-left text-slate-200 hover:text-white transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/10 rounded-xl text-left text-slate-200 hover:text-white transition-colors text-xs"
             >
               <Settings className="w-4 h-4 text-[#FFE600]" /> Settings
             </button>
@@ -73,7 +73,7 @@ export default function UserProfileDropup({ onOpenSettings }) {
             <button
               type="button"
               onClick={() => { setIsOpen(false); navigate('/dashboard'); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-red-500/10 text-red-400 rounded-xl text-left transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-red-500/10 text-red-400 rounded-xl text-left transition-colors text-xs"
             >
               <LogOut className="w-4 h-4" /> Exit Studio / Dashboard
             </button>
@@ -82,22 +82,24 @@ export default function UserProfileDropup({ onOpenSettings }) {
         </div>
       )}
 
-      {/* COLLAPSED TRIGGER BUTTON (ChatGPT Style Pill) */}
+      {/* ENLARGED COLLAPSED TRIGGER BUTTON */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-[#181A24]/95 hover:bg-[#202330] border-2 border-black rounded-2xl px-3 py-2 shadow-2xl flex items-center gap-3 text-white transition-all hover:scale-105 active:scale-95"
+        className="min-w-[220px] px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/90 hover:bg-zinc-800/90 shadow-xl backdrop-blur-md flex items-center justify-between gap-3 text-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
       >
-        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF6B1A] to-amber-300 text-black font-extrabold flex items-center justify-center text-xs shadow">
-          {userInitials}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#FF6B1A] via-amber-400 to-amber-300 text-black font-extrabold flex items-center justify-center text-xs shadow-md shrink-0">
+            {userInitials}
+          </div>
+
+          <div className="text-left font-sans min-w-0">
+            <p className="text-sm font-semibold text-white tracking-wide truncate">{userName}</p>
+            <p className="text-xs font-medium text-amber-400/90 flex items-center gap-1">Free Plan</p>
+          </div>
         </div>
 
-        <div className="text-left font-mono">
-          <p className="text-xs font-bold leading-none text-white">{userName}</p>
-          <p className="text-[9px] text-amber-400 leading-tight">Free Plan</p>
-        </div>
-
-        <ChevronUp className={`w-4 h-4 text-slate-400 ml-1 transition-transform duration-200 ${isOpen ? 'rotate-180 text-white' : ''}`} />
+        <ChevronUp className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-white' : ''}`} />
       </button>
 
     </div>
