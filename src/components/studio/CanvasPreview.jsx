@@ -186,8 +186,184 @@ export default function CanvasPreview({
     }
   };
 
+  // Dedicated Context-Aware Schema Edit Payload Generator
   const handleOpenEditModal = (key, label, blockId) => {
-    setEditModalData({ key, label, blockId });
+    const block = schema.blocks.find(b => b.id === blockId);
+    if (!block) return;
+
+    if (key === 'cta-primary') {
+      setEditModalData({
+        type: 'button-primary',
+        label: 'Primary CTA Button',
+        blockId,
+        btnText: block.content?.ctaText || 'Explore Projects'
+      });
+    } else if (key === 'cta-secondary') {
+      setEditModalData({
+        type: 'button-secondary',
+        label: 'Secondary CTA Button',
+        blockId,
+        btnText: block.content?.secondaryCta || 'Contact Me'
+      });
+    } else if (key === 'contact-email-btn') {
+      setEditModalData({
+        type: 'button-email',
+        label: 'Email CTA Button',
+        blockId,
+        email: block.content?.email || 'alex@developer.com'
+      });
+    } else if (key.startsWith('project-card-')) {
+      const projId = key.replace('project-card-', '');
+      const item = block.content?.items?.find(it => it.id === projId);
+      if (item) {
+        setEditModalData({
+          type: 'project-card',
+          label: `Project Card: ${item.title}`,
+          blockId,
+          projId,
+          title: item.title || '',
+          description: item.description || '',
+          link: item.link || '',
+          tags: item.tags ? item.tags.join(', ') : ''
+        });
+      }
+    } else if (key.startsWith('skill-cat-')) {
+      const catName = key.replace('skill-cat-', '');
+      const category = block.content?.categories?.find(c => c.name === catName);
+      if (category) {
+        setEditModalData({
+          type: 'skill-category',
+          label: `Skill Category: ${category.name}`,
+          blockId,
+          oldCatName: category.name,
+          name: category.name,
+          skills: category.skills ? category.skills.join(', ') : ''
+        });
+      }
+    } else if (key === 'hero-avatar') {
+      setEditModalData({
+        type: 'avatar',
+        label: 'Avatar / Hero Image',
+        blockId,
+        url: block.content?.avatarUrl || '/photo/Sarang.png'
+      });
+    } else if (key === 'hero-tagline') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Tagline',
+        blockId,
+        fieldPath: 'content.headline',
+        text: block.content?.headline || ''
+      });
+    } else if (key === 'hero-name') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Headline Name',
+        blockId,
+        fieldPath: 'content.name',
+        text: block.content?.name || ''
+      });
+    } else if (key === 'hero-bio') {
+      setEditModalData({
+        type: 'text-multi',
+        label: 'Bio Paragraph',
+        blockId,
+        fieldPath: 'content.bio',
+        text: block.content?.bio || ''
+      });
+    } else if (key === 'projects-header') {
+      setEditModalData({
+        type: 'text-pair',
+        label: 'Projects Section Title',
+        blockId,
+        title: block.content?.title || '',
+        subtitle: block.content?.subtitle || ''
+      });
+    } else if (key === 'skills-header') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Skills Section Title',
+        blockId,
+        fieldPath: 'content.title',
+        text: block.content?.title || ''
+      });
+    } else if (key === 'contact-header') {
+      setEditModalData({
+        type: 'text-pair',
+        label: 'Contact Section Title',
+        blockId,
+        title: block.content?.title || '',
+        subtitle: block.content?.subtitle || ''
+      });
+    } else {
+      setEditModalData({
+        type: 'generic',
+        label,
+        blockId,
+        title: block.content?.title || '',
+        subtitle: block.content?.subtitle || ''
+      });
+    }
+  };
+
+  // Precise State Dispatcher
+  const handleSaveModal = () => {
+    if (!editModalData) return;
+
+    const { type, blockId } = editModalData;
+
+    if (type === 'button-primary') {
+      handleInlineChange(blockId, 'content.ctaText', editModalData.btnText);
+    } else if (type === 'button-secondary') {
+      handleInlineChange(blockId, 'content.secondaryCta', editModalData.btnText);
+    } else if (type === 'button-email') {
+      handleInlineChange(blockId, 'content.email', editModalData.email);
+    } else if (type === 'project-card') {
+      const block = schema.blocks.find(b => b.id === blockId);
+      if (block && block.content?.items) {
+        const updatedItems = block.content.items.map(it => {
+          if (it.id === editModalData.projId) {
+            return {
+              ...it,
+              title: editModalData.title,
+              description: editModalData.description,
+              link: editModalData.link,
+              tags: typeof editModalData.tags === 'string'
+                ? editModalData.tags.split(',').map(t => t.trim()).filter(Boolean)
+                : editModalData.tags
+            };
+          }
+          return it;
+        });
+        handleInlineChange(blockId, 'content.items', updatedItems);
+      }
+    } else if (type === 'skill-category') {
+      const block = schema.blocks.find(b => b.id === blockId);
+      if (block && block.content?.categories) {
+        const updatedCategories = block.content.categories.map(c => {
+          if (c.name === editModalData.oldCatName) {
+            return {
+              ...c,
+              name: editModalData.name,
+              skills: typeof editModalData.skills === 'string'
+                ? editModalData.skills.split(',').map(s => s.trim()).filter(Boolean)
+                : editModalData.skills
+            };
+          }
+          return c;
+        });
+        handleInlineChange(blockId, 'content.categories', updatedCategories);
+      }
+    } else if (type === 'avatar') {
+      handleInlineChange(blockId, 'content.avatarUrl', editModalData.url);
+    } else if (type === 'text-single' || type === 'text-multi') {
+      handleInlineChange(blockId, editModalData.fieldPath, editModalData.text);
+    } else if (type === 'text-pair') {
+      handleInlineChange(blockId, 'content.title', editModalData.title);
+      handleInlineChange(blockId, 'content.subtitle', editModalData.subtitle);
+    }
+
+    setEditModalData(null);
   };
 
   return (
@@ -666,14 +842,14 @@ export default function CanvasPreview({
         </div>
       </div>
 
-      {/* MODAL DRAWER FALLBACK FOR DEEP EDITING */}
+      {/* DEDICATED CONTEXT-AWARE EDIT MODAL */}
       {editModalData && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#181A24] border-2 border-black rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 font-sans text-white relative">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading font-extrabold text-base flex items-center gap-2">
                 <Pencil className="w-4 h-4 text-[#38BDF8]" />
-                <span>Edit {editModalData.label}</span>
+                <span>{editModalData.label}</span>
               </h3>
               <button
                 type="button"
@@ -684,47 +860,176 @@ export default function CanvasPreview({
               </button>
             </div>
 
+            {/* Context-Aware Dynamic Form Fields */}
             <div className="space-y-3 font-mono text-xs">
-              <div>
-                <label className="block text-slate-400 mb-1">Title / Headline:</label>
-                <input
-                  type="text"
-                  defaultValue={
-                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.title ||
-                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.name ||
-                    ""
-                  }
-                  onChange={(e) => {
-                    handleInlineChange(editModalData.blockId, 'content.title', e.target.value);
-                    handleInlineChange(editModalData.blockId, 'content.name', e.target.value);
-                  }}
-                  className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
-                />
-              </div>
 
-              <div>
-                <label className="block text-slate-400 mb-1">Subtitle / Bio Paragraph:</label>
-                <textarea
-                  rows={3}
-                  defaultValue={
-                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.subtitle ||
-                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.bio ||
-                    ""
-                  }
-                  onChange={(e) => {
-                    handleInlineChange(editModalData.blockId, 'content.subtitle', e.target.value);
-                    handleInlineChange(editModalData.blockId, 'content.bio', e.target.value);
-                  }}
-                  className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
-                />
-              </div>
+              {/* CTA Button Edit Form */}
+              {(editModalData.type === 'button-primary' || editModalData.type === 'button-secondary') && (
+                <div>
+                  <label className="block text-slate-400 mb-1">Button Label Text:</label>
+                  <input
+                    type="text"
+                    value={editModalData.btnText}
+                    onChange={(e) => setEditModalData({ ...editModalData, btnText: e.target.value })}
+                    className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                  />
+                </div>
+              )}
+
+              {/* Email Button Edit Form */}
+              {editModalData.type === 'button-email' && (
+                <div>
+                  <label className="block text-slate-400 mb-1">Email Address:</label>
+                  <input
+                    type="email"
+                    value={editModalData.email}
+                    onChange={(e) => setEditModalData({ ...editModalData, email: e.target.value })}
+                    className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                  />
+                </div>
+              )}
+
+              {/* Project Card Edit Form */}
+              {editModalData.type === 'project-card' && (
+                <>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Project Title:</label>
+                    <input
+                      type="text"
+                      value={editModalData.title}
+                      onChange={(e) => setEditModalData({ ...editModalData, title: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Description:</label>
+                    <textarea
+                      rows={3}
+                      value={editModalData.description}
+                      onChange={(e) => setEditModalData({ ...editModalData, description: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Live Demo / Repository Link:</label>
+                    <input
+                      type="url"
+                      value={editModalData.link}
+                      onChange={(e) => setEditModalData({ ...editModalData, link: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Tags (comma-separated):</label>
+                    <input
+                      type="text"
+                      value={editModalData.tags}
+                      onChange={(e) => setEditModalData({ ...editModalData, tags: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                      placeholder="React, Three.js, GSAP"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Skill Category Edit Form */}
+              {editModalData.type === 'skill-category' && (
+                <>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Category Name:</label>
+                    <input
+                      type="text"
+                      value={editModalData.name}
+                      onChange={(e) => setEditModalData({ ...editModalData, name: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Skills (comma-separated):</label>
+                    <input
+                      type="text"
+                      value={editModalData.skills}
+                      onChange={(e) => setEditModalData({ ...editModalData, skills: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                      placeholder="React, Vite, Tailwind CSS, GSAP"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Avatar Image Form */}
+              {editModalData.type === 'avatar' && (
+                <div>
+                  <label className="block text-slate-400 mb-1">Image URL:</label>
+                  <input
+                    type="url"
+                    value={editModalData.url}
+                    onChange={(e) => setEditModalData({ ...editModalData, url: e.target.value })}
+                    className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                  />
+                </div>
+              )}
+
+              {/* Text Single / Multi Form */}
+              {(editModalData.type === 'text-single' || editModalData.type === 'text-multi') && (
+                <div>
+                  <label className="block text-slate-400 mb-1">Content:</label>
+                  {editModalData.type === 'text-multi' ? (
+                    <textarea
+                      rows={4}
+                      value={editModalData.text}
+                      onChange={(e) => setEditModalData({ ...editModalData, text: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={editModalData.text}
+                      onChange={(e) => setEditModalData({ ...editModalData, text: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* Text Pair Form */}
+              {editModalData.type === 'text-pair' && (
+                <>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Title:</label>
+                    <input
+                      type="text"
+                      value={editModalData.title}
+                      onChange={(e) => setEditModalData({ ...editModalData, title: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Subtitle:</label>
+                    <input
+                      type="text"
+                      value={editModalData.subtitle}
+                      onChange={(e) => setEditModalData({ ...editModalData, subtitle: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                </>
+              )}
+
             </div>
 
-            <div className="pt-2 flex justify-end">
+            <div className="pt-2 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditModalData(null)}
-                className="px-5 py-2 bg-[#00FFA3] text-black font-extrabold text-xs uppercase tracking-wider rounded-xl border border-black shadow-[2px_2px_0px_0px_#000]"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveModal}
+                className="px-5 py-2 bg-[#00FFA3] text-black font-extrabold text-xs uppercase tracking-wider rounded-xl border border-black shadow-[2px_2px_0px_0px_#000] hover:bg-[#20ffb0] transition-colors"
               >
                 Done
               </button>
