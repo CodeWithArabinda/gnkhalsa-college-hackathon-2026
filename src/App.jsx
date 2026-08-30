@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { PortfolioProvider } from './context/PortfolioContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
@@ -13,16 +14,18 @@ function App() {
   return (
     <AuthProvider>
       <PortfolioProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/create" element={<CreatePortfolio />} />
-            <Route path="/studio" element={<StudioEditor />} />
-            <Route path="/p/:public_slug" element={<PublicPortfolioPage />} />
-          </Routes>
-        </Router>
+        <ThemeProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/create" element={<CreatePortfolio />} />
+              <Route path="/studio" element={<StudioEditor />} />
+              <Route path="/p/:public_slug" element={<PublicPortfolioPage />} />
+            </Routes>
+          </Router>
+        </ThemeProvider>
       </PortfolioProvider>
     </AuthProvider>
   );

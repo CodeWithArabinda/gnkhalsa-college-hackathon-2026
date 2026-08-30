@@ -3,14 +3,19 @@ import StudioNavbar from '../components/studio/StudioNavbar';
 import StudioToolbar from '../components/studio/StudioToolbar';
 import CanvasPreview from '../components/studio/CanvasPreview';
 import CopilotChat from '../components/studio/CopilotChat';
+import UserProfileDropup from '../components/studio/UserProfileDropup';
+import StudioSettingsModal from '../components/studio/StudioSettingsModal';
+import { useStudioTheme } from '../context/ThemeContext';
 import { initialPortfolioSchema } from '../types/schema';
 import { processUserPrompt } from '../lib/geminiBuilder';
 
 export default function StudioEditor() {
+  const { studioTheme } = useStudioTheme();
   const [deviceMode, setDeviceMode] = useState('desktop');
   const [selectedElement, setSelectedElement] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [saveStatus, setSaveStatus] = useState('saved');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // History Stack (past, present, future) with LocalStorage restoration
   const [history, setHistory] = useState(() => {
@@ -98,205 +103,213 @@ export default function StudioEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [history]);
 
-  // Debounced Autosave to localStorage
+  // Debounced Autosave (500ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
         localStorage.setItem('stackfolio_studio_draft', JSON.stringify(schema));
         setSaveStatus('saved');
-      } catch (e) {}
+      } catch (e) {
+        console.error("Autosave error:", e);
+      }
     }, 500);
 
     return () => clearTimeout(timer);
   }, [schema]);
 
-  // Handle inline contentEditable changes from CanvasPreview
+  // Element level property updates
+  const handleUpdateElementStyle = (elementKey, newStyle) => {
+    updateSchemaState((prev) => {
+      const prevElementStyles = prev.elementStyles || {};
+      const current = prevElementStyles[elementKey] || {};
+      return {
+        ...prev,
+        elementStyles: {
+          ...prevElementStyles,
+          [elementKey]: typeof newStyle === 'function' ? newStyle(current) : { ...current, ...newStyle }
+        }
+      };
+    });
+  };
+
+  // Granular Block content mutation
   const handleUpdateBlock = (blockId, fieldPath, value) => {
     updateSchemaState((prev) => {
       const updatedBlocks = prev.blocks.map((block) => {
         if (block.id !== blockId) return block;
 
-        const updatedContent = { ...block.content };
-        const keys = fieldPath.replace('content.', '').split('.');
-        
-        if (keys.length === 1) {
-          updatedContent[keys[0]] = value;
-        } else if (keys.length === 2) {
-          updatedContent[keys[0]] = {
-            ...updatedContent[keys[0]],
-            [keys[1]]: value
+        const pathParts = fieldPath.split('.');
+        if (pathParts.length === 1) {
+          return { ...block, [fieldPath]: value };
+        } else if (pathParts.length === 2 && pathParts[0] === 'content') {
+          return {
+            ...block,
+            content: {
+              ...block.content,
+              [pathParts[1]]: value
+            }
           };
         }
-
-        return { ...block, content: updatedContent };
+        return block;
       });
 
       return { ...prev, blocks: updatedBlocks };
     });
   };
 
-  // Handle element-level isolated style & offset mutations
-  const handleUpdateElementStyle = (elementKey, styleUpdates) => {
+  // Add new component to schema
+  const handleAddElement = (type) => {
     updateSchemaState((prev) => {
-      const prevStyles = prev.elementStyles || {};
-      const targetStyle = prevStyles[elementKey] || {};
-      const updatedStyle = typeof styleUpdates === 'function' ? styleUpdates(targetStyle) : { ...targetStyle, ...styleUpdates };
-      return {
-        ...prev,
-        elementStyles: {
-          ...prevStyles,
-          [elementKey]: updatedStyle
-        }
-      };
-    });
-  };
+      const newBlockId = `block-${Date.now()}`;
 
-  // Reorder sections
-  const handleMoveBlock = (index, direction) => {
-    updateSchemaState((prev) => {
-      const blocks = [...prev.blocks];
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= blocks.length) return prev;
-      const temp = blocks[index];
-      blocks[index] = blocks[targetIndex];
-      blocks[targetIndex] = temp;
-      return { ...prev, blocks };
-    });
-  };
-
-  // Duplicate section
-  const handleDuplicateBlock = (index) => {
-    updateSchemaState((prev) => {
-      const blocks = [...prev.blocks];
-      const target = blocks[index];
-      const cloned = JSON.parse(JSON.stringify(target));
-      cloned.id = `${cloned.type.toLowerCase()}-${Date.now()}`;
-      blocks.splice(index + 1, 0, cloned);
-      return { ...prev, blocks };
-    });
-  };
-
-  // Delete section
-  const handleDeleteBlock = (index) => {
-    updateSchemaState((prev) => {
-      const blocks = [...prev.blocks];
-      blocks.splice(index, 1);
-      return { ...prev, blocks };
-    });
-  };
-
-  // Add new element block from + Add Menu
-  const handleAddElement = (elementType) => {
-    updateSchemaState((prev) => {
-      const blocks = [...prev.blocks];
-      if (elementType === 'project') {
-        const newProjectBlock = {
-          id: `projects-${Date.now()}`,
-          type: 'ProjectGridBlock',
-          content: {
-            title: 'New Showcase Section',
-            subtitle: 'Created via Studio Add Tool',
-            items: [
-              {
-                id: `p-${Date.now()}`,
-                title: 'New Project Showcase',
-                description: 'Full stack web application built with modern architecture.',
-                tags: ['React', 'Node.js', 'Tailwind'],
-                link: 'https://github.com'
-              }
-            ]
-          }
-        };
-        blocks.push(newProjectBlock);
-      } else if (elementType === 'skill') {
-        const newSkillBlock = {
-          id: `skills-${Date.now()}`,
-          type: 'SkillsBlock',
-          content: {
-            title: 'Core Competencies',
-            categories: [
-              { name: 'Specialized Skills', skills: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js'] }
-            ]
-          }
-        };
-        blocks.push(newSkillBlock);
-      } else if (elementType === 'text') {
-        const newHeroBlock = {
-          id: `hero-${Date.now()}`,
+      if (type === 'text') {
+        const newBlock = {
+          id: newBlockId,
           type: 'HeroBlock',
           content: {
-            headline: 'Special Announcement',
-            name: 'New Custom Title',
-            bio: 'Click and edit this text block directly on the canvas.',
-            ctaText: 'View Work',
-            secondaryCta: 'Contact'
+            name: "New Custom Heading",
+            headline: "✨ Custom Highlight",
+            bio: "Add your customized paragraph content here directly on the interactive studio canvas.",
+            ctaText: "Get Started",
+            secondaryCta: "Learn More"
           }
         };
-        blocks.push(newHeroBlock);
-      }
-      return { ...prev, blocks };
-    });
-  };
-
-  // Replace Image handler
-  const handleReplaceImage = (element) => {
-    const newUrl = window.prompt("Enter new Image URL (or paste image link):", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80");
-    if (!newUrl) return;
-
-    updateSchemaState((prev) => {
-      const blocks = prev.blocks.map((b) => {
-        if (b.type === 'HeroBlock') {
-          return {
-            ...b,
-            content: { ...b.content, avatarUrl: newUrl }
+        return { ...prev, blocks: [...prev.blocks, newBlock] };
+      } else if (type === 'project') {
+        const projectBlock = prev.blocks.find(b => b.type === 'ProjectGridBlock');
+        if (projectBlock) {
+          const newItem = {
+            id: `p-${Date.now()}`,
+            title: "New AI Project",
+            description: "Fullstack web application powered by Gemini and Vite.",
+            tags: ["React", "AI", "Tailwind"],
+            link: "https://github.com"
           };
+          const updatedBlocks = prev.blocks.map(b => b.id === projectBlock.id ? {
+            ...b,
+            content: { ...b.content, items: [...(b.content.items || []), newItem] }
+          } : b);
+          return { ...prev, blocks: updatedBlocks };
         }
-        return b;
-      });
-      return { ...prev, blocks };
+      } else if (type === 'skill') {
+        const skillBlock = prev.blocks.find(b => b.type === 'SkillsBlock');
+        if (skillBlock) {
+          const updatedCategories = (skillBlock.content?.categories || []).map((cat, i) => i === 0 ? {
+            ...cat,
+            skills: [...(cat.skills || []), "GraphQL"]
+          } : cat);
+          const updatedBlocks = prev.blocks.map(b => b.id === skillBlock.id ? {
+            ...b,
+            content: { ...b.content, categories: updatedCategories }
+          } : b);
+          return { ...prev, blocks: updatedBlocks };
+        }
+      }
+      return prev;
     });
   };
 
-  // AI Polish section
-  const handlePolishWithAI = async (block) => {
-    return handleApplyPrompt(`Polish and rewrite the ${block?.type || 'Hero'} section content to sound impressive and senior.`);
+  // Block Reordering & Deletion
+  const handleMoveBlock = (index, direction) => {
+    updateSchemaState((prev) => {
+      const newBlocks = [...prev.blocks];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= newBlocks.length) return prev;
+      const [moved] = newBlocks.splice(index, 1);
+      newBlocks.splice(targetIndex, 0, moved);
+      return { ...prev, blocks: newBlocks };
+    });
   };
 
-  // AI Prompt Processor — calls Gemini Flash schema engine
-  const handleApplyPrompt = async (promptText) => {
+  const handleDuplicateBlock = (index) => {
+    updateSchemaState((prev) => {
+      const newBlocks = [...prev.blocks];
+      const dup = JSON.parse(JSON.stringify(newBlocks[index]));
+      dup.id = `${dup.id}-copy-${Date.now()}`;
+      newBlocks.splice(index + 1, 0, dup);
+      return { ...prev, blocks: newBlocks };
+    });
+  };
+
+  const handleDeleteBlock = (index) => {
+    updateSchemaState((prev) => {
+      const newBlocks = [...prev.blocks];
+      newBlocks.splice(index, 1);
+      return { ...prev, blocks: newBlocks };
+    });
+  };
+
+  // Replace Avatar / Hero image
+  const handleReplaceImage = (newUrlOrData) => {
+    updateSchemaState((prev) => {
+      const heroBlock = prev.blocks.find(b => b.type === 'HeroBlock');
+      if (!heroBlock) return prev;
+
+      const updatedBlocks = prev.blocks.map(b => b.id === heroBlock.id ? {
+        ...b,
+        content: { ...b.content, avatarUrl: newUrlOrData }
+      } : b);
+
+      return { ...prev, blocks: updatedBlocks };
+    });
+  };
+
+  // Aria AI Polish
+  const handlePolishWithAI = async (elementContext) => {
     setIsGenerating(true);
     try {
-      const result = await processUserPrompt(promptText, schema);
-      if (result && result.updatedSchema) {
-        updateSchemaState(result.updatedSchema);
-      } else if (result && result.schema) {
-        updateSchemaState(result.schema);
+      const prompt = `Polish and improve the messaging for component type ${elementContext?.type || 'headline'} to sound senior, high-impact, and recruiter-ready.`;
+      const aiResponse = await processUserPrompt(prompt, schema);
+      if (aiResponse?.schema) {
+        updateSchemaState(aiResponse.schema);
       }
-      return result.aiMessage || result.message || "Portfolio successfully updated!";
     } catch (err) {
-      throw err;
+      console.error("Aria polish error:", err);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handlePublish = () => {
-    updateSchemaState((prev) => ({
-      ...prev,
-      metadata: { ...prev.metadata, published: true }
-    }));
+  // Gemini Prompts
+  const handleApplyPrompt = async (userPrompt) => {
+    setIsGenerating(true);
+    try {
+      const aiResult = await processUserPrompt(userPrompt, schema);
+      if (aiResult?.schema) {
+        updateSchemaState(aiResult.schema);
+      }
+    } catch (err) {
+      console.error("Gemini build error:", err);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const currentSelectedStyle = selectedElement?.key ? (schema.elementStyles || {})[selectedElement.key] : {};
+  // Publish / Export Schema
+  const handlePublish = () => {
+    const jsonStr = JSON.stringify(schema, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `portfolio-schema-${schema?.metadata?.slug || 'export'}.json`;
+    a.click();
+    URL.revokeObjectURL(a);
+  };
+
+  const currentSelectedStyle = selectedElement?.key
+    ? (schema.elementStyles && schema.elementStyles[selectedElement.key]) || {}
+    : {};
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0F1117] overflow-hidden">
+    <div className={`h-screen w-screen flex flex-col font-sans overflow-hidden select-none transition-colors duration-200 ${
+      studioTheme === 'light' ? 'bg-[#f8fafc] text-slate-900' : 'bg-[#0B0B0E] text-white'
+    }`}>
       
-      {/* Studio Header */}
+      {/* Top Main Navigation */}
       <StudioNavbar
         deviceMode={deviceMode}
         setDeviceMode={setDeviceMode}
-        schema={schema}
         onPublish={handlePublish}
         onUndo={handleUndo}
         canUndo={history.past.length > 0}
@@ -328,9 +341,9 @@ export default function StudioEditor() {
       />
 
       {/* Main Split-Screen Workspace */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         
-        {/* 70% Live Canvas Preview */}
+        {/* Live Canvas Preview */}
         <CanvasPreview
           schema={schema}
           deviceMode={deviceMode}
@@ -346,14 +359,23 @@ export default function StudioEditor() {
           onUpdateElementStyle={handleUpdateElementStyle}
         />
 
-        {/* 30% AI Copilot Panel */}
+        {/* AI Copilot Panel */}
         <CopilotChat
           schema={schema}
           onApplyPrompt={handleApplyPrompt}
           isGenerating={isGenerating}
         />
 
+        {/* Bottom-Left ChatGPT Style User Profile Dropup */}
+        <UserProfileDropup onOpenSettings={() => setIsSettingsOpen(true)} />
+
       </div>
+
+      {/* Studio Settings Modal */}
+      <StudioSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
 
     </div>
   );
