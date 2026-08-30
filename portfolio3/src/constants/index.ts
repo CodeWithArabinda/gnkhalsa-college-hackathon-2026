@@ -73,12 +73,12 @@ export const socialLinks: TSocial[] = [
   },
   {
     name: "Email",
-    url: "mailto:alex.rivera.dev@gmail.com",
+    url: "mailto:nilesh.gupta.dev@gmail.com",
     icon: "email",
   },
   {
     name: "Website",
-    url: "https://alexrivera.dev",
+    url: "https://nileshgupta.dev",
     icon: "website",
   },
 ];
@@ -305,7 +305,7 @@ export const projects: TProject[] = [
 export const testimonials: TTestimonial[] = [
   {
     testimonial:
-      "Alex is an exceptionally skilled full-stack developer. His attention to design aesthetics and 3D visual details elevated our product launch to another level.",
+      "Nilesh is an exceptionally skilled full-stack developer. His attention to design aesthetics and 3D visual details elevated our product launch to another level.",
     name: "Sarah Jenkins",
     designation: "Product Director",
     company: "Nexus Innovations",
@@ -313,7 +313,7 @@ export const testimonials: TTestimonial[] = [
   },
   {
     testimonial:
-      "Working with Alex was an absolute pleasure. He delivered our AI integration days ahead of deadline with zero bugs and clean architecture.",
+      "Working with Nilesh was an absolute pleasure. He delivered our AI integration days ahead of deadline with zero bugs and clean architecture.",
     name: "Marcus Vance",
     designation: "CTO",
     company: "QuantTech Solutions",
