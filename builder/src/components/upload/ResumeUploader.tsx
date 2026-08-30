@@ -12,6 +12,9 @@ import {
   ClipboardPaste,
   FileCode,
   Zap,
+  Key,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import ExtractionProgressModal from "./ExtractionProgressModal";
 
@@ -31,7 +34,31 @@ export default function ResumeUploader() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pastedText, setPastedText] = useState("");
   const [showPasteMode, setShowPasteMode] = useState(false);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [showApiKeyText, setShowApiKeyText] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem("foliocraft_gemini_key") || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const savedApiKey = localStorage.getItem("foliocraft_gemini_key") || "";
+
+  const handleSaveApiKey = () => {
+    const trimmed = apiKeyInput.trim();
+    if (trimmed) {
+      localStorage.setItem("foliocraft_gemini_key", trimmed);
+      // Inject into import.meta.env equivalent for runtime use
+      (window as any).__GEMINI_API_KEY__ = trimmed;
+    } else {
+      localStorage.removeItem("foliocraft_gemini_key");
+      (window as any).__GEMINI_API_KEY__ = "";
+    }
+    setShowApiKeyInput(false);
+  };
+
+  // On mount, restore saved key to runtime
+  React.useEffect(() => {
+    const saved = localStorage.getItem("foliocraft_gemini_key");
+    if (saved) (window as any).__GEMINI_API_KEY__ = saved;
+  }, []);
 
   const processFile = async (file: File) => {
     setErrorMessage(null);
@@ -63,9 +90,10 @@ export default function ResumeUploader() {
         throw new Error("Unable to extract sufficient readable text from this file. Please ensure it is not an image-only scan or try copy-pasting the text.");
       }
 
-      setExtractionProgressText("Parsing skills, experience and projects...");
-      const parsed = parseResumeText(text, file.name);
+      setExtractionProgressText("AI is analyzing your resume...");
+      const parsed = await parseResumeText(text, file.name);
 
+      setExtractionProgressText(parsed.method === "ai" ? "AI extraction complete ✓" : "Extracted using pattern matching ✓");
       setPortfolio(parsed.portfolio);
 
       setTimeout(() => {
@@ -98,16 +126,17 @@ export default function ResumeUploader() {
     }
   };
 
-  const handlePasteSubmit = () => {
+  const handlePasteSubmit = async () => {
     if (!pastedText.trim() || pastedText.trim().length < 30) {
       setErrorMessage("Please paste at least 30 characters of resume content.");
       return;
     }
 
     setIsExtracting(true);
-    setExtractionProgressText("Parsing pasted resume text stream...");
+    setExtractionProgressText("AI is analyzing your resume...");
     try {
-      const parsed = parseResumeText(pastedText, "pasted-resume.txt");
+      const parsed = await parseResumeText(pastedText, "pasted-resume.txt");
+      setExtractionProgressText(parsed.method === "ai" ? "AI extraction complete ✓" : "Extracted using pattern matching ✓");
       setPortfolio(parsed.portfolio);
       setTimeout(() => {
         setIsExtracting(false);
@@ -138,6 +167,80 @@ export default function ResumeUploader() {
           FolioCraft extracts your experience, skills, and projects into a canonical data structure and feeds it into existing rich portfolio templates as props.
         </p>
       </div>
+
+      {/* API Key Banner */}
+      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+        <div className="h-8 w-8 rounded-xl bg-purple-600/15 border border-purple-500/30 flex items-center justify-center shrink-0">
+          <Key className="h-4 w-4 text-purple-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-white">
+            {savedApiKey ? "✓ Gemini AI Key Set" : "Gemini API Key"}
+          </p>
+          <p className="text-[11px] text-slate-400">
+            {savedApiKey
+              ? "AI-powered extraction active. Accurate parsing from any resume format."
+              : "Add a free Gemini API key for intelligent AI-powered resume extraction."}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600/10 hover:bg-purple-600/20 text-purple-300 border border-purple-500/20 transition-all shrink-0"
+        >
+          {savedApiKey ? "Update" : "Add Key"}
+        </button>
+      </div>
+
+      {/* API Key Input Panel */}
+      {showApiKeyInput && (
+        <div className="p-4 rounded-2xl bg-slate-900 border border-purple-500/30 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <p className="text-xs text-slate-300 font-semibold">
+            Enter your{" "}
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-400 underline hover:text-purple-300"
+            >
+              Google Gemini API Key
+            </a>{" "}
+            (free tier available)
+          </p>
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <input
+                type={showApiKeyText ? "text" : "password"}
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder="AIza..."
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none focus:border-purple-500 transition-colors pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowApiKeyText(!showApiKeyText)}
+                className="absolute right-2.5 top-2 text-slate-500 hover:text-slate-300"
+              >
+                {showApiKeyText ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+            <button
+              onClick={handleSaveApiKey}
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setShowApiKeyInput(false)}
+              className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+          <p className="text-[10px] text-slate-500">
+            🔒 Key stored only in your browser's localStorage. Never sent to any server.
+          </p>
+        </div>
+      )}
 
       {/* Error Banner */}
       {errorMessage && (
