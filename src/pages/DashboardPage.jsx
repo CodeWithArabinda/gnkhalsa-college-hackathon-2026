@@ -71,6 +71,24 @@ export default function DashboardPage() {
   const displayEmail = user?.email || 'kshitijpilankar@gmail.com';
   const userInitials = displayName.split(' ').map(n => n[0]).join('').toUpperCase() || 'KP';
 
+  const handleResumeSuccess = (data) => {
+    if (data?.blocks) {
+      localStorage.setItem('stackfolio_studio_schema', JSON.stringify(data));
+      const heroBlock = data.blocks.find(b => b.type === 'HeroBlock');
+      const contactBlock = data.blocks.find(b => b.type === 'ContactBlock');
+      applyParsedResume({
+        full_name: heroBlock?.content?.name || '',
+        headline: heroBlock?.content?.headline || '',
+        bio: heroBlock?.content?.bio || '',
+        email: contactBlock?.content?.email || ''
+      });
+    } else {
+      applyParsedResume(data);
+    }
+    setIsUploadModalOpen(false);
+    navigate('/studio');
+  };
+
   return (
     <div className="flex h-screen w-full bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] overflow-hidden font-sans text-slate-900 select-none">
       
@@ -201,7 +219,7 @@ export default function DashboardPage() {
       <ResumeUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onSuccess={applyParsedResume}
+        onSuccess={handleResumeSuccess}
       />
 
     </div>
