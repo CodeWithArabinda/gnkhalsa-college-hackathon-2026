@@ -44,7 +44,18 @@ function EditableCanvasItem({
 
   const handleMouseDown = (e) => {
     e.stopPropagation();
-    onSelectElement && onSelectElement({ key: elementKey, label, blockId, blockIndex });
+    const domText = e.currentTarget ? (e.currentTarget.innerText || "").trim() : "";
+    onSelectElement && onSelectElement({
+      key: elementKey,
+      id: elementKey,
+      label,
+      blockId,
+      blockIndex,
+      currentText: domText,
+      value: domText,
+      defaultValue: domText,
+      styles: st
+    });
 
     isDragging.current = true;
     dragStartPos.current = { x: e.clientX, y: e.clientY };
