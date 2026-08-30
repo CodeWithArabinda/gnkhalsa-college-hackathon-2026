@@ -93,9 +93,9 @@
                     "url": "https://www.youtube.com/",
                     "user": "username"
                 },
-                "gurushots": {
-                    "title": "GuruShots profile",
-                    "url": "https://gurushots.com/",
+                "github": {
+                    "title": "Github profile",
+                    "url": "https://github.com/",
                     "user": "username"
                 },
                 "instagram": {
@@ -103,9 +103,9 @@
                     "url": "https://instagram.com/",
                     "user": "username"
                 },
-                "twitch": {
-                    "title": "Twitch profile",
-                    "url": "https://twitch.com/",
+                "x": {
+                    "title": "X profile",
+                    "url": "https://x.com/",
                     "user": "username"
                 }
             }
