@@ -6,11 +6,10 @@ import {
 
 import "react-vertical-timeline-component/style.min.css";
 
-import { experiences } from "../../constants";
+import { usePortfolio } from "../../contexts/PortfolioContext";
 import { SectionWrapper } from "../../hoc";
 import { Header } from "../atoms/Header";
 import { TExperience } from "../../types";
-import { config } from "../../constants/config";
 
 const ExperienceCard: React.FC<TExperience> = (experience) => {
   return (
@@ -60,6 +59,7 @@ const ExperienceCard: React.FC<TExperience> = (experience) => {
 };
 
 const Experience = () => {
+  const { config, experiences } = usePortfolio();
   return (
     <>
       <Header useMotion={true} {...config.sections.experience} />

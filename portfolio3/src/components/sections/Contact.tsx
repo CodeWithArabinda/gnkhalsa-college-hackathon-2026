@@ -5,12 +5,13 @@ import emailjs from "@emailjs/browser";
 import { EarthCanvas } from "../canvas";
 import { SectionWrapper } from "../../hoc";
 import { slideIn } from "../../utils/motion";
-import { config } from "../../constants/config";
-import { socialLinks } from "../../constants";
+import { usePortfolio } from "../../contexts/PortfolioContext";
 
-const INITIAL_STATE = Object.fromEntries(
-  Object.keys(config.contact.form).map((input) => [input, ""])
-);
+const INITIAL_STATE = {
+  name: "",
+  email: "",
+  message: "",
+};
 
 const emailjsConfig = {
   serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_dummy",
@@ -19,6 +20,7 @@ const emailjsConfig = {
 };
 
 const Contact = () => {
+  const { config, socialLinks } = usePortfolio();
   const formRef = useRef<HTMLFormElement>(null);
   const [form, setForm] = useState(INITIAL_STATE);
   const [loading, setLoading] = useState(false);
@@ -146,7 +148,7 @@ const Contact = () => {
                     type={input === "email" ? "email" : "text"}
                     name={input}
                     required
-                    value={form[`${input}`]}
+                    value={form[input as keyof typeof INITIAL_STATE]}
                     onChange={handleChange}
                     placeholder={placeholder}
                     className="bg-tertiary placeholder:text-secondary rounded-xl border border-white/10 px-5 py-3.5 font-medium text-white outline-none focus:border-[#915EFF] transition-colors"

@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { styles } from "../../constants/styles";
 import { ComputersCanvas } from "../canvas";
-import { config } from "../../constants/config";
-import { socialLinks } from "../../constants";
+import { usePortfolio } from "../../contexts/PortfolioContext";
 
 const Hero = () => {
+  const { config, socialLinks } = usePortfolio();
   return (
     <section id="home" className={`relative mx-auto min-h-screen w-full flex flex-col justify-between overflow-hidden pb-8 pt-[90px] sm:pt-[110px]`}>
       <div

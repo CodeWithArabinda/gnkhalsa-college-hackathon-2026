@@ -11,7 +11,7 @@ import {
   Footer,
   StarsCanvas,
 } from "./components";
-import { config } from "./constants/config";
+import { PortfolioProvider, PortfolioDataProps, usePortfolio } from "./contexts/PortfolioContext";
 
 const MotionBackground = () => (
   <div className="animated-bg">
@@ -21,12 +21,14 @@ const MotionBackground = () => (
   </div>
 );
 
-const App = () => {
+const AppContent = () => {
+  const { config } = usePortfolio();
+
   useEffect(() => {
     if (document.title !== config.html.title) {
       document.title = config.html.title;
     }
-  }, []);
+  }, [config.html.title]);
 
   return (
     <BrowserRouter>
@@ -56,6 +58,14 @@ const App = () => {
         <Footer />
       </div>
     </BrowserRouter>
+  );
+};
+
+const App = ({ portfolio }: { portfolio?: PortfolioDataProps }) => {
+  return (
+    <PortfolioProvider portfolio={portfolio}>
+      <AppContent />
+    </PortfolioProvider>
   );
 };
 

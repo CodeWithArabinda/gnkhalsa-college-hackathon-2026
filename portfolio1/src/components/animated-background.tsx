@@ -163,32 +163,11 @@ const KeyboardScene = ({ maxDpr }: { maxDpr: number }) => {
     const frame1 = splineApp?.findObjectByName("frame-1");
     const frame2 = splineApp?.findObjectByName("frame-2");
 
-    if (!frame1 || !frame2 || !framesParent) {
-      return { start: () => { }, stop: () => { } };
-    }
+    if (framesParent) framesParent.visible = false;
+    if (frame1) frame1.visible = false;
+    if (frame2) frame2.visible = false;
 
-    let interval: NodeJS.Timeout;
-    const start = () => {
-      let i = 0;
-      framesParent.visible = true;
-      interval = setInterval(() => {
-        if (i % 2) {
-          frame1.visible = false;
-          frame2.visible = true;
-        } else {
-          frame1.visible = true;
-          frame2.visible = false;
-        }
-        i++;
-      }, 100);
-    };
-    const stop = () => {
-      clearInterval(interval);
-      framesParent.visible = false;
-      frame1.visible = false;
-      frame2.visible = false;
-    };
-    return { start, stop };
+    return { start: () => { }, stop: () => { } };
   };
 
   const getKeycapsAnimation = () => {

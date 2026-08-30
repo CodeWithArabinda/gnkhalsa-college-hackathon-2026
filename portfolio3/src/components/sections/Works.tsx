@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import Tilt from "react-parallax-tilt";
 import { motion } from "framer-motion";
 
+import { usePortfolio } from "../../contexts/PortfolioContext";
 import { github } from "../../assets";
 import { SectionWrapper } from "../../hoc";
-import { projects } from "../../constants";
 import { fadeIn } from "../../utils/motion";
-import { config } from "../../constants/config";
 import { Header } from "../atoms/Header";
 import { TProject } from "../../types";
 
@@ -93,6 +92,7 @@ const ProjectCard: React.FC<{ index: number } & TProject> = ({
 };
 
 const Works = () => {
+  const { config, projects } = usePortfolio();
   const [showAll, setShowAll] = useState(false);
   const visibleProjects = showAll ? projects : projects.slice(0, 3);
 

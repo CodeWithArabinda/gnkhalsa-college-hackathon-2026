@@ -1,11 +1,12 @@
 import Link from "next/link";
 import React from "react";
 import SectionTitle from "../global/SectionTitle";
-import projects from "@/data/content/projects";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 
 import ProjectCard from "../projects/ProjectCard";
 
 function Projects() {
+  const { projects } = usePortfolio();
   return (
     <div className="flex flex-col text-left justify-between pt-8 relative">
       <div id="learnmore">

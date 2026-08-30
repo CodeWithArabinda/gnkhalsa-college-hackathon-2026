@@ -1,13 +1,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-import { stats } from "../../constants";
+import { usePortfolio } from "../../contexts/PortfolioContext";
 import { SectionWrapper } from "../../hoc";
 import { fadeIn } from "../../utils/motion";
-import { config } from "../../constants/config";
 import { Header } from "../atoms/Header";
 
 const About = () => {
+  const { config, stats } = usePortfolio();
   return (
     <>
       <Header useMotion={true} {...config.sections.about} />

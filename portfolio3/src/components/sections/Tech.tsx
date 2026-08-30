@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
+import { usePortfolio } from "../../contexts/PortfolioContext";
 import { SectionWrapper } from "../../hoc";
-import { skillCategories } from "../../constants";
 import { Header } from "../atoms/Header";
-import { config } from "../../constants/config";
 import { fadeIn } from "../../utils/motion";
 
 const Tech = () => {
+  const { config, skillCategories } = usePortfolio();
   return (
     <>
       <Header useMotion={true} {...config.sections.skills} />

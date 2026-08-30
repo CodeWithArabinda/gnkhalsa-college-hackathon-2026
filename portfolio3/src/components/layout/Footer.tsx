@@ -1,8 +1,8 @@
 import React from "react";
-import { config } from "../../constants/config";
-import { socialLinks } from "../../constants";
+import { usePortfolio } from "../../contexts/PortfolioContext";
 
 const Footer: React.FC = () => {
+  const { config, socialLinks } = usePortfolio();
   return (
     <footer className="bg-primary border-t border-white/10 py-8 px-6 text-center text-secondary relative z-10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">

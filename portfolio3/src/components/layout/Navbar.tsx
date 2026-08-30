@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { usePortfolio } from "../../contexts/PortfolioContext";
 import { styles } from "../../constants/styles";
 import { navLinks } from "../../constants";
 import { menu, close } from "../../assets";
-import { config } from "../../constants/config";
 
 const Navbar = () => {
+  const { config } = usePortfolio();
   const [active, setActive] = useState<string | null>();
   const [toggle, setToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -66,7 +67,9 @@ const Navbar = () => {
         >
           <div className="h-10 w-10 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 p-[2px]">
             <div className="h-full w-full bg-primary rounded-full flex items-center justify-center">
-              <span className="text-[#915EFF] font-black text-lg">NG</span>
+              <span className="text-[#915EFF] font-black text-lg">
+                {config.html.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+              </span>
             </div>
           </div>
           <p className="cursor-pointer text-[17px] font-bold text-white flex items-center gap-1.5">
