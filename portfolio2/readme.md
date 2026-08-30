@@ -1,25 +1,39 @@
-## Usage
+# Nilesh Gupta - Modern Glassmorphic Landing Portfolio (Portfolio 2)
 
-* This template uses tailwind css every tailwind class are prefixed with `tw-`, to help differentiate
-  between tailwind classes and other classes  
+A fast, highly-responsive, single-page glassmorphic landing portfolio page built with vanilla HTML, JS, and TailwindCSS.
 
-During development add the following to head tag
+## 🚀 Technologies Used
+- **Structure**: Semantic HTML5
+- **Styling**: TailwindCSS, PostCSS, Autoprefixer
+- **Interactivity**: Vanilla JavaScript ES6
+- **Asset / Server Host**: Static Local Server (serve)
 
-```html
-<link rel="stylesheet" href="tailwind-runtime.css"><!--replace with path to your tailwind runtime-->
-```
-During production use
+## 🛠️ Installation & Setup
 
-```html
-<link rel="stylesheet" href="tailwind-build.css"><!--replace with path to your tailwind build-->
-```
+Ensure you have [Node.js](https://nodejs.org/) installed.
 
-To start Tailwind during development use
-```html
-npm run start:tailwind
+### 1. Navigate to the project directory:
+```bash
+cd portfolio2
 ```
 
-To create a build file use
-```html
-npm run build:tailwind
+### 2. Install dev dependencies:
+```bash
+npm install
 ```
+
+### 3. Run the development server:
+```bash
+npm run dev
+```
+
+### 4. Build Tailwind CSS stylesheet:
+```bash
+npm run build
+```
+
+## 📂 Project Structure
+- `index.html`: Main entrypoint landing page structure.
+- `index.js`: Vanilla JS logic for mobile menu toggle and page navigation.
+- `css/tailwind.css`: Raw Tailwind directives.
+- `css/tailwind-build.css`: Built, minimized CSS output used by index.html.

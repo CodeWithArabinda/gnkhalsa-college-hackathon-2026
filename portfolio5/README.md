@@ -1,18 +1,43 @@
-# **[braydentw.io](https://braydentw.io)**
+# Nilesh Gupta - Next.js & MDX Blog Portfolio (Portfolio 5)
 
-Hey there! I'm Brayden and this is my lovely lovely portfolio built using **React, NextJS, and TailwindCSS**!
+A developer blog and personal portfolio page built with Next.js, Contentlayer, MDX, and TailwindCSS.
 
-## Guidelines
+## 🚀 Technologies Used
+- **Framework**: Next.js (v12) / React
+- **Content Management**: Contentlayer (for parsing markdown/MDX articles)
+- **Styling**: TailwindCSS, Tailwind Forms
+- **Markdown / Code Processing**: rehype-prism-plus, remark-gfm, rehype-slug
 
-> **Note**: **I ask of you that you do your best to follow these rules:**
+## 🛠️ Installation & Setup
 
-1. You can **use** this code and style **as inspiration**.
-2. **Please do not copy it directly**.
-3. **Giving credit** to (@BraydenTW) the author **is appreciated**.
+Ensure you have [Node.js](https://nodejs.org/) installed.
 
-Doing so makes it better for everyone here on this platform and respects what everyone has made. **Please be you and make yourself unique from the rest!** ✨
+### 1. Navigate to the project directory:
+```bash
+cd portfolio5
+```
 
-<hr/>
-<a href="https://www.buymeacoffee.com/braydenw" target="_blank"><img src="./public/static/misc/buy-me-a-coffee.svg" alt="Buy Me A Coffee: @BraydenW" width="160"></a>&nbsp;
-<br/>
-<p>Thank you so much for your support. 💙</p>
+### 2. Install dependencies:
+```bash
+npm install
+```
+
+### 3. Run the development server:
+```bash
+npm run dev
+```
+
+### 4. Build for production:
+```bash
+npm run build
+```
+
+### 5. Start production server:
+```bash
+npm run start
+```
+
+## 📂 Project Structure
+- `pages`: Next.js pages router (home, articles, projects, contact).
+- `components`: Reusable layout elements (Navbar, ProjectCard, BlogCard).
+- `data`: MDX blog posts and local data config collections.
