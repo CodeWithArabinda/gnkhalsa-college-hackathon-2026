@@ -1,8 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Monitor, Tablet, Smartphone, ExternalLink, ChevronDown, RotateCcw, RotateCw, Zap, Sparkles } from 'lucide-react';
+import { Monitor, Tablet, Smartphone, ExternalLink, RotateCcw, RotateCw, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { morphSchemaArchetype } from '../../lib/geminiBuilder';
+
+const ARCHETYPES = [
+  {
+    id: 'bento-minimal',
+    label: 'Bento Minimal',
+    icon: '🍏',
+    activeClass: 'bg-slate-900 text-white border-2 border-black shadow-[1px_1px_0px_#000]',
+  },
+  {
+    id: 'cyber-terminal',
+    label: 'Cyber Terminal',
+    icon: '⚡',
+    activeClass: 'bg-[#00f5ff] text-black border-2 border-black shadow-[1px_1px_0px_#000]',
+  },
+  {
+    id: 'neo-brutalist',
+    label: 'Neo Brutalist',
+    icon: '💛',
+    activeClass: 'bg-[#FFE600] text-black border-2 border-black shadow-[1px_1px_0px_#000]',
+  },
+  {
+    id: 'warm-editorial',
+    label: 'Warm Editorial',
+    icon: '📖',
+    activeClass: 'bg-[#C2410C] text-white border-2 border-black shadow-[1px_1px_0px_#000]',
+  },
+];
+
+/** Normalize any legacy/alias archetype key to one of the 4 canonical IDs */
+function normalizeArchetype(raw) {
+  if (!raw) return 'bento-minimal';
+  const s = raw.toLowerCase().replace(/_/g, '-');
+  if (s === 'cyber-ai') return 'cyber-terminal';
+  if (s === 'humanist-light') return 'warm-editorial';
+  const known = ['bento-minimal', 'cyber-terminal', 'neo-brutalist', 'warm-editorial'];
+  return known.includes(s) ? s : 'bento-minimal';
+}
 
 export default function StudioNavbar({
   deviceMode,
@@ -17,16 +53,24 @@ export default function StudioNavbar({
   onResetDefault,
   onMorphArchetype
 }) {
+  // Optimistic local state — updates IMMEDIATELY on click so the pill moves at once
+  const [localArchetype, setLocalArchetype] = useState(() => normalizeArchetype(schema?.archetype));
+
+  // Keep in sync when schema changes externally (undo / redo / initial load)
+  useEffect(() => {
+    const normalized = normalizeArchetype(schema?.archetype);
+    setLocalArchetype(normalized);
+  }, [schema?.archetype]);
+
   const handlePublish = () => {
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
+    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
     if (onPublish) onPublish();
   };
 
-  const activeArchetype = schema?.archetype || 'bento-minimal';
+  const handleSelectArchetype = (id) => {
+    setLocalArchetype(id);          // instant visual feedback
+    if (onMorphArchetype) onMorphArchetype(id); // propagate to schema
+  };
 
   return (
     <header className="h-[52px] bg-white border-b-[2.5px] border-black px-4 flex items-center justify-between shrink-0 text-slate-900 text-xs font-sans select-none z-30 shadow-[0_3px_0px_#000000]">
@@ -47,54 +91,21 @@ export default function StudioNavbar({
 
         {/* 1-CLICK ARCHETYPE SWITCHER PILL SEGMENT */}
         <div className="hidden xl:flex items-center bg-slate-100 p-0.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000000]">
-          {[
-            {
-              id: 'bento-minimal',
-              label: 'Bento Minimal',
-              icon: '🍏',
-              activeClass: 'bg-slate-900 text-white border-2 border-black shadow-[1px_1px_0px_#000]',
-            },
-            {
-              id: 'cyber-terminal',
-              label: 'Cyber Terminal',
-              icon: '⚡',
-              activeClass: 'bg-[#00f5ff] text-black border-2 border-black shadow-[1px_1px_0px_#000]',
-            },
-            {
-              id: 'neo-brutalist',
-              label: 'Neo Brutalist',
-              icon: '💛',
-              activeClass: 'bg-[#FFE600] text-black border-2 border-black shadow-[1px_1px_0px_#000]',
-            },
-            {
-              id: 'warm-editorial',
-              label: 'Warm Editorial',
-              icon: '📖',
-              activeClass: 'bg-[#C2410C] text-white border-2 border-black shadow-[1px_1px_0px_#000]',
-            },
-          ].map((theme) => {
-            const currentRaw = (schema?.archetype || 'bento-minimal').toLowerCase().replace(/_/g, '-');
-            const isSelected =
-              currentRaw === theme.id ||
-              (theme.id === 'cyber-terminal' && currentRaw === 'cyber-ai') ||
-              (theme.id === 'warm-editorial' && currentRaw === 'humanist-light');
-
-            return (
-              <button
-                key={theme.id}
-                type="button"
-                onClick={() => onMorphArchetype && onMorphArchetype(theme.id)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
-                    ? theme.activeClass
-                    : 'text-slate-700 hover:text-black border-2 border-transparent hover:bg-slate-200/50'
-                }`}
-              >
-                <span>{theme.icon}</span>
-                <span>{theme.label}</span>
-              </button>
-            );
-          })}
+          {ARCHETYPES.map((theme) => (
+            <button
+              key={theme.id}
+              type="button"
+              onClick={() => handleSelectArchetype(theme.id)}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                localArchetype === theme.id
+                  ? theme.activeClass
+                  : 'text-slate-700 hover:text-black border-2 border-transparent hover:bg-slate-200/50'
+              }`}
+            >
+              <span>{theme.icon}</span>
+              <span>{theme.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
