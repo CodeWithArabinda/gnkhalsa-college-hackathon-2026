@@ -13,6 +13,14 @@ import {
 } from "./components";
 import { config } from "./constants/config";
 
+const MotionBackground = () => (
+  <div className="animated-bg">
+    <div className="aurora-blob aurora-blob-1" />
+    <div className="aurora-blob aurora-blob-2" />
+    <div className="aurora-blob aurora-blob-3" />
+  </div>
+);
+
 const App = () => {
   useEffect(() => {
     if (document.title !== config.html.title) {
@@ -22,17 +30,23 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <div className="bg-primary relative z-0 selection:bg-[#915EFF] selection:text-white">
-        {/* 01. HERO PATTERN CONTAINER (HERO THROUGH SKILLS & TECH STACK) */}
-        <div className="bg-hero-pattern bg-cover bg-center bg-no-repeat">
-          <Navbar />
-          <Hero />
-          <About />
-          <Works />
-          <Tech />
-        </div>
+      <div className="bg-[#050816] relative z-0 selection:bg-[#915EFF] selection:text-white min-h-screen">
+        <MotionBackground />
 
-        {/* 06. CONTACT / CTA */}
+        {/* NAVIGATION & HERO / INTRODUCTION */}
+        <Navbar />
+        <Hero />
+
+        {/* ABOUT ME */}
+        <About />
+
+        {/* FEATURED PROJECTS */}
+        <Works />
+
+        {/* SKILLS & TECHNOLOGIES */}
+        <Tech />
+
+        {/* CONTACT / CTA */}
         <div className="relative z-0">
           <Contact />
           <StarsCanvas />
