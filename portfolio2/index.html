@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Jamie Alex | Full-Stack & AI Engineer Portfolio</title>
+        <meta name="description" content="Portfolio of Jamie Alex - Full-Stack Developer & AI Engineer specializing in React, Node.js, Next.js, and Machine Learning." />
+        <link
+            rel="shortcut icon"
+            href="./assets/logo.png"
+            type="image/x-icon"
+        />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:title" content="Jamie Alex | Full-Stack & AI Engineer Portfolio" />
+        <meta property="og:description" content="Full-Stack Developer & AI Engineer creating modern web applications and AI platforms." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://github.com/" />
+        <meta property="og:image" content="./assets/images/home/man.jpg" />
+
+        <link rel="stylesheet" href="./css/tailwind-build.css" />
+        <link rel="stylesheet" href="css/index.css" />
+
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+            integrity="sha512-dPXYcDub/aeb08c63jRq/k6GaKccl256JQy/AnOq7CAnEZ9FzSL9wSbcZkMp4R26vBsMLFYH4kQ67/bbV8XaCQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+    </head>
+    <body
+        class="tw-flex tw-min-h-[100vh] tw-flex-col tw-bg-[#fff] tw-font-mono tw-text-black"
+    >
+        <!-- 01. NAVIGATION -->
+        <header
+            class="tw-fixed tw-top-0 tw-left-0 tw-z-30 tw-flex tw-h-[70px] tw-w-full tw-items-center tw-justify-between tw-bg-white/90 tw-backdrop-blur-md tw-px-[5%] tw-shadow-sm"
+        >
+            <a
+                class="tw-flex tw-items-center tw-gap-2 tw-text-2xl tw-font-bold tw-tracking-tight"
+                href="#"
+            >
+                <span class="tw-bg-black tw-text-white tw-px-2 tw-py-1 tw-rounded">J</span> Jamie Dev
+            </a>
+            <div
+                class="collapsible-header animated-collapse max-lg:tw-shadow-md"
+                id="collapsed-header-items"
+            >
+                <div
+                    class="tw-flex tw-h-full tw-w-max tw-gap-4 tw-text-base tw-text-black max-lg:tw-mt-[30px] max-lg:tw-flex-col max-lg:tw-place-items-end max-lg:tw-gap-5 lg:tw-mx-auto lg:tw-place-items-center"
+                >
+                    <a class="header-links" href="#about">About</a>
+                    <a class="header-links" href="#experience">Experience</a>
+                    <a class="header-links" href="#projects">Projects</a>
+                    <a class="header-links" href="#skills">Skills</a>
+                    <a class="header-links" href="#achievements">Achievements</a>
+                </div>
+                <div
+                    class="tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col max-md:tw-place-content-center"
+                >
+                    <a
+                        href="#contact"
+                        aria-label="contact"
+                        class="tw-flex tw-h-[40px] tw-place-items-center tw-gap-2 tw-rounded-full tw-bg-black tw-p-1 tw-pl-4 tw-text-white tw-transition-transform hover:tw-scale-105"
+                    >
+                        <span>Get in touch</span>
+                        <div
+                            class="tw-flex tw-h-[30px] tw-w-[30px] tw-place-content-center tw-place-items-center tw-rounded-full tw-bg-white tw-font-semibold tw-text-black"
+                        >
+                            <i class="bi bi-arrow-up-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <button
+                class="bi bi-list tw-absolute tw-right-4 tw-top-4 tw-z-50 tw-text-3xl tw-text-black lg:tw-hidden"
+                onclick="toggleHeader()"
+                aria-label="menu"
+                id="collapse-btn"
+            ></button>
+        </header>
+
+        <!-- 02. HERO / INTRODUCTION -->
+        <section
+            class="tw-relative tw-flex tw-min-h-[100vh] tw-w-full tw-flex-col tw-justify-center tw-pt-[90px] tw-pb-16 tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24"
+        >
+            <div
+                class="tw-mx-auto tw-flex tw-w-full tw-max-w-7xl tw-flex-col-reverse lg:tw-flex-row tw-items-center tw-justify-between tw-gap-12"
+            >
+                <!-- Hero Left Content -->
+                <div class="tw-flex tw-flex-1 tw-flex-col tw-justify-center">
+                    <div class="reveal-hero-text tw-mb-3 tw-flex tw-items-center tw-gap-2">
+                        <span class="tw-inline-block tw-h-3 tw-w-3 tw-rounded-full tw-bg-green-500 tw-animate-pulse"></span>
+                        <span class="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-600">Available for Opportunities</span>
+                    </div>
+
+                    <h1 class="tw-flex tw-flex-wrap tw-text-5xl sm:tw-text-6xl lg:tw-text-7xl tw-font-bold tw-uppercase tw-leading-tight tw-tracking-tight">
+                        <span class="reveal-hero-text tw-text-gray-500 tw-block tw-w-full">Hello, I'm</span>
+                        <span class="reveal-hero-text tw-bg-black tw-text-white tw-px-4 tw-py-1 tw-mt-2 tw-rounded-md">Jamie Alex</span>
+                    </h1>
+
+                    <h2 class="reveal-hero-text tw-mt-4 tw-text-2xl sm:tw-text-3xl tw-font-semibold tw-text-gray-800">
+                        Full-Stack Developer & AI Engineer
+                    </h2>
+
+                    <p class="reveal-hero-text tw-mt-4 tw-max-w-2xl tw-text-lg tw-text-gray-600 tw-leading-relaxed">
+                        Passionate software engineer specializing in building high-performance web applications, scalable backend microservices, and AI-driven platforms that deliver exceptional user experiences.
+                    </p>
+
+                    <!-- Hero CTA Buttons -->
+                    <div class="reveal-hero-text tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-4">
+                        <a
+                            href="#projects"
+                            class="tw-flex tw-h-[48px] tw-items-center tw-gap-3 tw-rounded-full tw-bg-black tw-px-6 tw-text-white tw-font-medium tw-transition-all hover:tw-bg-gray-800 hover:tw-shadow-lg"
+                        >
+                            <span>View My Work</span>
+                            <i class="bi bi-arrow-down-circle-fill tw-text-xl"></i>
+                        </a>
+                        <a
+                            href="#contact"
+                            class="tw-flex tw-h-[48px] tw-items-center tw-gap-3 tw-rounded-full tw-border-2 tw-border-black tw-bg-transparent tw-px-6 tw-text-black tw-font-medium tw-transition-all hover:tw-bg-black hover:tw-text-white"
+                        >
+                            <span>Download Resume</span>
+                            <i class="bi bi-download tw-text-lg"></i>
+                        </a>
+                    </div>
+
+                    <!-- Hero Social Links -->
+                    <div class="reveal-hero-text tw-mt-8 tw-flex tw-items-center tw-gap-6 tw-text-2xl">
+                        <a href="https://github.com" target="_blank" aria-label="GitHub" class="tw-text-gray-700 hover:tw-text-black tw-transition-colors">
+                            <i class="bi bi-github"></i>
+                        </a>
+                        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn" class="tw-text-gray-700 hover:tw-text-blue-600 tw-transition-colors">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="mailto:jamie.alex@example.com" aria-label="Email" class="tw-text-gray-700 hover:tw-text-red-500 tw-transition-colors">
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
+                        <a href="#contact" aria-label="Website" class="tw-text-gray-700 hover:tw-text-green-600 tw-transition-colors">
+                            <i class="bi bi-globe"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hero Right Visual / Profile Image -->
+                <div class="tw-flex tw-w-full lg:tw-w-1/2 tw-justify-center tw-items-center">
+                    <div class="tw-relative tw-w-full tw-max-w-[420px] tw-aspect-square tw-rounded-2xl tw-overflow-hidden tw-shadow-2xl tw-border-4 tw-border-black/5">
+                        <img
+                            src="./assets/images/home/man.jpg"
+                            alt="Jamie Alex"
+                            class="reveal-hero-img tw-h-full tw-w-full tw-object-cover"
+                        />
+                        <div class="tw-absolute tw-bottom-4 tw-left-4 tw-right-4 tw-bg-white/90 tw-backdrop-blur-md tw-p-3 tw-rounded-xl tw-shadow-lg tw-flex tw-items-center tw-gap-3">
+                            <div class="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-black tw-text-white">
+                                <i class="bi bi-code-slash tw-text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="tw-text-sm tw-font-bold">Building Modern Software</p>
+                                <p class="tw-text-xs tw-text-gray-600">React • Node.js • Python • AI</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03. ABOUT ME -->
+        <section
+            id="about"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20 tw-bg-gray-50"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">03. Background</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">ABOUT ME</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <div class="tw-mt-12 tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-12 tw-items-center">
+                    <!-- Left: Story & Goals -->
+                    <div class="lg:tw-col-span-7 tw-flex tw-flex-col tw-gap-6">
+                        <h3 class="reveal-up tw-text-2xl tw-font-bold">Architecting modern solutions with creativity and code.</h3>
+                        
+                        <p class="reveal-up tw-text-gray-700 tw-text-lg tw-leading-relaxed">
+                            I am a full-stack engineer and AI specialist dedicated to building seamless web applications and integrating cutting-edge machine learning capabilities into real-world software.
+                        </p>
+
+                        <div class="reveal-up tw-flex tw-flex-col tw-gap-4 tw-mt-2">
+                            <div class="tw-flex tw-items-start tw-gap-4 tw-p-4 tw-rounded-xl tw-bg-white tw-shadow-sm">
+                                <i class="bi bi-rocket-takeoff-fill tw-text-2xl tw-text-black"></i>
+                                <div>
+                                    <h4 class="tw-font-bold tw-text-lg">Career Goals</h4>
+                                    <p class="tw-text-gray-600 tw-text-sm">To architect scalable web platforms and lead high-impact engineering teams building intelligent software solutions.</p>
+                                </div>
+                            </div>
+
+                            <div class="tw-flex tw-items-start tw-gap-4 tw-p-4 tw-rounded-xl tw-bg-white tw-shadow-sm">
+                                <i class="bi bi-lightbulb-fill tw-text-2xl tw-text-black"></i>
+                                <div>
+                                    <h4 class="tw-font-bold tw-text-lg">Professional Interests</h4>
+                                    <p class="tw-text-gray-600 tw-text-sm">Full-Stack Web Engineering, LLM Integration, Microservices, Cloud Infrastructure, and UI/UX Design Systems.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Stats Cards -->
+                    <div class="lg:tw-col-span-5 tw-grid tw-grid-cols-1 sm:tw-grid-cols-3 lg:tw-grid-cols-1 tw-gap-6">
+                        <div class="reveal-up tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-bg-black tw-text-white tw-rounded-2xl tw-shadow-lg text-center tw-transform tw-transition-transform hover:tw-scale-105">
+                            <span class="tw-text-5xl tw-font-extrabold">2+</span>
+                            <span class="tw-text-sm tw-font-semibold tw-mt-2 tw-uppercase tw-tracking-wider tw-text-gray-300">Years Experience</span>
+                        </div>
+
+                        <div class="reveal-up tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-bg-white tw-border-2 tw-border-black tw-text-black tw-rounded-2xl tw-shadow-lg text-center tw-transform tw-transition-transform hover:tw-scale-105">
+                            <span class="tw-text-5xl tw-font-extrabold">15+</span>
+                            <span class="tw-text-sm tw-font-semibold tw-mt-2 tw-uppercase tw-tracking-wider tw-text-gray-600">Projects Completed</span>
+                        </div>
+
+                        <div class="reveal-up tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-bg-gray-200 tw-text-black tw-rounded-2xl tw-shadow-lg text-center tw-transform tw-transition-transform hover:tw-scale-105">
+                            <span class="tw-text-5xl tw-font-extrabold">20+</span>
+                            <span class="tw-text-sm tw-font-semibold tw-mt-2 tw-uppercase tw-tracking-wider tw-text-gray-700">Skills & Tools</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04. FEATURED PROJECTS ⭐ -->
+        <section
+            id="projects"
+            class="tw-relative tw-flex tw-min-h-[100vh] tw-w-full tw-flex-col tw-items-center tw-overflow-hidden tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">04. Portfolio</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">FEATURED PROJECTS ⭐</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <div
+                    class="tw-mt-12 tw-w-full tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-8"
+                >
+                    <!-- Project Card 1 -->
+                    <div
+                        class="reveal-up tw-flex tw-flex-col tw-rounded-2xl tw-border tw-border-gray-200 tw-bg-white tw-overflow-hidden tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:tw-border-black/30"
+                    >
+                        <div class="tw-h-[260px] tw-w-full tw-overflow-hidden tw-relative">
+                            <img
+                                src="./assets/images/home/design.jpg"
+                                class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 hover:tw-scale-105"
+                                alt="AI Resume Platform"
+                            />
+                            <span class="tw-absolute tw-top-4 tw-right-4 tw-bg-black tw-text-white tw-text-xs tw-font-bold tw-px-3 tw-py-1 tw-rounded-full">Full-Stack & AI</span>
+                        </div>
+                        <div class="tw-flex tw-flex-col tw-gap-3 tw-p-6">
+                            <h3 class="tw-text-2xl tw-font-bold">AI Resume & Portfolio Builder</h3>
+                            <p class="tw-text-gray-600 tw-leading-relaxed">
+                                Intelligent platform that parses candidate resumes, extracts core skills, and automatically generates customized portfolio landing pages.
+                            </p>
+                            <div class="tw-flex tw-flex-wrap tw-gap-2 tw-my-2">
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">React</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Node.js</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">OpenAI API</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Tailwind</span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-4 tw-mt-2">
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-black tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white">
+                                    <i class="bi bi-box-arrow-up-right"></i> Live Demo
+                                </a>
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-gray-300 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-gray-100">
+                                    <i class="bi bi-github"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 2 -->
+                    <div
+                        class="reveal-up tw-flex tw-flex-col tw-rounded-2xl tw-border tw-border-gray-200 tw-bg-white tw-overflow-hidden tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:tw-border-black/30"
+                    >
+                        <div class="tw-h-[260px] tw-w-full tw-overflow-hidden tw-relative">
+                            <img
+                                src="./assets/images/home/editing.jpg"
+                                class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 hover:tw-scale-105"
+                                alt="Analytics Dashboard"
+                            />
+                            <span class="tw-absolute tw-top-4 tw-right-4 tw-bg-black tw-text-white tw-text-xs tw-font-bold tw-px-3 tw-py-1 tw-rounded-full">Data & ML</span>
+                        </div>
+                        <div class="tw-flex tw-flex-col tw-gap-3 tw-p-6">
+                            <h3 class="tw-text-2xl tw-font-bold">E-Commerce Predictive Analytics</h3>
+                            <p class="tw-text-gray-600 tw-leading-relaxed">
+                                Real-time analytics dashboard providing customer behavioral insights, automated sales forecasting models, and inventory metrics.
+                            </p>
+                            <div class="tw-flex tw-flex-wrap tw-gap-2 tw-my-2">
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Python</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Machine Learning</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">FastAPI</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">PostgreSQL</span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-4 tw-mt-2">
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-black tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white">
+                                    <i class="bi bi-box-arrow-up-right"></i> Live Demo
+                                </a>
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-gray-300 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-gray-100">
+                                    <i class="bi bi-github"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 3 -->
+                    <div
+                        class="reveal-up tw-flex tw-flex-col tw-rounded-2xl tw-border tw-border-gray-200 tw-bg-white tw-overflow-hidden tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:tw-border-black/30"
+                    >
+                        <div class="tw-h-[260px] tw-w-full tw-overflow-hidden tw-relative">
+                            <img
+                                src="./assets/images/home/photography.jpg"
+                                class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 hover:tw-scale-105"
+                                alt="Real-time Workspace"
+                            />
+                            <span class="tw-absolute tw-top-4 tw-right-4 tw-bg-black tw-text-white tw-text-xs tw-font-bold tw-px-3 tw-py-1 tw-rounded-full">WebSockets</span>
+                        </div>
+                        <div class="tw-flex tw-flex-col tw-gap-3 tw-p-6">
+                            <h3 class="tw-text-2xl tw-font-bold">Real-time Collaborative Workspace</h3>
+                            <p class="tw-text-gray-600 tw-leading-relaxed">
+                                Cloud document editor supporting concurrent multi-user live editing, WebSocket state synchronization, and version history.
+                            </p>
+                            <div class="tw-flex tw-flex-wrap tw-gap-2 tw-my-2">
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Next.js</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">TypeScript</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">WebSockets</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Redis</span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-4 tw-mt-2">
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-black tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white">
+                                    <i class="bi bi-box-arrow-up-right"></i> Live Demo
+                                </a>
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-gray-300 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-gray-100">
+                                    <i class="bi bi-github"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 4 -->
+                    <div
+                        class="reveal-up tw-flex tw-flex-col tw-rounded-2xl tw-border tw-border-gray-200 tw-bg-white tw-overflow-hidden tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:tw-border-black/30"
+                    >
+                        <div class="tw-h-[260px] tw-w-full tw-overflow-hidden tw-relative">
+                            <img
+                                src="./assets/images/home/forest.jpg"
+                                class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-500 hover:tw-scale-105"
+                                alt="Computer Vision"
+                            />
+                            <span class="tw-absolute tw-top-4 tw-right-4 tw-bg-black tw-text-white tw-text-xs tw-font-bold tw-px-3 tw-py-1 tw-rounded-full">Computer Vision</span>
+                        </div>
+                        <div class="tw-flex tw-flex-col tw-gap-3 tw-p-6">
+                            <h3 class="tw-text-2xl tw-font-bold">Autonomous Object Detection System</h3>
+                            <p class="tw-text-gray-600 tw-leading-relaxed">
+                                Computer vision solution leveraging deep learning models for real-time video telemetry tracking and environmental classification.
+                            </p>
+                            <div class="tw-flex tw-flex-wrap tw-gap-2 tw-my-2">
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Python</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">PyTorch</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">OpenCV</span>
+                                <span class="tw-bg-gray-100 tw-text-xs tw-font-semibold tw-px-3 tw-py-1 tw-rounded-md">Docker</span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-4 tw-mt-2">
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-black tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white">
+                                    <i class="bi bi-box-arrow-up-right"></i> Live Demo
+                                </a>
+                                <a href="https://github.com" target="_blank" class="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-gray-300 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-gray-100">
+                                    <i class="bi bi-github"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View All Projects Button -->
+                <div class="reveal-up tw-mt-12 tw-flex tw-justify-center">
+                    <a
+                        href="https://github.com"
+                        target="_blank"
+                        class="tw-flex tw-items-center tw-gap-3 tw-rounded-full tw-border-2 tw-border-black tw-bg-white tw-px-8 tw-py-3 tw-font-bold tw-text-black tw-transition-all hover:tw-bg-black hover:tw-text-white"
+                    >
+                        <span>View All Projects on GitHub</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 05. EXPERIENCE -->
+        <section
+            id="experience"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20 tw-bg-gray-50"
+        >
+            <div class="tw-w-full tw-max-w-4xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">05. Career</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">EXPERIENCE</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <!-- Timeline Container -->
+                <div class="tw-mt-12 tw-relative tw-border-l-2 tw-border-black tw-ml-4 sm:tw-ml-8 tw-pl-6 sm:tw-pl-10 tw-space-y-12">
+                    <!-- Timeline Item 1 -->
+                    <div class="reveal-up tw-relative">
+                        <div class="tw-absolute -tw-left-[31px] sm:-tw-left-[47px] tw-top-0 tw-h-6 tw-w-6 tw-rounded-full tw-border-4 tw-border-white tw-bg-black"></div>
+                        <span class="tw-inline-block tw-rounded-md tw-bg-black tw-px-3 tw-py-1 tw-text-xs tw-font-bold tw-text-white">2025 — Present</span>
+                        <h3 class="tw-text-2xl tw-font-bold tw-mt-2">Software Developer</h3>
+                        <p class="tw-text-lg tw-font-semibold tw-text-gray-700">TechVentures AI Inc.</p>
+                        <p class="tw-mt-2 tw-text-gray-600 tw-leading-relaxed">
+                            Leading full-stack engineering initiatives for enterprise web products, microservices architecture, and AI-driven automation workflows.
+                        </p>
+                        <ul class="tw-mt-3 tw-space-y-2 tw-text-gray-700 tw-list-disc tw-pl-5">
+                            <li>Architected REST & GraphQL microservices handling 500k+ daily API queries with 99.9% uptime.</li>
+                            <li>Integrated OpenAI & LLM pipelines into core SaaS products, reducing customer processing time by 40%.</li>
+                            <li>Mentored junior developers and instituted CI/CD automated testing standards.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Timeline Item 2 -->
+                    <div class="reveal-up tw-relative">
+                        <div class="tw-absolute -tw-left-[31px] sm:-tw-left-[47px] tw-top-0 tw-h-6 tw-w-6 tw-rounded-full tw-border-4 tw-border-white tw-bg-black"></div>
+                        <span class="tw-inline-block tw-rounded-md tw-bg-gray-200 tw-px-3 tw-py-1 tw-text-xs tw-font-bold tw-text-black">2024 — 2025</span>
+                        <h3 class="tw-text-2xl tw-font-bold tw-mt-2">Full-Stack Engineer</h3>
+                        <p class="tw-text-lg tw-font-semibold tw-text-gray-700">InnovateTech Solutions</p>
+                        <p class="tw-mt-2 tw-text-gray-600 tw-leading-relaxed">
+                            Developed web platforms, database structures, and internal operations dashboards for scale-up clients.
+                        </p>
+                        <ul class="tw-mt-3 tw-space-y-2 tw-text-gray-700 tw-list-disc tw-pl-5">
+                            <li>Refactored legacy frontend codebase into React & Tailwind, increasing Lighthouse performance score from 64 to 98.</li>
+                            <li>Implemented OAuth2 authentication workflows and Stripe billing subscription modules.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Timeline Item 3 -->
+                    <div class="reveal-up tw-relative">
+                        <div class="tw-absolute -tw-left-[31px] sm:-tw-left-[47px] tw-top-0 tw-h-6 tw-w-6 tw-rounded-full tw-border-4 tw-border-white tw-bg-black"></div>
+                        <span class="tw-inline-block tw-rounded-md tw-bg-gray-200 tw-px-3 tw-py-1 tw-text-xs tw-font-bold tw-text-black">2023 — 2024</span>
+                        <h3 class="tw-text-2xl tw-font-bold tw-mt-2">Frontend Developer Intern</h3>
+                        <p class="tw-text-lg tw-font-semibold tw-text-gray-700">CloudPulse Studio</p>
+                        <p class="tw-mt-2 tw-text-gray-600 tw-leading-relaxed">
+                            Collaborated with UI/UX designers to implement responsive, pixel-perfect user interfaces and component libraries.
+                        </p>
+                        <ul class="tw-mt-3 tw-space-y-2 tw-text-gray-700 tw-list-disc tw-pl-5">
+                            <li>Created over 15 reusable UI component blocks adopted across company web applications.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 06. EDUCATION -->
+        <section
+            id="education"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">06. Academics</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">EDUCATION</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <div class="tw-mt-12 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-8">
+                    <!-- Education 1 -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-8 tw-rounded-2xl tw-border-2 tw-border-black tw-bg-white tw-shadow-lg">
+                        <div class="tw-flex tw-items-center tw-gap-3">
+                            <span class="tw-text-3xl">🎓</span>
+                            <div>
+                                <h3 class="tw-text-2xl tw-font-bold">B.S. in Computer Science</h3>
+                                <p class="tw-text-gray-600 tw-font-semibold">State Institute of Technology</p>
+                            </div>
+                        </div>
+                        <div class="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-border-t tw-border-gray-200 tw-pt-4">
+                            <span class="tw-text-sm tw-font-bold tw-text-gray-500">2022 — 2026</span>
+                            <span class="tw-bg-black tw-text-white tw-text-xs tw-font-bold tw-px-3 tw-py-1 tw-rounded-full">CGPA: 3.9 / 4.0</span>
+                        </div>
+                        <p class="tw-mt-4 tw-text-gray-700 tw-leading-relaxed">
+                            Focus on Machine Learning, Database Systems, Web Architecture, and Distributed Systems. President of the University Computer Society.
+                        </p>
+                    </div>
+
+                    <!-- Education 2 -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-8 tw-rounded-2xl tw-border-2 tw-border-gray-200 tw-bg-gray-50 tw-shadow-lg">
+                        <div class="tw-flex tw-items-center tw-gap-3">
+                            <span class="tw-text-3xl">🎓</span>
+                            <div>
+                                <h3 class="tw-text-2xl tw-font-bold">Higher Secondary (CS & Math)</h3>
+                                <p class="tw-text-gray-600 tw-font-semibold">National Science Academy</p>
+                            </div>
+                        </div>
+                        <div class="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-border-t tw-border-gray-200 tw-pt-4">
+                            <span class="tw-text-sm tw-font-bold tw-text-gray-500">2020 — 2022</span>
+                            <span class="tw-bg-gray-200 tw-text-black tw-text-xs tw-font-bold tw-px-3 tw-py-1 tw-rounded-full">Distinction (95%)</span>
+                        </div>
+                        <p class="tw-mt-4 tw-text-gray-700 tw-leading-relaxed">
+                            Specialized in Computer Science fundamentals and Advanced Mathematics. Honored with CS Academic Excellence Medal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 07. SKILLS & TECHNOLOGIES -->
+        <section
+            id="skills"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20 tw-bg-gray-50"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">07. Expertise</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">SKILLS & TECHNOLOGIES</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <div class="tw-mt-12 tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-8">
+                    <!-- Category 1: Frontend -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-lg tw-border tw-border-gray-200">
+                        <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-black tw-text-white">
+                                <i class="bi bi-window-stack tw-text-2xl"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold">FRONTEND</h3>
+                        </div>
+                        <div class="tw-flex tw-flex-wrap tw-gap-2">
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">React</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Next.js</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">TypeScript</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Tailwind CSS</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">JavaScript</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">HTML5 / CSS3</span>
+                        </div>
+                    </div>
+
+                    <!-- Category 2: Backend -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-lg tw-border tw-border-gray-200">
+                        <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-black tw-text-white">
+                                <i class="bi bi-server tw-text-2xl"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold">BACKEND</h3>
+                        </div>
+                        <div class="tw-flex tw-flex-wrap tw-gap-2">
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Node.js</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Express</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">MongoDB</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">PostgreSQL</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">GraphQL</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">REST APIs</span>
+                        </div>
+                    </div>
+
+                    <!-- Category 3: Tools -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-lg tw-border tw-border-gray-200">
+                        <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-black tw-text-white">
+                                <i class="bi bi-tools tw-text-2xl"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold">TOOLS</h3>
+                        </div>
+                        <div class="tw-flex tw-flex-wrap tw-gap-2">
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Git & GitHub</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Docker</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Figma</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Vercel</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Postman</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Linux</span>
+                        </div>
+                    </div>
+
+                    <!-- Category 4: Other / AI -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-lg tw-border tw-border-gray-200">
+                        <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-black tw-text-white">
+                                <i class="bi bi-cpu tw-text-2xl"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold">OTHER</h3>
+                        </div>
+                        <div class="tw-flex tw-flex-wrap tw-gap-2">
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">AI / ML</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">Python</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">UI/UX Design</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">PyTorch</span>
+                            <span class="tw-bg-gray-100 tw-text-sm tw-font-semibold tw-px-3 tw-py-1.5 tw-rounded-lg">OpenCV</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 08. ACHIEVEMENTS & CERTIFICATIONS -->
+        <section
+            id="achievements"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">08. Recognition</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">ACHIEVEMENTS & CERTIFICATIONS</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <div class="tw-mt-12 tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-8">
+                    <!-- Achievement 1 -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-8 tw-rounded-2xl tw-bg-white tw-border tw-border-gray-200 tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:-tw-translate-y-1">
+                        <span class="tw-text-4xl">🏆</span>
+                        <h3 class="tw-text-2xl tw-font-bold tw-mt-4">1st Place — National AI Hackathon</h3>
+                        <p class="tw-text-gray-600 tw-mt-2 tw-leading-relaxed">
+                            Built an offline AI medical diagnostic assistant powered by quantized local LLMs, winning top honors among 120+ competing engineering teams.
+                        </p>
+                    </div>
+
+                    <!-- Achievement 2 -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-8 tw-rounded-2xl tw-bg-white tw-border tw-border-gray-200 tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:-tw-translate-y-1">
+                        <span class="tw-text-4xl">📜</span>
+                        <h3 class="tw-text-2xl tw-font-bold tw-mt-4">AWS Certified Solutions Architect</h3>
+                        <p class="tw-text-gray-600 tw-mt-2 tw-leading-relaxed">
+                            Amazon Web Services professional credential validating expertise in designing distributed, fault-tolerant cloud architectures.
+                        </p>
+                    </div>
+
+                    <!-- Achievement 3 -->
+                    <div class="reveal-up tw-flex tw-flex-col tw-p-8 tw-rounded-2xl tw-bg-white tw-border tw-border-gray-200 tw-shadow-lg tw-transition-all hover:tw-shadow-xl hover:-tw-translate-y-1">
+                        <span class="tw-text-4xl">🥇</span>
+                        <h3 class="tw-text-2xl tw-font-bold tw-mt-4">Top Open Source Contributor</h3>
+                        <p class="tw-text-gray-600 tw-mt-2 tw-leading-relaxed">
+                            Recognized for core component contributions, bug fixes, and performance optimization PRs merged into major web ecosystems.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 09. CURRENTLY / NOW -->
+        <section
+            id="currently"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-20 tw-bg-gray-50"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-500">09. Active Status</span>
+                    <h2 class="reveal-up tw-text-4xl sm:tw-text-5xl tw-font-bold tw-mt-2">CURRENTLY / NOW</h2>
+                    <div class="reveal-up tw-mx-auto tw-my-4 tw-h-1 tw-w-24 tw-bg-black"></div>
+                </div>
+
+                <div class="tw-mt-12 tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-8">
+                    <!-- Status Item 1 -->
+                    <div class="reveal-up tw-flex tw-items-start tw-gap-4 tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-md tw-border-l-4 tw-border-blue-500">
+                        <span class="tw-text-3xl">🔵</span>
+                        <div>
+                            <h3 class="tw-font-bold tw-text-xl">Currently Building</h3>
+                            <p class="tw-text-gray-600 tw-mt-1">Next-gen AI Resume & Portfolio builder platform with instant live preview & analytics.</p>
+                        </div>
+                    </div>
+
+                    <!-- Status Item 2 -->
+                    <div class="reveal-up tw-flex tw-items-start tw-gap-4 tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-md tw-border-l-4 tw-border-purple-500">
+                        <span class="tw-text-3xl">📚</span>
+                        <div>
+                            <h3 class="tw-font-bold tw-text-xl">Currently Learning</h3>
+                            <p class="tw-text-gray-600 tw-mt-1">Advanced LLM Fine-Tuning techniques & Next.js 15 Server Actions architecture.</p>
+                        </div>
+                    </div>
+
+                    <!-- Status Item 3 -->
+                    <div class="reveal-up tw-flex tw-items-start tw-gap-4 tw-p-6 tw-rounded-2xl tw-bg-white tw-shadow-md tw-border-l-4 tw-border-green-500">
+                        <span class="tw-text-3xl">🎯</span>
+                        <div>
+                            <h3 class="tw-font-bold tw-text-xl">Currently Open To</h3>
+                            <p class="tw-text-gray-600 tw-mt-1">Full-time Software Engineering roles, AI Developer projects & Freelance collaborations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. CONTACT / CTA -->
+        <section
+            id="contact"
+            class="tw-relative tw-w-full tw-flex tw-flex-col tw-items-center tw-px-6 sm:tw-px-10 md:tw-px-16 lg:tw-px-24 tw-py-24 tw-bg-black tw-text-white"
+        >
+            <div class="tw-w-full tw-max-w-7xl">
+                <div class="tw-text-center">
+                    <span class="reveal-up tw-text-sm tw-font-bold tw-uppercase tw-tracking-widest tw-text-gray-400">10. Contact</span>
+                    <h2 class="reveal-up tw-text-5xl sm:tw-text-6xl tw-font-bold tw-mt-2">LET'S WORK TOGETHER</h2>
+                    <p class="reveal-up tw-text-xl tw-text-gray-300 tw-mt-4 tw-max-w-2xl tw-mx-auto">
+                        Have an interesting project, engineering role, or idea? Reach out and let's turn it into reality.
+                    </p>
+                    <div class="reveal-up tw-mx-auto tw-my-6 tw-h-1 tw-w-24 tw-bg-white"></div>
+                </div>
+
+                <div class="tw-mt-12 tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-12 tw-items-start">
+                    <!-- Direct Contact Info -->
+                    <div class="lg:tw-col-span-5 tw-flex tw-flex-col tw-gap-6">
+                        <div class="reveal-up tw-flex tw-items-center tw-gap-4 tw-p-5 tw-rounded-2xl tw-bg-gray-900 tw-border tw-border-gray-800">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-white tw-text-black">
+                                <i class="bi bi-envelope-fill tw-text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="tw-text-xs tw-uppercase tw-tracking-wider tw-text-gray-400">Email Me</p>
+                                <a href="mailto:jamie.alex@example.com" class="tw-text-lg tw-font-bold hover:tw-underline">jamie.alex@example.com</a>
+                            </div>
+                        </div>
+
+                        <div class="reveal-up tw-flex tw-items-center tw-gap-4 tw-p-5 tw-rounded-2xl tw-bg-gray-900 tw-border tw-border-gray-800">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-white tw-text-black">
+                                <i class="bi bi-linkedin tw-text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="tw-text-xs tw-uppercase tw-tracking-wider tw-text-gray-400">LinkedIn</p>
+                                <a href="https://linkedin.com" target="_blank" class="tw-text-lg tw-font-bold hover:tw-underline">linkedin.com/in/jamiealex</a>
+                            </div>
+                        </div>
+
+                        <div class="reveal-up tw-flex tw-items-center tw-gap-4 tw-p-5 tw-rounded-2xl tw-bg-gray-900 tw-border tw-border-gray-800">
+                            <div class="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-xl tw-bg-white tw-text-black">
+                                <i class="bi bi-github tw-text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="tw-text-xs tw-uppercase tw-tracking-wider tw-text-gray-400">GitHub</p>
+                                <a href="https://github.com" target="_blank" class="tw-text-lg tw-font-bold hover:tw-underline">github.com/jamiealex</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Contact Form -->
+                    <div class="lg:tw-col-span-7 reveal-up tw-bg-gray-900 tw-p-8 tw-rounded-2xl tw-border tw-border-gray-800">
+                        <form onsubmit="event.preventDefault(); alert('Thank you! Your message has been sent.');" class="tw-flex tw-flex-col tw-gap-6">
+                            <div>
+                                <label class="tw-block tw-text-sm tw-font-semibold tw-text-gray-300 tw-mb-2">Your Name</label>
+                                <input type="text" required placeholder="Alex Morgan" class="tw-w-full tw-rounded-xl tw-bg-black tw-border tw-border-gray-700 tw-p-3.5 tw-text-white focus:tw-border-white focus:tw-outline-none" />
+                            </div>
+
+                            <div>
+                                <label class="tw-block tw-text-sm tw-font-semibold tw-text-gray-300 tw-mb-2">Your Email</label>
+                                <input type="email" required placeholder="alex@example.com" class="tw-w-full tw-rounded-xl tw-bg-black tw-border tw-border-gray-700 tw-p-3.5 tw-text-white focus:tw-border-white focus:tw-outline-none" />
+                            </div>
+
+                            <div>
+                                <label class="tw-block tw-text-sm tw-font-semibold tw-text-gray-300 tw-mb-2">Your Message</label>
+                                <textarea rows="4" required placeholder="Hello Jamie, I'd like to discuss a project..." class="tw-w-full tw-rounded-xl tw-bg-black tw-border tw-border-gray-700 tw-p-3.5 tw-text-white focus:tw-border-white focus:tw-outline-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="tw-flex tw-h-[50px] tw-items-center tw-justify-center tw-gap-3 tw-rounded-xl tw-bg-white tw-font-bold tw-text-black tw-transition-all hover:tw-bg-gray-200">
+                                <span>Get In Touch</span>
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer
+            class="tw-flex tw-w-full tw-flex-col sm:tw-flex-row tw-items-center tw-justify-between tw-gap-4 tw-bg-black tw-border-t tw-border-gray-800 tw-px-[8%] tw-py-8 tw-text-sm tw-text-gray-400"
+        >
+            <p>© 2026 Jamie Alex. All rights reserved.</p>
+            <p class="tw-flex tw-items-center tw-gap-1">
+                Built with <i class="bi bi-suit-heart-fill tw-text-red-500"></i> HTML, Tailwind CSS & GSAP
+            </p>
+        </footer>
+    </body>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/gsap.min.js"
+        integrity="sha512-B1lby8cGcAUU3GR+Fd809/ZxgHbfwJMp0jLTVfHiArTuUt++VqSlJpaJvhNtRf3NERaxDNmmxkdx2o+aHd4bvw=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/ScrollTrigger.min.js"
+        integrity="sha512-AY2+JxnBETJ0wcXnLPCcZJIJx0eimyhz3OJ55k2Jx4RtYC+XdIi2VtJQ+tP3BaTst4otlGG1TtPJ9fKrAUnRdQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    ></script>
+
+    <script src="./index.js"></script>
+</html>
