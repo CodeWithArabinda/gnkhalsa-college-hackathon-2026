@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import {
   Sparkles, Mail, ExternalLink, Edit3, GripVertical, AlignLeft, AlignCenter, AlignRight,
-  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move
+  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move,
+  Pencil, X, Link as LinkIcon, Tag
 } from 'lucide-react';
 import CanvasBuildingState from './CanvasBuildingState';
 
@@ -18,6 +19,7 @@ function EditableCanvasItem({
   onSelectElement,
   onUpdateElementStyle,
   onPolishWithAI,
+  onOpenEditModal,
   children,
   className = '',
   blockId,
@@ -87,25 +89,38 @@ function EditableCanvasItem({
         borderRadius: st.borderRadius ? `${st.borderRadius}px` : undefined
       }}
     >
-      {/* Element Badge Tag */}
+      {/* FLOATING ACTION PILL (Sits cleanly ABOVE the top border -top-9 left-0 to prevent text overlap) */}
       {(isSelected || isHovered) && (
-        <div className="absolute -top-6 left-0 z-40 bg-[#FF6B1A] text-black font-mono font-bold text-[9px] px-2 py-0.5 rounded shadow-[1px_1px_0px_0px_#000] uppercase tracking-wider flex items-center gap-1 pointer-events-none">
-          <Move className="w-2.5 h-2.5" /> [ {label} ]
-        </div>
-      )}
+        <div className="absolute -top-9 left-0 z-50 bg-[#181A24] border-2 border-black rounded-xl px-2 py-1 shadow-2xl flex items-center gap-1.5 text-xs font-mono text-white pointer-events-auto">
+          {/* Badge Tag */}
+          <span className="px-2 py-0.5 bg-[#FF6B1A] text-black font-extrabold text-[9px] rounded uppercase tracking-wider flex items-center gap-1">
+            <Move className="w-2.5 h-2.5" /> [ {label} ]
+          </span>
 
-      {/* Floating Mini Context Toolbar */}
-      {isSelected && (
-        <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-50 bg-[#181A24] border-2 border-black rounded-xl px-2 py-1 shadow-2xl flex items-center gap-1.5 text-xs font-mono text-white">
-          <span className="text-[10px] font-bold text-[#FF6B1A] uppercase">[ {label} ]</span>
           <div className="w-px h-3.5 bg-white/20" />
+
+          {/* Quick Edit Pencil Trigger */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenEditModal && onOpenEditModal(elementKey, label, blockId);
+            }}
+            className="px-2 py-0.5 bg-[#38BDF8] text-black font-extrabold text-[10px] rounded flex items-center gap-1 hover:bg-[#60a5fa] transition-colors"
+            title="Edit Text & Fields"
+          >
+            <Pencil className="w-3 h-3 text-black" /> Edit Text
+          </button>
+
+          {/* Aria Polish */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onPolishWithAI && onPolishWithAI({ type: label });
             }}
-            className="px-2 py-0.5 bg-[#FFE600] text-black font-extrabold text-[10px] rounded flex items-center gap-1 hover:bg-[#ffed4d]"
+            className="px-2 py-0.5 bg-[#FFE600] text-black font-extrabold text-[10px] rounded flex items-center gap-1 hover:bg-[#ffed4d] transition-colors"
+            title="Rewrite with AI"
           >
             <Wand2 className="w-3 h-3 text-black" /> Aria Polish
           </button>
@@ -135,6 +150,7 @@ export default function CanvasPreview({
   onUpdateElementStyle
 }) {
   const [hoveredElementKey, setHoveredElementKey] = useState(null);
+  const [editModalData, setEditModalData] = useState(null);
   const projectsRef = useRef(null);
   const contactRef = useRef(null);
 
@@ -168,6 +184,10 @@ export default function CanvasPreview({
     if (contactRef.current) {
       contactRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handleOpenEditModal = (key, label, blockId) => {
+    setEditModalData({ key, label, blockId });
   };
 
   return (
@@ -231,6 +251,7 @@ export default function CanvasPreview({
                         onSelectElement={onSelectElement}
                         onUpdateElementStyle={onUpdateElementStyle}
                         onPolishWithAI={onPolishWithAI}
+                        onOpenEditModal={handleOpenEditModal}
                         blockId={block.id}
                         blockIndex={index}
                         className="self-start"
@@ -262,6 +283,7 @@ export default function CanvasPreview({
                           onSelectElement={onSelectElement}
                           onUpdateElementStyle={onUpdateElementStyle}
                           onPolishWithAI={onPolishWithAI}
+                          onOpenEditModal={handleOpenEditModal}
                           blockId={block.id}
                           blockIndex={index}
                         >
@@ -290,6 +312,7 @@ export default function CanvasPreview({
                           onSelectElement={onSelectElement}
                           onUpdateElementStyle={onUpdateElementStyle}
                           onPolishWithAI={onPolishWithAI}
+                          onOpenEditModal={handleOpenEditModal}
                           blockId={block.id}
                           blockIndex={index}
                         >
@@ -321,6 +344,7 @@ export default function CanvasPreview({
                         onSelectElement={onSelectElement}
                         onUpdateElementStyle={onUpdateElementStyle}
                         onPolishWithAI={onPolishWithAI}
+                        onOpenEditModal={handleOpenEditModal}
                         blockId={block.id}
                         blockIndex={index}
                         className="max-w-xl"
@@ -335,7 +359,7 @@ export default function CanvasPreview({
                         </p>
                       </EditableCanvasItem>
 
-                      {/* 4. CTA Buttons (Explore Projects & Contact Me) */}
+                      {/* 4. CTA Buttons */}
                       <div className="flex flex-wrap gap-3 pt-2">
                         <EditableCanvasItem
                           elementKey="cta-primary"
@@ -347,6 +371,7 @@ export default function CanvasPreview({
                           onSelectElement={onSelectElement}
                           onUpdateElementStyle={onUpdateElementStyle}
                           onPolishWithAI={onPolishWithAI}
+                          onOpenEditModal={handleOpenEditModal}
                           blockId={block.id}
                           blockIndex={index}
                         >
@@ -376,6 +401,7 @@ export default function CanvasPreview({
                           onSelectElement={onSelectElement}
                           onUpdateElementStyle={onUpdateElementStyle}
                           onPolishWithAI={onPolishWithAI}
+                          onOpenEditModal={handleOpenEditModal}
                           blockId={block.id}
                           blockIndex={index}
                         >
@@ -414,6 +440,7 @@ export default function CanvasPreview({
                         onSelectElement={onSelectElement}
                         onUpdateElementStyle={onUpdateElementStyle}
                         onPolishWithAI={onPolishWithAI}
+                        onOpenEditModal={handleOpenEditModal}
                         blockId={block.id}
                         blockIndex={index}
                         className="space-y-1"
@@ -443,6 +470,7 @@ export default function CanvasPreview({
                             onSelectElement={onSelectElement}
                             onUpdateElementStyle={onUpdateElementStyle}
                             onPolishWithAI={onPolishWithAI}
+                            onOpenEditModal={handleOpenEditModal}
                             blockId={block.id}
                             blockIndex={index}
                           >
@@ -513,6 +541,7 @@ export default function CanvasPreview({
                         onSelectElement={onSelectElement}
                         onUpdateElementStyle={onUpdateElementStyle}
                         onPolishWithAI={onPolishWithAI}
+                        onOpenEditModal={handleOpenEditModal}
                         blockId={block.id}
                         blockIndex={index}
                       >
@@ -539,6 +568,7 @@ export default function CanvasPreview({
                             onSelectElement={onSelectElement}
                             onUpdateElementStyle={onUpdateElementStyle}
                             onPolishWithAI={onPolishWithAI}
+                            onOpenEditModal={handleOpenEditModal}
                             blockId={block.id}
                             blockIndex={index}
                           >
@@ -573,6 +603,7 @@ export default function CanvasPreview({
                         onSelectElement={onSelectElement}
                         onUpdateElementStyle={onUpdateElementStyle}
                         onPolishWithAI={onPolishWithAI}
+                        onOpenEditModal={handleOpenEditModal}
                         blockId={block.id}
                         blockIndex={index}
                         className="max-w-md mx-auto space-y-2"
@@ -606,6 +637,7 @@ export default function CanvasPreview({
                           onSelectElement={onSelectElement}
                           onUpdateElementStyle={onUpdateElementStyle}
                           onPolishWithAI={onPolishWithAI}
+                          onOpenEditModal={handleOpenEditModal}
                           blockId={block.id}
                           blockIndex={index}
                           className="inline-block"
@@ -633,6 +665,74 @@ export default function CanvasPreview({
           )}
         </div>
       </div>
+
+      {/* MODAL DRAWER FALLBACK FOR DEEP EDITING */}
+      {editModalData && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#181A24] border-2 border-black rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 font-sans text-white relative">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="font-heading font-extrabold text-base flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-[#38BDF8]" />
+                <span>Edit {editModalData.label}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditModalData(null)}
+                className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 font-mono text-xs">
+              <div>
+                <label className="block text-slate-400 mb-1">Title / Headline:</label>
+                <input
+                  type="text"
+                  defaultValue={
+                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.title ||
+                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.name ||
+                    ""
+                  }
+                  onChange={(e) => {
+                    handleInlineChange(editModalData.blockId, 'content.title', e.target.value);
+                    handleInlineChange(editModalData.blockId, 'content.name', e.target.value);
+                  }}
+                  className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1">Subtitle / Bio Paragraph:</label>
+                <textarea
+                  rows={3}
+                  defaultValue={
+                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.subtitle ||
+                    schema.blocks.find(b => b.id === editModalData.blockId)?.content?.bio ||
+                    ""
+                  }
+                  onChange={(e) => {
+                    handleInlineChange(editModalData.blockId, 'content.subtitle', e.target.value);
+                    handleInlineChange(editModalData.blockId, 'content.bio', e.target.value);
+                  }}
+                  className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setEditModalData(null)}
+                className="px-5 py-2 bg-[#00FFA3] text-black font-extrabold text-xs uppercase tracking-wider rounded-xl border border-black shadow-[2px_2px_0px_0px_#000]"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
