@@ -1,20 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Sparkles, Mail, ExternalLink, Edit3, GripVertical, AlignLeft, AlignCenter, AlignRight,
-  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Type, Move, Plus, Image as ImageIcon
+  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move
 } from 'lucide-react';
+import CanvasBuildingState from './CanvasBuildingState';
 
 export default function CanvasPreview({
   schema,
   deviceMode,
+  isGenerating,
   onUpdateBlock,
   onMoveBlock,
   onDuplicateBlock,
   onDeleteBlock,
-  onPolishWithAI
+  onPolishWithAI,
+  onSelectElement,
+  selectedElement,
+  onReplaceImage
 }) {
-  const [selectedElement, setSelectedElement] = useState(null);
   const [hoveredElementId, setHoveredElementId] = useState(null);
+  const [dragOffset, setDragOffset] = useState(null);
+  const isDragging = useRef(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
 
   if (!schema) return null;
 
@@ -39,9 +46,31 @@ export default function CanvasPreview({
   const isSelected = (id) => selectedElement?.id === id;
   const isHovered = (id) => hoveredElementId === id;
 
+  const handleMouseDown = (e, id, type, label, blockIndex) => {
+    e.stopPropagation();
+    onSelectElement && onSelectElement({ id, type, label, blockIndex });
+
+    isDragging.current = true;
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    const dx = Math.round(e.clientX - dragStartPos.current.x);
+    const dy = Math.round(e.clientY - dragStartPos.current.y);
+    setDragOffset({ x: dx, y: dy });
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    setDragOffset(null);
+  };
+
   return (
     <div
-      onClick={() => setSelectedElement(null)}
+      onClick={() => onSelectElement && onSelectElement(null)}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       className="flex-1 bg-[#0F1117] bg-grid-pattern-dark overflow-y-auto p-4 sm:p-8 flex flex-col items-center justify-start relative select-none"
     >
       {/* Background Ambient Glow Orbs */}
@@ -70,12 +99,16 @@ export default function CanvasPreview({
 
           <div className="flex items-center gap-2 font-mono text-[10px] text-slate-400">
             <span className="w-2 h-2 rounded-full bg-[#00FFA3] animate-pulse" />
-            <span className="hidden sm:inline">LIVE EDIT CANVAS</span>
+            <span className="hidden sm:inline">DIRECT CANVAS EDITOR</span>
           </div>
         </div>
 
         {/* Canvas Render Body */}
         <div className="flex-1 overflow-y-auto text-white relative">
+          
+          {/* Real-time AI Generation Experience Overlay */}
+          {isGenerating && <CanvasBuildingState />}
+
           {schema.blocks && schema.blocks.length > 0 ? (
             schema.blocks.map((block, index) => {
               const blockSelected = isSelected(block.id);
@@ -86,100 +119,82 @@ export default function CanvasPreview({
                   key={block.id}
                   onMouseEnter={() => setHoveredElementId(block.id)}
                   onMouseLeave={() => setHoveredElementId(null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedElement({ id: block.id, type: block.type, label: block.type, index });
-                  }}
+                  onMouseDown={(e) => handleMouseDown(e, block.id, block.type, block.type, index)}
                   className={`relative transition-all ${
                     blockSelected
-                      ? 'ring-2 ring-[#FF6B1A] ring-offset-2 ring-offset-black z-20'
+                      ? 'border-2 border-[#FF6B1A] shadow-[0_0_15px_rgba(255,107,26,0.5)] z-20'
                       : blockHovered
                       ? 'border-2 border-dashed border-[#FF6B1A]/50 z-10'
                       : 'border-b border-white/5 last:border-b-0'
                   }`}
+                  style={
+                    blockSelected && dragOffset
+                      ? { transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` }
+                      : {}
+                  }
                 >
-                  {/* FLOATING CONTEXTUAL TOOLBAR (when selected) */}
+                  {/* Element Badge Tag (Top-Left) */}
+                  {(blockSelected || blockHovered) && (
+                    <div className="absolute -top-3 left-3 z-40 bg-[#38BDF8] text-black font-mono font-black text-[9px] px-2 py-0.5 rounded border border-black shadow-[1.5px_1.5px_0px_0px_#000] uppercase tracking-wider flex items-center gap-1 pointer-events-none">
+                      <Move className="w-2.5 h-2.5" /> [ {block.type} ]
+                      {dragOffset && ` (x: ${dragOffset.x}px, y: ${dragOffset.y}px)`}
+                    </div>
+                  )}
+
+                  {/* FLOATING MINI CONTEXT MENU (when selected) */}
                   {blockSelected && (
-                    <div className="absolute -top-12 left-4 z-40 bg-[#181A24] border-2 border-black rounded-xl p-1.5 shadow-2xl flex items-center space-x-1.5 text-xs font-mono text-white animate-in fade-in zoom-in duration-150">
-                      
-                      {/* Element Badge Tag */}
-                      <span className="px-2 py-0.5 bg-[#FF6B1A] text-black font-extrabold text-[10px] rounded uppercase tracking-wider">
-                        {block.type}
-                      </span>
-
-                      <div className="w-px h-4 bg-white/20" />
-
-                      {/* Section Order Up/Down */}
+                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 bg-[#181A24]/90 backdrop-blur-md border-2 border-black rounded-xl p-1 shadow-2xl flex items-center gap-1 text-xs font-mono text-white animate-in fade-in zoom-in duration-150">
                       <button
                         type="button"
-                        onClick={() => onMoveBlock && onMoveBlock(index, 'up')}
-                        disabled={index === 0}
-                        className="p-1 hover:bg-white/10 rounded disabled:opacity-30"
-                        title="Move Section Up"
+                        onClick={() => onDeleteBlock && onDeleteBlock(index)}
+                        className="p-1.5 hover:bg-white/10 rounded flex items-center gap-1 text-slate-300"
+                        title="Cut Element"
                       >
-                        <ChevronUp className="w-3.5 h-3.5" />
+                        <Scissors className="w-3.5 h-3.5" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onMoveBlock && onMoveBlock(index, 'down')}
-                        disabled={index === schema.blocks.length - 1}
-                        className="p-1 hover:bg-white/10 rounded disabled:opacity-30"
-                        title="Move Section Down"
-                      >
-                        <ChevronDown className="w-3.5 h-3.5" />
-                      </button>
-
-                      <div className="w-px h-4 bg-white/20" />
-
-                      {/* AI Polish */}
-                      <button
-                        type="button"
-                        onClick={() => onPolishWithAI && onPolishWithAI(block)}
-                        className="flex items-center gap-1 px-2 py-0.5 bg-[#FFE600] text-black font-bold text-[10px] rounded hover:bg-[#ffed4d]"
-                        title="AI Rewrite Section"
-                      >
-                        <Wand2 className="w-3.5 h-3.5" /> Aria Polish
-                      </button>
-
-                      <div className="w-px h-4 bg-white/20" />
-
-                      {/* Duplicate */}
                       <button
                         type="button"
                         onClick={() => onDuplicateBlock && onDuplicateBlock(index)}
-                        className="p-1 hover:bg-white/10 rounded text-slate-300 hover:text-white"
-                        title="Duplicate Section"
+                        className="p-1.5 hover:bg-white/10 rounded flex items-center gap-1 text-slate-300"
+                        title="Duplicate Element"
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Delete */}
+                      <div className="w-px h-4 bg-white/20" />
+
                       <button
                         type="button"
-                        onClick={() => onDeleteBlock && onDeleteBlock(index)}
-                        className="p-1 hover:bg-red-500/20 text-red-400 rounded hover:text-red-300"
-                        title="Delete Section"
+                        onClick={() => onPolishWithAI && onPolishWithAI(block)}
+                        className="flex items-center gap-1 px-2.5 py-1 bg-[#FFE600] text-black font-extrabold text-[10px] rounded hover:bg-[#ffed4d] border border-black shadow-[1px_1px_0px_0px_#000]"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Wand2 className="w-3 h-3 text-black" /> Ask Aria
                       </button>
                     </div>
                   )}
 
-                  {/* Corner Anchor Dots (when selected) */}
+                  {/* 8 ANCHOR BOUNDING DOTS (4 Corners + 4 Edge Midpoints) */}
                   {blockSelected && (
                     <>
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 -left-1.5 z-30" />
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 -right-1.5 z-30" />
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-1.5 -left-1.5 z-30" />
-                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-1.5 -right-1.5 z-30" />
+                      {/* Top-Left */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 -left-1.5 z-30 cursor-nwse-resize" />
+                      {/* Top-Center */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 left-1/2 -translate-x-1/2 z-30 cursor-ns-resize" />
+                      {/* Top-Right */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -top-1.5 -right-1.5 z-30 cursor-nesw-resize" />
+                      {/* Left-Center */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute top-1/2 -translate-y-1/2 -left-1.5 z-30 cursor-ew-resize" />
+                      {/* Right-Center */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute top-1/2 -translate-y-1/2 -right-1.5 z-30 cursor-ew-resize" />
+                      {/* Bottom-Left */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-1.5 -left-1.5 z-30 cursor-nesw-resize" />
+                      {/* Bottom-Center */}
+                      <div className="w-2.5 h-2.5 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-1.5 left-1/2 -translate-x-1/2 z-30 cursor-ns-resize" />
+                      {/* Bottom-Right (Stretch / Rotate Indicator) */}
+                      <div className="w-4 h-4 bg-[#FF6B1A] border border-black rounded-full absolute -bottom-2 -right-2 z-40 cursor-se-resize flex items-center justify-center text-black shadow-md">
+                        <RotateCw className="w-2.5 h-2.5" />
+                      </div>
                     </>
-                  )}
-
-                  {/* Block Hover Grip Indicator */}
-                  {blockHovered && !blockSelected && (
-                    <div className="absolute top-3 left-3 z-20 bg-[#FFE600] text-black font-mono font-bold text-[10px] px-2 py-0.5 rounded border border-black shadow-[1.5px_1.5px_0px_0px_#000] flex items-center gap-1">
-                      <GripVertical className="w-3 h-3" /> {block.type}
-                    </div>
                   )}
 
                   {/* Block 1: HeroBlock */}
@@ -197,18 +212,35 @@ export default function CanvasPreview({
                         </span>
                       </div>
 
-                      <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                        I'm{' '}
-                        <span
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
-                          className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none focus:ring-2 focus:ring-[#FF6B1A] rounded"
+                      <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6 items-center">
+                        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                          I'm{' '}
+                          <span
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
+                            className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none focus:ring-2 focus:ring-[#FF6B1A] rounded"
+                          >
+                            {block.content.name}
+                          </span>
+                          .
+                        </h1>
+
+                        {/* Candidate Avatar Frame */}
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onReplaceImage && onReplaceImage(block);
+                          }}
+                          className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center cursor-pointer hover:border-[#38BDF8] transition-all relative group/img overflow-hidden shadow-xl"
+                          style={{ backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})` }}
                         >
-                          {block.content.name}
-                        </span>
-                        .
-                      </h1>
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-mono text-white gap-1">
+                            <ImageIcon className="w-4 h-4 text-[#38BDF8]" />
+                            <span>Replace Image</span>
+                          </div>
+                        </div>
+                      </div>
 
                       <p
                         contentEditable

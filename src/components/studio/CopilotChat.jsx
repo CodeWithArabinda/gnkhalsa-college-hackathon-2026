@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Bot, User, RefreshCw, Wand2, ArrowRight } from 'lucide-react';
+import PlanningCard from './PlanningCard';
 
 const QUICK_PROMPTS = [
   "✨ Make theme Dark Cinematic",
@@ -8,7 +9,7 @@ const QUICK_PROMPTS = [
   "🎨 Add project: AI Copilot Studio"
 ];
 
-export default function CopilotChat({ schema, onApplyPrompt }) {
+export default function CopilotChat({ schema, onApplyPrompt, isGenerating: externalGenerating }) {
   const [messages, setMessages] = useState([
     {
       id: "m1",
@@ -17,8 +18,10 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
     }
   ]);
   const [input, setInput] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [internalGenerating, setInternalGenerating] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const isGenerating = externalGenerating !== undefined ? externalGenerating : internalGenerating;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,7 +43,7 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
 
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setIsGenerating(true);
+    setInternalGenerating(true);
 
     try {
       let responseText = "Updated your portfolio schema!";
@@ -64,7 +67,7 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
         { id: `err-${Date.now()}`, role: "assistant", text: errMsg }
       ]);
     } finally {
-      setIsGenerating(false);
+      setInternalGenerating(false);
     }
   };
 
@@ -119,6 +122,9 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
           </div>
         ))}
 
+        {/* Step-by-Step AI Planning Card */}
+        <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
+
         {isGenerating && (
           <div className="flex items-center space-x-2.5">
             <div className="w-7 h-7 rounded-lg bg-[#FF6B1A] text-black border border-black flex items-center justify-center">
@@ -126,7 +132,7 @@ export default function CopilotChat({ schema, onApplyPrompt }) {
             </div>
             <div className="bg-[#1D202D] border border-white/10 rounded-2xl p-3 text-slate-400 font-mono text-[11px] flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#FF6B1A] animate-ping" />
-              Updating schema blocks...
+              Updating schema & layout blocks...
             </div>
           </div>
         )}

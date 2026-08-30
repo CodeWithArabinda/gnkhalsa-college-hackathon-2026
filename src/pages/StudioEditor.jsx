@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import StudioNavbar from '../components/studio/StudioNavbar';
+import StudioToolbar from '../components/studio/StudioToolbar';
 import CanvasPreview from '../components/studio/CanvasPreview';
 import CopilotChat from '../components/studio/CopilotChat';
 import { initialPortfolioSchema } from '../types/schema';
@@ -8,6 +9,8 @@ import { processUserPrompt } from '../lib/geminiBuilder';
 export default function StudioEditor() {
   const [schema, setSchema] = useState(initialPortfolioSchema);
   const [deviceMode, setDeviceMode] = useState('desktop');
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Handle inline contentEditable changes from CanvasPreview
   const handleUpdateBlock = (blockId, fieldPath, value) => {
@@ -68,20 +71,99 @@ export default function StudioEditor() {
     });
   };
 
+  // Add new element block from + Add Menu
+  const handleAddElement = (elementType) => {
+    setSchema((prev) => {
+      const blocks = [...prev.blocks];
+      if (elementType === 'project') {
+        const newProjectBlock = {
+          id: `projects-${Date.now()}`,
+          type: 'ProjectGridBlock',
+          content: {
+            title: 'New Showcase Section',
+            subtitle: 'Created via Studio Add Tool',
+            items: [
+              {
+                id: `p-${Date.now()}`,
+                title: 'New Project Showcase',
+                description: 'Full stack web application built with modern architecture.',
+                tags: ['React', 'Node.js', 'Tailwind'],
+                link: 'https://github.com'
+              }
+            ]
+          }
+        };
+        blocks.push(newProjectBlock);
+      } else if (elementType === 'skill') {
+        const newSkillBlock = {
+          id: `skills-${Date.now()}`,
+          type: 'SkillsBlock',
+          content: {
+            title: 'Core Competencies',
+            categories: [
+              { name: 'Specialized Skills', skills: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js'] }
+            ]
+          }
+        };
+        blocks.push(newSkillBlock);
+      } else if (elementType === 'text') {
+        const newHeroBlock = {
+          id: `hero-${Date.now()}`,
+          type: 'HeroBlock',
+          content: {
+            headline: 'Special Announcement',
+            name: 'New Custom Title',
+            bio: 'Click and edit this text block directly on the canvas.',
+            ctaText: 'View Work',
+            secondaryCta: 'Contact'
+          }
+        };
+        blocks.push(newHeroBlock);
+      }
+      return { ...prev, blocks };
+    });
+  };
+
+  // Replace Image handler
+  const handleReplaceImage = (element) => {
+    const newUrl = window.prompt("Enter new Image URL (or paste image link):", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80");
+    if (!newUrl) return;
+
+    setSchema((prev) => {
+      const blocks = prev.blocks.map((b) => {
+        if (b.type === 'HeroBlock') {
+          return {
+            ...b,
+            content: { ...b.content, avatarUrl: newUrl }
+          };
+        }
+        return b;
+      });
+      return { ...prev, blocks };
+    });
+  };
+
   // AI Polish section
   const handlePolishWithAI = async (block) => {
-    return handleApplyPrompt(`Polish and rewrite the ${block.type} section content to sound impressive and senior.`);
+    return handleApplyPrompt(`Polish and rewrite the ${block?.type || 'Hero'} section content to sound impressive and senior.`);
   };
 
   // AI Prompt Processor — calls Gemini Flash schema engine
   const handleApplyPrompt = async (promptText) => {
-    const result = await processUserPrompt(promptText, schema);
-    if (result && result.updatedSchema) {
-      setSchema(result.updatedSchema);
-    } else if (result && result.schema) {
-      setSchema(result.schema);
+    setIsGenerating(true);
+    try {
+      const result = await processUserPrompt(promptText, schema);
+      if (result && result.updatedSchema) {
+        setSchema(result.updatedSchema);
+      } else if (result && result.schema) {
+        setSchema(result.schema);
+      }
+      return result.aiMessage || result.message || "Portfolio successfully updated!";
+    } catch (err) {
+      throw err;
+    } finally {
+      setIsGenerating(false);
     }
-    return result.aiMessage || result.message || "Portfolio successfully updated!";
   };
 
   const handlePublish = () => {
@@ -102,6 +184,23 @@ export default function StudioEditor() {
         onPublish={handlePublish}
       />
 
+      {/* Top Contextual Studio Action Ribbon */}
+      <StudioToolbar
+        selectedElement={selectedElement}
+        onAddElement={handleAddElement}
+        onAskAria={(elem) => handlePolishWithAI(elem)}
+        onReplaceImage={handleReplaceImage}
+        onAddLink={() => window.prompt("Enter custom link URL:", "https://github.com")}
+        onAlignChange={() => {}}
+        onToggleStyle={() => {}}
+        onDeleteSelected={() => {
+          if (selectedElement && selectedElement.blockIndex !== undefined) {
+            handleDeleteBlock(selectedElement.blockIndex);
+            setSelectedElement(null);
+          }
+        }}
+      />
+
       {/* Main Split-Screen Workspace */}
       <div className="flex-1 flex overflow-hidden">
         
@@ -109,17 +208,22 @@ export default function StudioEditor() {
         <CanvasPreview
           schema={schema}
           deviceMode={deviceMode}
+          isGenerating={isGenerating}
           onUpdateBlock={handleUpdateBlock}
           onMoveBlock={handleMoveBlock}
           onDuplicateBlock={handleDuplicateBlock}
           onDeleteBlock={handleDeleteBlock}
           onPolishWithAI={handlePolishWithAI}
+          onSelectElement={setSelectedElement}
+          selectedElement={selectedElement}
+          onReplaceImage={handleReplaceImage}
         />
 
         {/* 30% AI Copilot Panel */}
         <CopilotChat
           schema={schema}
           onApplyPrompt={handleApplyPrompt}
+          isGenerating={isGenerating}
         />
 
       </div>
