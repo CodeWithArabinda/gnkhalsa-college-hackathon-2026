@@ -1,46 +1,11 @@
 import React from "react";
-import Tilt from "react-parallax-tilt";
 import { motion } from "framer-motion";
 
-import { services, stats } from "../../constants";
+import { stats } from "../../constants";
 import { SectionWrapper } from "../../hoc";
 import { fadeIn } from "../../utils/motion";
 import { config } from "../../constants/config";
 import { Header } from "../atoms/Header";
-
-interface IServiceCard {
-  index: number;
-  title: string;
-  icon: string;
-}
-
-const ServiceCard: React.FC<IServiceCard> = ({ index, title, icon }) => (
-  <Tilt
-    glareEnable
-    tiltEnable
-    tiltMaxAngleX={25}
-    tiltMaxAngleY={25}
-    glareColor="#aaa6c3"
-    className="w-full xs:w-[250px]"
-  >
-    <motion.div
-      variants={fadeIn("right", "spring", index * 0.3, 0.75)}
-      className="green-pink-gradient shadow-card w-full rounded-[20px] p-[1px]"
-    >
-      <div className="bg-tertiary flex min-h-[260px] flex-col items-center justify-evenly rounded-[20px] px-8 py-5">
-        <img
-          src={icon}
-          alt={title}
-          className="h-16 w-16 object-contain"
-        />
-
-        <h3 className="text-center text-[18px] font-bold text-white">
-          {title}
-        </h3>
-      </div>
-    </motion.div>
-  </Tilt>
-);
 
 const About = () => {
   return (
@@ -73,16 +38,6 @@ const About = () => {
           </div>
         ))}
       </motion.div>
-
-      {/* Domain / Role Expertise Cards */}
-      <div className="mt-14">
-        <h4 className="text-white text-xl font-bold mb-6">Core Specializations</h4>
-        <div className="flex flex-wrap gap-8 max-sm:justify-center">
-          {services.map((service, index) => (
-            <ServiceCard key={service.title} index={index} {...service} />
-          ))}
-        </div>
-      </div>
     </>
   );
 };
