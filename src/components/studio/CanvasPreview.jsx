@@ -216,30 +216,28 @@ export default function CanvasPreview({
   // Helper to render Full Headline with Dynamic Accent Word Highlighting
   const renderDynamicHeadline = (headingText, accentColor = "#ff6b1a") => {
     if (!headingText) return null;
-    let fullText = headingText;
-    if (!fullText.includes("I'm") && !fullText.includes("Im") && !fullText.includes("I am")) {
-      fullText = `I'm ${fullText}.`;
+    const words = headingText.trim().split(" ");
+    if (words.length <= 1) {
+      return <span className="text-white font-bold">{headingText}</span>;
     }
-    const words = fullText.trim().split(" ");
-    if (words.length === 1) {
-      return <span className="text-white">{words[0]}</span>;
-    }
+    
     const lastWord = words[words.length - 1];
     const firstWords = words.slice(0, -1).join(" ");
 
     return (
-      <>
+      <span className="inline-block font-extrabold tracking-tight">
         <span className="text-white">{firstWords} </span>
         <span
+          className="inline-block bg-gradient-to-r from-white via-zinc-200 bg-clip-text text-transparent"
           style={{
-            background: `linear-gradient(to right, #ffffff, ${accentColor})`,
+            backgroundImage: `linear-gradient(135deg, #ffffff 20%, ${accentColor} 100%)`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
         >
           {lastWord}
         </span>
-      </>
+      </span>
     );
   };
 
