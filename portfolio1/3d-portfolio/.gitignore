@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js
+.next/
+out/
+
+# production
+build/
+
+# local env files
+.env*
+.env*.local
+
+# Vercel
+.vercel/
+
+# testing
+coverage/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Local AI/editor settings
+.claude/settings.local.json
+
+# raw screenshot dump
+public/assets/projects-screenshots/raw/

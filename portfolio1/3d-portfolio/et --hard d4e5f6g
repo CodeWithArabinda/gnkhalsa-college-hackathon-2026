@@ -1,0 +1,315 @@
+[33m83cd291[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m react version
+[33m6f0f796[m next js project
+[33m1fb3691[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m chore(projects): move waku and kanbi live links to .dev
+[33mf013154[m feat(analytics): default umami url and report deploy hostname
+[33m8950347[m feat(overlays): add opt-in domain migration notice
+[33m2bb8a1d[m feat(seo): add sitemap and robots routes
+[33maf2aa04[m chore(config): point canonical domain at nareshkhatri.dev
+[33m7079edc[m fix(footer): wrap copyright year in Suspense for cacheComponents
+[33mab56e26[m fix(github-stars): fetch count via cached server action
+[33mff33362[m style(experience): drop z-10 from section wrapper
+[33mbe341d1[m style(hero): bolden hero heading and intro text
+[33m6ba3075[m style(hero): bolden hero heading and intro text
+[33mcef1013[m feat(projects): add live and source links for project cards
+[33me0d3ca4[m fix(smooth-scroll): move autoRaf to top-level ReactLenis prop
+[33me9f2f1c[m docs(projects): tighten preview and slideshow comments
+[33mc0ad603[m chore(assets): gitignore raw screenshot dump
+[33m9791f40[m feat(projects): scrolling card previews with adaptive image fit
+[33m78987bd[m feat(projects): add peakposts, thesvg brand logos, drop stale projects
+[33m3f3a78c[m fix(scroll): sync lenis with scrolltrigger so section animations stop
+[33mf81cad8[m fix(cursor): keep magnetic target glued and springing back
+[33m057391d[m feat(cursor): magnetic hover with unified elastic cursor
+[33m2018644[m fix(cursor): rebind gsap setters when elastic cursor remounts
+[33m0659fb5[m fix(chat): bump message body weight for legibility
+[33mb01fd49[m style(nav): render menu links in extra-bold display font
+[33mad9e647[m feat(theme): lock in Unbounded display, mono accent, medium weight
+[33mfd7dd50[m fix(realtime): reconnect socket after sleep/wake
+[33mb881e2b[m style(menu): restyle motion toggle as a subtle ghost button
+[33m1772e46[m fix(spline): re-init keyboard when 3D is re-enabled
+[33mc0cf7f8[m feat(menu): close the menu when clicking the overlay
+[33m3a2b691[m feat(menu): move reduced-motion toggle to bottom-right, expand with label
+[33m556e058[m feat(menu): add a reduced-motion toggle
+[33m0e1e9d0[m fix(perf): stop gating 3D on unreliable hardware signals
+[33m9fd7ff3[m chore: drop unused three dep and dead spline asset
+[33m18fb8cc[m perf(spline): pause render loop on tab hide, fix resize listener leak
+[33m1daf446[m perf(spline): preconnect to unpkg for faster wasm fetch
+[33m68ae56b[m fix(perf): stop dropping 3D on capable devices
+[33ma48f46a[m feat(skills): html skills fallback + reduced-motion opt-in nudge
+[33m316ed88[m perf(home): scale down heavy effects on low-end devices
+[33m695bfbe[m fix(config): allow same-origin PDF framing for resume page
+[33m3fb0fd7[m feat(resume): add doodle overlay and tune viewer for mobile
+[33mb2430e5[m fix(navigation): replace section hash instead of appending on scroll
+[33me5c64ac[m fix(realtime): prevent remote cursors overflowing viewport on mobile
+[33ma7882ee[m feat(resume): add resume route with inline view and download
+[33m1c16d42[m feat(realtime): add figma-style follow mode for remote cursors
+[33m3e6456d[m fix(realtime): stop chat messages overflowing the popover width
+[33m9668d21[m fix(realtime): truncate quoted reply previews with ellipsis
+[33m4b9b8e4[m feat(realtime): defer chat init fetch and rework join row
+[33m2a4144f[m fix(realtime): prevent long unbroken messages from overflowing chat
+[33m042ea3a[m fix(frontend): resolve react 19 and next 16 breaking changes
+[33m146d1a4[m chore(deps): upgrade next 14→16, react 18→19, and patch vulnerable deps
+[33m4681461[m feat(projects): revamp project section with responsive dialog and theme-aware styling
+[33m75cf207[m fix(realtime): handle isTyping flag in typing events
+[33m9b00118[m refactor(blogs): revamp blog listing and post pages with editorial design
+[33m97cc7e1[m fix(realtime): restrict realtime features to home page only
+[33ma3289b3[m feat(realtime): add keyboard shortcuts and reaction tooltips
+[33me0afc7f[m feat(realtime): add infinite scroll, rate limit UI, and cursor tracking
+[33me49b8bc[m fix(realtime): remove visitor join sound
+[33m05824d7[m feat(realtime): add message editing and secure admin auth dialog
+[33m02cca81[m fix(realtime): autofocus chat input and hide user count on mobile
+[33m90ad679[m fix(radial-menu): show disabled menu during cooldown instead of context menu
+[33m365a5e0[m feat(radial-menu): add intensity scaling, cooldown, charge tone, and hint
+[33m9f97afe[m feat(radial-menu): add shockwave effect and sound on confetti trigger
+[33m8fba0b0[m fix(realtime): use absolute positioning for remote cursors
+[33m358b033[m fix(realtime): stringify reaction key lookup, disable inline smiley button
+[33m76440da[m fix(realtime): persist user profiles in map and fix header after system msgs
+[33mdfc07ba[m style(realtime): discord-style timestamps, day separators, hover highlight, bigger buttons
+[33m35bd148[m feat(realtime): add reactions, reply, system join msgs, admin badge, and join sound
+[33m8b68bd7[m feat(realtime): add types for reactions, replies, system msgs, and admin
+[33mee78243[m feat(realtime): add toast, connection status, people label, shortcuts, slash commands
+[33madb0eb9[m fix(realtime): fix msg deletion type mismatch, dead state, and reconnect
+[33m7ec99c0[m perf(realtime): memoize derived data, remove dead prop, add aria-label
+[33ma0d7d4b[m fix(realtime): fix type error, stale closures, memory leak, and missing deps
+[33mc291e3c[m fix(radial-menu): center menu on cursor and preserve native context menu on interactive elements
+[33m5ba7dee[m fix(button): fix cloneElement type error in CI build
+[33m24d871a[m fix: resolve build errors and re-enable eslint ignoreDuringBuilds
+[33mca90862[m feat(analytics): add google analytics via @next/third-parties
+[33m9567053[m feat(ui): add blog loading skeleton and cache headers for static assets
+[33m0d8d6b8[m feat(contact): add client-side field-level validation with zod
+[33mc362ba0[m chore(floating-dock): remove dead code and unused imports
+[33ma622bfd[m chore(quality): fix ts-ignore, any types, and remove dead code
+[33mba56ea3[m fix(security): add security headers, rate limiting, enable eslint in builds
+[33m0e04846[m fix(seo): add metadata to 404 page
+[33m66d229d[m fix(a11y): add missing aria attributes across components
+[33me92fee6[m fix(core): add useEffect cleanup and fix stale closures
+[33m07090a3[m refactor(deps): migrate from framer-motion to motion
+[33macb3a6e[m fix(core): fix modal memory leak, contact form error handling, and api route privacy
+[33m315a3e5[m Add comment to FUNDING.yml
+[33m2de755b[m Update GitHub Sponsors username in FUNDING.yml
+[33mf376c37[m docs: update README with customization guide and env setup
+[33m4e93cda[m docs: update README with customization guide and env setup
+[33m1a3f3de[m feat: enable scroll-to-cursor from chat message list
+[33m06a500e[m feat: implement scroll-to-cursor and refine realtime UI interactions
+[33m244ec60[m chore: cleanup unused files and components
+[33ma524736[m fix: only show OnlineUsers if ws url is present
+[33ma425fa9[m feat: update resume link and experience section
+[33mda8a840[m feat: extract user profile editing UI from UserItem into a dedicated EditProfileModal.
+[33ma63d9f5[m feat: Prioritize message-specific color for chat avatar background.
+[33m94e082a[m feat: Implement keyboard press/release and chat message send/receive sound effects using a new `useSounds` hook and audio assets.
+[33m68de510[m refactor: enhance animated background scaling with device-specific and clamped offsets
+[33m989e61d[m fix: Enable pointer events on the floating dock container.
+[33m503f7dc[m chore: Remove console.log from chat message list component.
+[33me7dc1d1[m feat: Add optional color property to chat messages and apply it as a fallback in the UI.
+[33m46dc9e1[m feat: Enhance remote cursors with expanding avatar pills displaying user information
+[33mf12eaa0[m feat: Add an overlay to UserList to allow closing it by clicking outside.
+[33m610bd13[m feat: Implement user profile editing modal with avatar and color selection.
+[33mde6a2fc[m feat: add theme toggle transition animation
+[33m4b0858f[m feat: add an experience section
+[33mdc6ed9c[m feat: create a reusable section wrapper component for all sections
+[33m271c469[m refactor: consolidate providers and centralize global app overlays
+[33mc0f11d9[m feat: add msg deletion and warning
+[33mae741e1[m chore: remove logs
+[33mbdb072b[m feat: make buttons look more consistant
+[33mae20851[m feat: add twitter logo in hero section
+[33mefc762a[m feat: add flag next to user name
+[33m3e65b76[m feat: add a radial menu with emoji cofetti
+[33m4dc7950[m fix: dedup Message type
+[33m0ce8b35[m feat: show country flag besides user in chat
+[33ma756358[m feat: update chat ui and use new online user and msgs interface
+[33mc8fd53f[m fix: only connect to ws when url is available
+[33m38911ba[m fix: reduce nav height being too large
+[33m7817213[m fix: reduce keyboard scale on skills section
+[33ma5e59c9[m fix(github-stars): fix repo redirection issue
+[33m721ba3b[m chore: enable strict mode and ignore build errors
+[33mf290730[m feat(blogs): add my first blog!
+[33me59dcd9[m refactor(github-stars): remove unless in view event logic
+[33m15db98a[m fix(blogs): remove early return to follow react hook rules
+[33m127880d[m feat: add a github repo stars count in header
+[33ma5e8867[m fix(icons): replace deprecated icons
+[33mc6146cb[m feat(blogs): add blogs section with reduced distractions
+[33m99db3c8[m refactor: enhance animation code and make keyboard more responsive
+[33m45c066f[m feat: suppress hydration warnings
+[33m78bae06[m fix: replace h1 with div to fix nested h1 errors
+[33m2e1ae1d[m fix(icons): update twitter icon
+[33mee001ba[m fix: contact form message placeholder
+[33me22e1bc[m fix: generate random username if not available in localstorage
+[33m76c2dde[m feat: :sparkles: update context for user and chat events
+[33m2eb49e5[m chore: remove useless code
+[33m09e88d9[m install: tabs from shadcn
+[33m4386c87[m feat: add online users and chat
+[33m6df7847[m fix: :bug: use self hosted umami instance
+[33m9bc08d7[m feat: :truck: use author data from config
+[33mbf4e8d2[m feat: :sparkles: create hook to get viewport height and width
+[33m90a4030[m perf: :zap: disable shadows in mobile keycaps
+[33me34cb0d[m fix: :lipstick: fix button extending header height
+[33m96e5590[m feat: :thread: update tech stack
+[33m03b923b[m fix: :bug: remove useRef
+[33m1fc08df[m feat: :lipstick: show cursors on top
+[33m7c8a797[m feat: :lipstick: add animations
+[33md43f955[m feat: :sparkles: show users who are online
+[33m0530556[m feat: :sparkles: generate users name and color
+[33m80fa306[m refactor: :truck: move remote-cursors component to realtime directory
+[33m91a9e0a[m feat: :sparkles: add remote cursor feature :fire:
+[33m1567f48[m feat: :heavy_plus_sign: add socketio client
+[33me0ba6e6[m feat: :zap: add few params to improve perf
+[33mad9341e[m feat: :sparkles: create a hook to throttle a function
+[33m2f6d66a[m feat: :sparkles: add github repo in portfolio link
+[33m2da8313[m feat: :fire: remove react fiber lib
+[33m9b249cd[m feat: :bug: remove sanity reference for now
+[33m6502026[m feat: :memo: update readme
+[33me2b337a[m feat: :bug: add pointer-events-none to gradient div
+[33m4d829a8[m feat: :lipstick: use simple icons for github and linkedin
+[33m17eef9d[m feat: :lipstick: underline current route
+[33mf37b922[m feat: :sparkles: add social buttons in footer
+[33m5bf3787[m feat: :sparkles: create social media icons
+[33m6108607[m feat: :bug: add github link
+[33mc636475[m feat: :lipstick: remove all hover background styles
+[33mae03af7[m feat: :sparkles: adjust dark color on keyboard text
+[33m9a0c6f8[m feat: :fire: remove logs
+[33mcc5b9e3[m feat: :sparkles: add box reveal animation
+[33m1af7e6d[m feat: :art: return margin top
+[33m5a18ca1[m feat: :memo: update vercel description
+[33m4d51a39[m feat: :sparkles: add my email
+[33m1fea986[m feat: :lipstick: add background opacity
+[33m7a40764[m feat: :bug: add contact us keyboard animation back
+[33m238e1f4[m feat: :truck: split sections into files
+[33m8cc5421[m feat: :sparkles: add keyboard reveal animation and use object to store states
+[33m3601695[m feat: :sparkles: show current link in white
+[33mc764b6d[m feat: :iphone: improve responsiveness on mobile
+[33mc114604[m feat: :fire: remove pointer-events-none class
+[33mcc78558[m feat: :zap: add pointer-events-none class recursively to every child
+[33m76d9cfa[m feat: :bug: fix reseting keycaps to y:0
+[33m223b2f0[m feat: :fire: remove duplicated conditions
+[33m23d7e4e[m feat: :lipstick: hide keyboard text when section isnt skill & minor improvement in code
+[33m313e15b[m feat: :sparkles: add blurIn animation
+[33m4c06b79[m feat: :art: decrease icon width
+[33mb412efe[m feat: :bug: add pointer event none on icons
+[33ma3a0dea[m feat: :bug: show dark 3d text on keyboard in light theme
+[33mee1de28[m feat: add scroll down icon
+[33m27d24be[m feat: :heavy_plus_sign: use devtools-detector pkg since i give up doing it myself
+[33mda107f0[m feat: :zap: make keycap animation more elastic
+[33mdc7365f[m feat: :fire: remove span wraping author name
+[33me66b60a[m feat: :fire: remove unnessary tooltips
+[33m3771a7e[m feat: :art: make dark theme by default
+[33m3ca0303[m feat: open link in new tab
+[33ma6ba542[m feat: :mag: wrap headings inside links
+[33mcec972f[m feat: :lipstick: make spline canvas take full height
+[33m34ae798[m feat: :bug: add corrent footer links
+[33m2e2947e[m feat: :truck: add full author name
+[33m34c5d1f[m feat: :lipstick: add more hover targets
+[33m65cc9ef[m feat: :art: add buttons in links
+[33m3c9fd8c[m feat: :sparkles: use get syntax to define name function
+[33me1572ed[m feat: minor changes in tooltips
+[33m3ea71f0[m feat: :mag: update og image
+[33m99153ec[m feat: :zap: create a site config file to store meta data
+[33m20804f5[m feat: :mag: add seo stuff
+[33mdcc018a[m feat: :sparkles: update resume link and add easter egg hint
+[33mf8c833c[m feat: :bug: fix nyan cat spawning logic
+[33md83c0bd[m feat: :fire: remove unnecessary code
+[33m317a616[m feat: :ambulance: remove hover event
+[33me4f7bc7[m feat: :fire: decrease skills section height to 150vh
+[33mc0efffe[m feat: :bug: add z index
+[33mef42c16[m feat: :mute: remove logs
+[33m1247a44[m feat: :zap: make it client component
+[33mbc016a0[m feat: :sparkles: add easter eggs in main layout
+[33mae0bfb3[m feat: :sparkles: create easter egg component with nyan cat
+[33m46a4b33[m feat: :fire: remove nyan cat
+[33mf87e78e[m feat: :sparkles: create hook to detect devtools open
+[33m2d11add[m feat: :zap: allow bypassing loading
+[33mdb0dd01[m feat: :zap: hide keycap initially
+[33mc62813a[m feat: :bug: fix links
+[33m7f077f0[m feat: :bug: wait for spline to load before revealing keycaps
+[33mbd7f9d0[m feat: :mute: remove logs
+[33ma4da72e[m feat: :sparkles: add a 404 page
+[33m5717e62[m feat: :sparkles: add nav thumbnails
+[33m66b1561[m feat: :lipstick: add top padding in projects heading
+[33m0d7c95f[m feat: :sparkles: add nyan cat
+[33m3e59213[m feat: :art: improve elasticity of cursor
+[33m35f9748[m feat: :art: add top padding on contact section
+[33mc5d4fa1[m feat: :lipstick: add smooth scrolling
+[33me50204f[m feat: :mag: add link to hire me button
+[33mc1ddc10[m feat: :label: add mouse event type
+[33mbfa6070[m feat: :iphone: make shit responsive for windows laptops
+[33m7f91e23[m feat: :fire: pain, pure agony. But it works amazingly now
+[33m4b61db4[m feat: :zap: use loading percent from preloader context
+[33m1e57846[m feat: :zap: use gsap to calculate loading percentage
+[33md41a64a[m feat: :dizzy: add keycaps animation on contact section
+[33m36decc3[m feat: :truck: move preloader from page to layout
+[33m37dda38[m feat: :zap: make cursor movements more fluid
+[33m4b808bd[m feat: :sparkles: add new prop to prevent cursor snap animation
+[33m0ad4559[m feat: :sparkles: add hire me button with tooltips
+[33m12d13e9[m feat: :bug: remove 'our' ref
+[33m8f6685d[m feat: :bug: replace welcome with from
+[33m1c3e182[m feat: :sparkles: add key bouncing animatino
+[33md9fcea7[m feat: :sparkles: create useMouse hook for later use
+[33m069abe8[m feat: :zap: design new cursor
+[33meb46add[m feat: :sparkles: create context to store preloading state
+[33m5642974[m perf: :zap: render low res modal on mobile and add reveal animation
+[33m561abfd[m feat: :sparkles: enable preloader
+[33m58ff2b3[m feat: :bug: fix landing page src
+[33m0e42e8e[m feat: :art: remove quotes with &apos;
+[33mc21aa85[m feat: :chart_with_upwards_trend: add umami analytics
+[33m9080721[m feat: :lipstick: add logic to allow smooth screen inside a dialog
+[33m7bf512a[m feat: :sparkles: add tooltip and minor ui changes
+[33m20e9dfe[m feat: :truck: move mode-toggle
+[33m0fcf3bf[m feat: :sparkles: add everything together
+[33m8928a0d[m feat: :recycle: add tooltip provider and place footer in layout
+[33m0eecb67[m feat: :bento: add missing assets
+[33m295d326[m feat: :fire: create a basic email template for resend
+[33m6720f44[m feat: :fire: moved this file to theme directory
+[33m474b656[m feat: :sparkles: add a brand color
+[33mca8f4ef[m feat: :sparkles: add contact form and setup resend to receive them in email
+[33mae3fa09[m feat: :art: change formatting
+[33mbd6adf5[m feat: :lipstick: increase z-index of header
+[33m87ee972[m feat: :fire: remove mode toggle from header
+[33mcf54afa[m feat: :tada: add projects section
+[33m7ade0a5[m feat: :sparkles: install some ui components
+[33m7493498[m feat: :sparkles: add aceternity logo
+[33m2f0cee0[m feat: :sparkles: add a funny theme toggler
+[33m57486de[m feat: :sparkles: add project and skills data
+[33m610a0bb[m feat: :sparkles: add use media query hook
+[33mce8e84e[m feat: :sparkles: add sleep util function
+[33mcf09ebe[m feat: :sparkles: show year dynamatically
+[33m2b8b6a6[m feat: :sparkles: add new keyboard modal
+[33mb331aa9[m feat: :sparkles: refactor code and add more keyboard states
+[33m46c091a[m feat: :bento: add project screenshots
+[33m6cc40b2[m feat: :sparkles: create a hero section
+[33mff9610d[m feat: :sparkles: add animated background with projects section
+[33mf3bf72b[m create hook for mouse position
+[33m30a36c6[m feat: :sparkles: define skills
+[33m6e3d70b[m feat: :sparkles: add animated modal
+[33m59e0adb[m feat: :sparkles: add projects section
+[33md05bc67[m feat: :bug: correct links
+[33m42fd096[m fix: increase header z-index
+[33m38164a2[m feat: :lipstick: change minor styles
+[33m56a3b60[m feat: :sparkles: add footer
+[33m9710b0f[m feat: :lipstick: add 3d timeline background with spline
+[33mb63af1a[m feat: :package: install gsap and splinetool
+[33m9eab6c9[m add spline file
+[33mf5b4771[m feat: :fire: remove tabler icons
+[33m59fe4fc[m feat: :sparkles: add project section
+[33m6ba3563[m feat: :sparkles: add project carousel
+[33maa7a1b8[m feat: :label: add Link type
+[33mddcf8ab[m feat: :fire: remove Link type
+[33mb3ca553[m feat: :sparkles: add smooth scroll and preloader
+[33md796732[m feat: :sparkles: add theme support
+[33m32ae63a[m feat: :lipstick: add lenis scrolling
+[33m8404ba7[m feat: :sparkles: create a preloader
+[33m9680746[m feat: :sparkles: install button and dropdown from shadcn
+[33mce74dcb[m feat: :sparkles: add header component
+[33m4a11586[m feat: setup shadcn and aceternity
+[33m23bd192[m feat: :sparkles: add JRA screenshot
+[33m01f0a7d[m feat: :sparkles: add contact page
+[33m28c2949[m feat: :sparkles: add about page
+[33md1569e8[m feat: :sparkles: add bg gradients
+[33ma113cde[m feat: :bug: remove bg gradiant from layout
+[33m0b01808[m feat: :sparkles: add a temp avatar
+[33mc6f28a5[m feat: :sparkles: add JRA screenshot
+[33m0201fe2[m fix: :bug: ignore splide import error
+[33meecaddd[m feat: :heavy_plus_sign: install splide
+[33m25579dc[m feat: :bug: hide cursor on small screens
+[33mf0096a8[m feat: :sparkles: add project details and screenshots
+[33m2591aa7[m feat: :lipstick: break hero line on small screens
+[33m018d122[m feat: :sparkles: add project screenshots
+[33mc418a4a[m initial commit
+[33m4ef3e68[m Initial commit from Create Next App
