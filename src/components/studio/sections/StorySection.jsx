@@ -17,26 +17,57 @@ export default function StorySection({
 }) {
   const content = block.content || {};
   const archetype = schema?.archetype || 'bento-minimal';
+  const blockId = block.id;
 
   const isCyber = archetype === 'cyber-terminal' || archetype === 'cyber-ai';
   const isBrutalist = archetype === 'neo-brutalist';
   const isWarm = archetype === 'warm-editorial';
+
+  const renderItem = (key, label, children, className = "") => {
+    if (EditableCanvasItem) {
+      return (
+        <EditableCanvasItem
+          elementKey={key}
+          label={label}
+          schema={schema}
+          selectedElement={selectedElement}
+          hoveredElementKey={hoveredElementKey}
+          setHoveredElementKey={setHoveredElementKey}
+          onSelectElement={onSelectElement}
+          onUpdateElementStyle={onUpdateElementStyle}
+          onPolishWithAI={onPolishWithAI}
+          onOpenEditModal={handleOpenEditModal}
+          blockId={blockId}
+          blockIndex={index}
+          className={className}
+        >
+          {children}
+        </EditableCanvasItem>
+      );
+    }
+    return children;
+  };
 
   // 1. Neo-Brutalist Story Variant
   if (isBrutalist) {
     return (
       <section id="story-section" className="p-8 sm:p-20 bg-[#FFFDF5] text-black font-sans border-b-3 border-black">
         <div className="max-w-6xl mx-auto bg-white border-3 border-black rounded-2xl p-8 space-y-6 shadow-[6px_6px_0px_#000]">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-[#FFE600] border-2 border-black rounded-md font-mono text-xs font-black text-black shadow-[2px_2px_0px_#000]">
-            <span>✦ ARCHITECTURAL PHILOSOPHY ✦</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tight">
-            {content.title || "The Architect"}
-          </h2>
-          <div className="text-slate-900 text-sm leading-relaxed space-y-4 font-bold">
-            <p>Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity.</p>
-            <p>My design philosophy is grounded in Neo-Brutalist UI principles — bold high contrast, thick black borders, functional hierarchy, and 0ms DOM delays.</p>
-          </div>
+          {renderItem('story-badge', 'Story Badge', (
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-[#FFE600] border-2 border-black rounded-md font-mono text-xs font-black text-black shadow-[2px_2px_0px_#000]">
+              <span>✦ ARCHITECTURAL PHILOSOPHY ✦</span>
+            </div>
+          ))}
+          {renderItem('story-title', 'Story Title', (
+            <h2 className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tight">
+              {content.title || "The Architect"}
+            </h2>
+          ))}
+          {renderItem('story-bio', 'Story Paragraph', (
+            <div className="text-slate-900 text-sm leading-relaxed space-y-4 font-bold">
+              <p>{content.bio || "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."}</p>
+            </div>
+          ))}
         </div>
       </section>
     );
@@ -51,11 +82,14 @@ export default function StorySection({
             <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1000&auto=format&fit=crop" alt="Workstation" className="w-full h-full object-cover" />
           </div>
           <div className="space-y-6">
-            <h2 className="text-4xl font-bold text-[#2C2621] tracking-tight">{content.title || "The Architect"}</h2>
-            <div className="text-[#645647] font-sans text-sm leading-relaxed space-y-4">
-              <p>Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity.</p>
-              <p>My design philosophy is grounded in Editorial UI principles — clean serif contrast, accessible typography, fluid micro-animations, and fast page loads.</p>
-            </div>
+            {renderItem('story-title', 'Story Title', (
+              <h2 className="text-4xl font-bold text-[#2C2621] tracking-tight">{content.title || "The Architect"}</h2>
+            ))}
+            {renderItem('story-bio', 'Story Paragraph', (
+              <div className="text-[#645647] font-sans text-sm leading-relaxed space-y-4">
+                <p>{content.bio || "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -73,12 +107,16 @@ export default function StorySection({
       <section id="story-section" className="p-8 sm:p-20 bg-[#090d16] text-white font-mono border-b border-cyan-500/20">
         <div className="max-w-4xl mx-auto space-y-10">
           <div className="border-b border-cyan-500/30 pb-4">
-            <h2 className="text-3xl font-black text-white">Engineering Timeline & Milestones</h2>
-            <p className="text-xs text-cyan-400 mt-1">Key career checkpoints and architectural achievements</p>
+            {renderItem('story-title', 'Timeline Title', (
+              <h2 className="text-3xl font-black text-white">Engineering Timeline & Milestones</h2>
+            ))}
+            {renderItem('story-subtitle', 'Timeline Subtitle', (
+              <p className="text-xs text-cyan-400 mt-1">Key career checkpoints and architectural achievements</p>
+            ))}
           </div>
           <div className="border-l-2 border-cyan-500/40 ml-4 pl-6 space-y-8 relative">
-            {milestones.map((m, idx) => (
-              <div key={m.year} className="relative group">
+            {milestones.map((m, idx) => renderItem(`milestone-card-${idx}`, `Milestone Card ${idx + 1}`, (
+              <div className="relative group">
                 <div className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-[#090d16] border-2 border-cyan-400 flex items-center justify-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                 </div>
@@ -88,7 +126,7 @@ export default function StorySection({
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">{m.detail}</p>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
       </section>
@@ -102,13 +140,11 @@ export default function StorySection({
         <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-900 flex items-center justify-center shadow-xs">
           <Quote className="w-6 h-6 text-slate-800" />
         </div>
-        <blockquote className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight tracking-tight max-w-3xl">
-          "{content.bio || "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."}"
-        </blockquote>
-        <div className="pt-4 flex flex-col items-center space-y-1">
-          <span className="text-sm font-bold text-slate-900 tracking-wider uppercase">KSHITIJ PILANKAR</span>
-          <span className="text-xs text-slate-500 font-mono">Principal UI/UX Systems Architect</span>
-        </div>
+        {renderItem('story-bio', 'Manifesto Pull Quote', (
+          <blockquote className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight tracking-tight max-w-3xl">
+            "{content.bio || "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."}"
+          </blockquote>
+        ))}
       </div>
     </section>
   );

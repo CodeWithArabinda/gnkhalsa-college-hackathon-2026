@@ -610,7 +610,21 @@ export default function CanvasPreview({
 
                       {/* Block 6: FooterBlock */}
                       {block.type === 'FooterBlock' && (
-                        <FooterSection archetype={schema?.archetype} theme={schema?.theme} />
+                        <FooterSection
+                          block={block}
+                          index={index}
+                          schema={schema}
+                          selectedElement={selectedElement}
+                          hoveredElementKey={hoveredElementKey}
+                          setHoveredElementKey={setHoveredElementKey}
+                          onSelectElement={onSelectElement}
+                          onUpdateElementStyle={onUpdateElementStyle}
+                          onPolishWithAI={onPolishWithAI}
+                          handleOpenEditModal={handleOpenEditModal}
+                          EditableCanvasItem={EditableCanvasItem}
+                          archetype={schema?.archetype}
+                          theme={schema?.theme}
+                        />
                       )}
 
                 </div>
