@@ -5,6 +5,17 @@ import { getArchetypeConfig } from '../../lib/geminiBuilder';
 
 const TEMPLATE_PRESETS = [
   {
+    id: 'portfolio1',
+    archetype: 'cyber-terminal',
+    name: 'PORTFOLIO1 (3D INTERACTIVE)',
+    category: 'Developer & Tech',
+    badge: 'NEW 3D ENGINE',
+    badgeColor: 'bg-[#00F5FF]',
+    description: '3D interactive developer showcase powered by React, GSAP, Lenis smooth scrolling, Spline canvas, and Radix dialogs.',
+    previewBg: 'bg-gradient-to-b from-[#07090e] via-[#0e1424] to-[#05080e]',
+    textColor: 'text-cyan-400'
+  },
+  {
     id: 'autono',
     archetype: 'neo-brutalist',
     name: 'AUTONO',

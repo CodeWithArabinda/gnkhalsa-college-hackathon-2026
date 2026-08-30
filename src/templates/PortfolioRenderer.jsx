@@ -11,6 +11,7 @@ import CinematicSpaceTemplate from './CinematicSpaceTemplate';
 import NeoBrutalistTemplate from './NeoBrutalistTemplate';
 import DarkTerminalTemplate from './DarkTerminalTemplate';
 import MinimalEditorialTemplate from './MinimalEditorialTemplate';
+import Portfolio1Template from './Portfolio1Template';
 
 /**
  * Template registry mapping `selected_template` keys to React components.
@@ -18,6 +19,17 @@ import MinimalEditorialTemplate from './MinimalEditorialTemplate';
  * and the TemplatesTab showcase catalog.
  */
 export const TEMPLATE_REGISTRY = {
+  portfolio1: {
+    id: 'portfolio1',
+    component: Portfolio1Template,
+    name: '3D Interactive (Nilesh)',
+    archetype: 'CYBER 3D CANVAS',
+    description: 'Prop-driven 3D interactive developer template powered by React, GSAP, Lenis smooth scrolling, Spline canvas viewport, and Radix dialogs.',
+    category: 'creative',
+    accent: '#00F5FF',
+    bgPreview: '#07090E',
+    badge: 'NEW 3D',
+  },
   dark_developer: {
     id: 'dark_developer',
     component: DarkDeveloperTemplate,
