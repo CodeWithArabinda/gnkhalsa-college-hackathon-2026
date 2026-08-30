@@ -60,7 +60,7 @@ export default function StudioToolbar({
   };
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/90 dark:border-zinc-700 shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-full px-3.5 py-1.5 flex items-center gap-2 text-slate-800 text-xs select-none pointer-events-auto">
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-full px-3.5 py-1.5 flex items-center gap-2 text-slate-800 select-none pointer-events-auto">
       
       {/* Hidden File Input for Native Image Uploads */}
       <input
@@ -84,32 +84,32 @@ export default function StudioToolbar({
         </button>
 
         {showAddMenu && (
-          <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-1.5 shadow-xl z-50 space-y-1 font-sans text-xs text-slate-800 dark:text-zinc-200">
+          <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl p-1.5 shadow-xl z-50 space-y-1 font-sans text-xs text-slate-800">
             <button
               type="button"
               onClick={() => { onAddElement('text'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
             >
               <Type className="w-4 h-4 text-[#0053ff]" /> Add Text Block
             </button>
             <button
               type="button"
               onClick={() => { onAddElement('image'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
             >
               <ImageIcon className="w-4 h-4 text-amber-500" /> Add Image Frame
             </button>
             <button
               type="button"
               onClick={() => { onAddElement('project'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
             >
               <Grid className="w-4 h-4 text-[#ff5100]" /> Add Project Card
             </button>
             <button
               type="button"
               onClick={() => { onAddElement('skill'); setShowAddMenu(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg text-left font-medium"
+              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg text-left font-medium"
             >
               <Code className="w-4 h-4 text-emerald-600" /> Add Skill Badge
             </button>
@@ -121,7 +121,7 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => onAskAria && onAskAria(selectedElement)}
-        className="flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors font-medium"
+        className="text-slate-700 hover:text-slate-950 font-semibold text-xs px-2.5 py-1 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-1.5"
       >
         <Sparkles className="w-3.5 h-3.5 text-[#0053ff]" />
         <span>Ask Aria</span>
@@ -131,7 +131,7 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => fileInputRef.current && fileInputRef.current.click()}
-        className="flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors font-medium"
+        className="text-slate-700 hover:text-slate-950 font-semibold text-xs px-2.5 py-1 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-1.5"
       >
         <Upload className="w-3.5 h-3.5 text-amber-600" />
         <span>Replace Image</span>
@@ -141,30 +141,30 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => onAddLink && onAddLink(selectedElement)}
-        className="flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors font-medium"
+        className="text-slate-700 hover:text-slate-950 font-semibold text-xs px-2.5 py-1 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-1.5"
       >
         <LinkIcon className="w-3.5 h-3.5 text-emerald-600" />
         <span>Link</span>
       </button>
 
       {/* Divider */}
-      <div className="h-4 w-[1px] bg-slate-200 dark:bg-zinc-700 mx-1" />
+      <div className="h-4 w-[1px] bg-slate-200" />
 
       {/* Image Specific Formatting Pill */}
       {isImageElement && (
-        <div className="flex items-center space-x-1 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full font-sans text-xs">
+        <div className="flex items-center space-x-1 bg-slate-100 px-2 py-0.5 rounded-full font-sans text-xs">
           <span className="text-[10px] text-[#0053ff] font-bold uppercase">Size:</span>
-          <button type="button" onClick={() => { updateStyle('width', 144); updateStyle('height', 144); }} className="px-1.5 py-0.5 hover:bg-white dark:hover:bg-zinc-700 rounded font-bold">S</button>
-          <button type="button" onClick={() => { updateStyle('width', 240); updateStyle('height', 240); }} className="px-1.5 py-0.5 hover:bg-white dark:hover:bg-zinc-700 rounded font-bold">M</button>
-          <button type="button" onClick={() => { updateStyle('width', 360); updateStyle('height', 360); }} className="px-1.5 py-0.5 hover:bg-white dark:hover:bg-zinc-700 rounded font-bold">L</button>
+          <button type="button" onClick={() => { updateStyle('width', 144); updateStyle('height', 144); }} className="px-1.5 py-0.5 hover:bg-white rounded font-bold">S</button>
+          <button type="button" onClick={() => { updateStyle('width', 240); updateStyle('height', 240); }} className="px-1.5 py-0.5 hover:bg-white rounded font-bold">M</button>
+          <button type="button" onClick={() => { updateStyle('width', 360); updateStyle('height', 360); }} className="px-1.5 py-0.5 hover:bg-white rounded font-bold">L</button>
         </div>
       )}
 
-      {/* Formatting Tools */}
+      {/* Utility Icons */}
       <button
         type="button"
         onClick={() => updateStyle('fontWeight', isBold ? '400' : '900')}
-        className={`p-1.5 rounded-full transition-colors ${isBold ? 'bg-[#0053ff] text-white' : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
+        className={`p-1.5 rounded-full transition-colors ${isBold ? 'bg-[#0053ff] text-white' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
         title="Bold"
       >
         <Bold className="w-3.5 h-3.5" />
@@ -173,7 +173,7 @@ export default function StudioToolbar({
       <button
         type="button"
         onClick={() => updateStyle('textAlign', textAlign === 'left' ? 'center' : 'left')}
-        className="p-1.5 text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+        className="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
         title="Align Text"
       >
         <AlignLeft className="w-3.5 h-3.5" />
@@ -181,7 +181,7 @@ export default function StudioToolbar({
 
       <button
         type="button"
-        className="p-1.5 text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+        className="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
         title="Crop Image / Mask"
       >
         <Crop className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ export default function StudioToolbar({
 
       <button
         type="button"
-        className="p-1.5 text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+        className="text-slate-500 hover:text-slate-800 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
         title="Stretch Element Width"
       >
         <Maximize2 className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export default function StudioToolbar({
         type="button"
         onClick={() => onDeleteSelected && onDeleteSelected(selectedElement)}
         disabled={!selectedElement}
-        className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 disabled:opacity-30 rounded-full transition-colors ml-1"
+        className="text-red-500 hover:text-red-700 p-1.5 rounded-full hover:bg-red-50 disabled:opacity-30 transition-colors"
         title="Delete Selected Element"
       >
         <Trash2 className="w-3.5 h-3.5" />
