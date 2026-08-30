@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-import { config } from "@/data/config";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 import { cn } from "@/lib/utils";
 
 // unset (the default) = nothing renders. set it only while migrating off an old domain.
@@ -10,6 +10,7 @@ const legacyHost = typeof process !== "undefined" && process.env ? process.env.N
 const DISMISS_KEY = "portfolio:domain-move-dismissed";
 
 export default function DomainNotice() {
+  const { config } = usePortfolio();
   const [show, setShow] = React.useState(false);
 
   React.useEffect(() => {

@@ -1,4 +1,5 @@
-import { EXPERIENCE, SkillNames, SKILLS } from "@/data/constants";
+import { usePortfolio } from "@/contexts/PortfolioContext";
+import { SkillNames } from "@/data/constants";
 import { SectionHeader } from "./section-header";
 import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,8 @@ import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ExperienceSection = () => {
+  const { EXPERIENCE } = usePortfolio();
+
   return (
     <SectionWrapper
       className="flex flex-col items-center justify-center min-h-[120vh] py-24"
@@ -38,9 +41,10 @@ const ExperienceCard = ({
   experience,
   index,
 }: {
-  experience: (typeof EXPERIENCE)[0];
+  experience: any;
   index: number;
 }) => {
+  const { SKILLS } = usePortfolio();
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -75,7 +79,7 @@ const ExperienceCard = ({
         </CardHeader>
         <CardContent className="space-y-6">
           <ul className="space-y-2.5 text-sm sm:text-base text-slate-300/90 leading-relaxed">
-            {experience.description.map((point, i) => (
+            {experience.description.map((point: string, i: number) => (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="text-emerald-400 mt-1.5 text-xs">▹</span>
                 <span>{point}</span>
@@ -84,20 +88,22 @@ const ExperienceCard = ({
           </ul>
 
           <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/60">
-            {experience.skills.map((skillName) => {
-              const skill = SKILLS[skillName as SkillNames];
+            {experience.skills.map((skillName: string) => {
+              const skill = SKILLS[skillName as SkillNames] || Object.values(SKILLS).find((s: any) => s.name === skillName);
               return (
                 <Badge
                   key={skillName}
                   variant="outline"
                   className="gap-2 text-xs font-normal bg-slate-950/60 hover:bg-slate-800 text-slate-300 border-slate-800 hover:border-emerald-500/30 transition-all duration-200 px-3 py-1 rounded-lg"
                 >
-                  <img
-                    src={skill.icon}
-                    alt={skill.label}
-                    className="w-3.5 h-3.5 object-contain opacity-90"
-                  />
-                  {skill.label}
+                  {skill?.icon && (
+                    <img
+                      src={skill.icon}
+                      alt={skill?.label || skillName}
+                      className="w-3.5 h-3.5 object-contain opacity-90"
+                    />
+                  )}
+                  {skill?.label || skillName}
                 </Badge>
               );
             })}

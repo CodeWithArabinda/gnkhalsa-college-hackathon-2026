@@ -8,11 +8,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ContactForm from "../ContactForm";
-import { config } from "@/data/config";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 import { SectionHeader } from "./section-header";
 import SectionWrapper from "../ui/section-wrapper";
 
 const ContactSection = () => {
+  const { config } = usePortfolio();
   return (
     <SectionWrapper id="contact" className="min-h-screen max-w-7xl mx-auto ">
       <SectionHeader id='contact' className="relative mb-14" title={

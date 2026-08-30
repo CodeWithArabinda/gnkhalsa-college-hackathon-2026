@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { footer } from "./config";
 import { Button } from "../ui/button";
 import SocialMediaButtons from "../social/social-media-icons";
-import { config } from "@/data/config";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 
 function CopyrightYear() {
   const year = new Date().getFullYear();
@@ -11,6 +11,7 @@ function CopyrightYear() {
 }
 
 function Footer() {
+  const { config } = usePortfolio();
   return (
     <footer className="flex w-full shrink-0 flex-col items-center gap-4 border-t border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-6 py-8 sm:flex-row sm:justify-between">
       <p className="text-xs text-slate-400 font-mono">

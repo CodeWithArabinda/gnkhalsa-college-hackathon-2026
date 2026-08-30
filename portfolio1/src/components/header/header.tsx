@@ -7,7 +7,7 @@ import { opacity, background } from "./anim";
 import Nav from "./nav";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { config } from "@/data/config";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 import OnlineUsers from "../realtime/online-users";
 
 interface HeaderProps {
@@ -15,6 +15,7 @@ interface HeaderProps {
 }
 
 const Header = ({ loader }: HeaderProps) => {
+  const { config } = usePortfolio();
   const [isActive, setIsActive] = useState<boolean>(false);
   const location = useLocation();
   const isHome = location.pathname === "/";

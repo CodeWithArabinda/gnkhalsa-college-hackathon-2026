@@ -11,13 +11,15 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "motion/react";
 
-import projects, { Project } from "@/data/projects";
+import { Project } from "@/data/projects";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 import { SectionHeader } from "./section-header";
 
 import SectionWrapper from "../ui/section-wrapper";
 import ScrollingPreview from "../scrolling-preview";
 
 const ProjectsSection = () => {
+  const { projects } = usePortfolio();
   return (
     <SectionWrapper id="projects" className="max-w-7xl mx-auto md:min-h-[130vh] px-4">
       <SectionHeader id="projects" title="Projects" />

@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import SectionWrapper from "../ui/section-wrapper";
 import { SectionHeader } from "./section-header";
-import { SKILLS } from "@/data/constants";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 import { usePerfProfile } from "@/hooks/use-perf-profile";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
  * grid instead. Progressive enhancement: the content survives without WebGL.
  */
 const SkillsSection = () => {
+  const { SKILLS } = usePortfolio();
   const { disable3D, ready } = usePerfProfile();
   const showGrid = ready && disable3D;
 

@@ -5,12 +5,12 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Download, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePortfolio } from "@/contexts/PortfolioContext";
 import ResumeDoodle from "./resume-doodle";
 
-// Drop the compiled PDF here: frontend/public/Naresh_Khatri_Resume.pdf
-const RESUME_PATH = "/Naresh_Khatri_Resume.pdf";
-
 export default function ResumeView() {
+  const { config } = usePortfolio();
+  const RESUME_PATH = config.resumeUrl || "/Naresh_Khatri_Resume.pdf";
   return (
     <div className="flex min-h-screen flex-col font-sans">
       {/* Hide the global nav on mobile, only while this page is mounted */}
@@ -60,7 +60,7 @@ export default function ResumeView() {
         >
           <ResumeDoodle
             src={`${RESUME_PATH}#toolbar=0&navpanes=0&view=FitH`}
-            title="Naresh Khatri — Résumé"
+            title={`${config.author} — Résumé`}
           />
         </motion.div>
       </div>
