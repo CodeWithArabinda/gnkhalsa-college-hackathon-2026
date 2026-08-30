@@ -8,6 +8,7 @@ import TemplateGallery from '../components/dashboard/TemplateGallery';
 import AnalyticsTab from '../components/dashboard/AnalyticsTab';
 import SettingsTab from '../components/dashboard/SettingsTab';
 import ResumeUploadModal from '../components/parser/ResumeUploadModal';
+import UserProfileDropup from '../components/studio/UserProfileDropup';
 
 import {
   Sparkles,
@@ -134,28 +135,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Bottom User Profile Card */}
-        <div className="pt-3 border-t-2 border-black/10">
-          <div className="border-2 border-black bg-white rounded-xl p-2.5 shadow-[3px_3px_0px_#000000] flex items-center justify-between">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-[#FFE600] border-2 border-black font-black text-black flex items-center justify-center text-xs shadow-[1.5px_1.5px_0px_#000000] shrink-0">
-                {userInitials}
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-black text-xs text-black truncate">{displayName}</h4>
-                <p className="text-[10px] font-bold text-slate-600 truncate">Free Tier</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => signOut().then(() => navigate('/auth'))}
-              className="p-1 text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
-              title="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <UserProfileDropup onOpenSettings={() => setActiveNav('settings')} />
 
       </aside>
 

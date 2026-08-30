@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Plus, FileText, Palette, FolderOpen, Layers,
+  PlusSquare, FileText, Palette, FolderArchive, Layers,
   HelpCircle
 } from 'lucide-react';
 import UserProfileDropup from './UserProfileDropup';
@@ -11,10 +11,10 @@ import MediaAssetsDrawer from './drawers/MediaAssetsDrawer';
 import LayersHelpDrawer from './drawers/LayersHelpDrawer';
 
 const NAV_ITEMS = [
-  { id: 'add', label: 'Add Elements', icon: Plus },
+  { id: 'add', label: 'Add Elements', icon: PlusSquare },
   { id: 'styles', label: 'Site Styles & Themes', icon: Palette },
   { id: 'pages', label: 'Pages & Sections', icon: FileText },
-  { id: 'media', label: 'Media Assets', icon: FolderOpen },
+  { id: 'media', label: 'Media Assets', icon: FolderArchive },
   { id: 'layers', label: 'Layer Tree', icon: Layers },
   { id: 'help', label: 'Help & Shortcuts', icon: HelpCircle }
 ];
@@ -57,12 +57,14 @@ export default function LeftSidebar({
         className="w-[240px] bg-white border-r-[2.5px] border-black flex flex-col justify-between h-full z-30 select-none shrink-0 shadow-[4px_0px_0px_#000000]"
       >
         {/* Top Navigation Items */}
-        <div className="p-3.5 space-y-2 overflow-y-auto font-sans text-xs">
-          <p className="font-mono text-[11px] font-black tracking-wider text-slate-500 uppercase px-2">
-            STUDIO TOOLS
+        <div className="p-3.5 space-y-3 overflow-y-auto font-sans text-xs">
+          
+          {/* Prominent Section Header */}
+          <p className="text-xs font-mono font-black tracking-widest text-black uppercase mb-3 px-1.5 flex items-center gap-1.5 opacity-90">
+            <span>STUDIO TOOLS</span>
           </p>
 
-          <div className="space-y-2 pt-1">
+          <div className="space-y-2">
             {NAV_ITEMS.map((item) => {
               const IconComp = item.icon;
               const isActive = (activeDrawer === item.id);
@@ -71,15 +73,13 @@ export default function LeftSidebar({
                   key={item.id}
                   type="button"
                   onClick={() => toggleDrawer(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 font-black transition-all cursor-pointer text-left text-xs ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 transition-all cursor-pointer text-left text-sm ${
                     isActive
-                      ? 'bg-[#FFE600] text-black border-black shadow-[3px_3px_0px_#000000]'
-                      : 'text-black border-transparent hover:border-black hover:bg-slate-50 hover:shadow-[2px_2px_0px_#000000]'
+                      ? 'bg-[#FFE600] text-black border-black shadow-[3px_3px_0px_#000000] font-black'
+                      : 'text-black border-transparent hover:border-black hover:bg-slate-50 hover:shadow-[2px_2px_0px_#000000] font-bold'
                   }`}
                 >
-                  <div className={`p-1 rounded-lg border-2 border-black ${isActive ? 'bg-black text-white' : 'bg-[#FFE600] text-black'}`}>
-                    <IconComp className="w-3.5 h-3.5" />
-                  </div>
+                  <IconComp className="w-5 h-5 stroke-[2.2] text-black shrink-0" />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
