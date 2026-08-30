@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initialPortfolioSchema } from '../types/schema';
 import { Sparkles, Mail, ExternalLink, Globe, Github, Linkedin, Twitter, Youtube, Instagram, Code, Server, Layers, ArrowRight, CheckCircle2 } from 'lucide-react';
+import SiteHeaderNavbar from '../components/studio/sections/SiteHeaderNavbar';
 
 export default function LivePortfolioPreview() {
   const [schema, setSchema] = useState(null);
@@ -43,6 +44,19 @@ export default function LivePortfolioPreview() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-100 relative">
       
+      {/* Site Header Navbar */}
+      <SiteHeaderNavbar
+        title={schema?.metadata?.title || "Kshitij Pilankar"}
+        scrollToProjects={() => {
+          const el = document.getElementById('projects-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+        scrollToContact={() => {
+          const el = document.getElementById('contact-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
+
       {/* 6 Wix Section Stream */}
       {schema.blocks && schema.blocks.length > 0 ? (
         schema.blocks.map((block) => {

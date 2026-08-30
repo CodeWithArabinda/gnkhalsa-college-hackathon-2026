@@ -5,6 +5,7 @@ import {
   Pencil, X, Link as LinkIcon, Tag, Upload, Scissors as CutIcon, Palette
 } from 'lucide-react';
 import CanvasBuildingState from './CanvasBuildingState';
+import SiteHeaderNavbar from './sections/SiteHeaderNavbar';
 import HeroSection from './sections/HeroSection';
 import WorksGridSection from './sections/WorksGridSection';
 import PillarsSection from './sections/PillarsSection';
@@ -493,24 +494,19 @@ export default function CanvasPreview({
               {/* Real-time AI Generation Overlay */}
               {isGenerating && <CanvasBuildingState />}
 
+              {/* Persistent Top Site Header Navbar */}
+              <SiteHeaderNavbar
+                title={schema?.metadata?.title || "Kshitij Pilankar"}
+                scrollToProjects={scrollToProjects}
+                scrollToContact={scrollToContact}
+              />
+
               {schema.blocks && schema.blocks.length > 0 ? (
                 schema.blocks.map((block, index) => {
                   return (
                     <div key={block.id} className={`relative border-b last:border-b-0 group/section ${
                       isCyber ? 'border-cyan-500/20' : isEditorial ? 'border-zinc-200' : 'border-slate-100'
                     }`}>
-                      
-                      {/* Floating Section Tag Badge */}
-                      <div className="absolute top-2 left-3 z-20">
-                        <span className={`px-2 py-0.5 text-[11px] font-bold rounded shadow-2xs ${
-                          isCyber ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-mono' :
-                          isBento ? 'bg-indigo-100 text-indigo-700 font-sans' :
-                          isEditorial ? 'bg-zinc-100 text-zinc-800 font-mono uppercase' :
-                          'bg-[#FFE600] text-black border-2 border-black font-mono font-black shadow-[1.5px_1.5px_0px_#000]'
-                        }`}>
-                          [ {block.type.replace('Block', '')} ]
-                        </span>
-                      </div>
 
                       {/* Block 1: HeroBlock */}
                       {block.type === 'HeroBlock' && (

@@ -15,7 +15,7 @@ export default function StorySection({
   EditableCanvasItem
 }) {
   return (
-    <section className="p-8 sm:p-16 bg-slate-50/50 font-sans text-slate-900 border-t border-b border-slate-100">
+    <section id="story-section" className="p-8 sm:p-16 bg-slate-50/50 font-sans text-slate-900 border-t border-b border-slate-100">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
         
         {/* Left: Workstation Photography */}
