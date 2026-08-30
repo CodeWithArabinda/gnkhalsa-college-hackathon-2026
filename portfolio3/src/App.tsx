@@ -6,11 +6,7 @@ import {
   Hero,
   About,
   Works,
-  Experience,
-  Education,
   Tech,
-  Achievements,
-  Currently,
   Contact,
   Footer,
   StarsCanvas,
@@ -39,22 +35,10 @@ const App = () => {
         {/* 04. FEATURED PROJECTS ⭐ */}
         <Works />
 
-        {/* 05. EXPERIENCE */}
-        <Experience />
-
-        {/* 06. EDUCATION */}
-        <Education />
-
-        {/* 07. SKILLS & TECHNOLOGIES */}
+        {/* 05. SKILLS & TECHNOLOGIES */}
         <Tech />
 
-        {/* 08. ACHIEVEMENTS & CERTIFICATIONS */}
-        <Achievements />
-
-        {/* 09. CURRENTLY / NOW */}
-        <Currently />
-
-        {/* 10. CONTACT / CTA */}
+        {/* 06. CONTACT / CTA */}
         <div className="relative z-0">
           <Contact />
           <StarsCanvas />
