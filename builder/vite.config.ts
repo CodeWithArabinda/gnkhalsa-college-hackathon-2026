@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@portfolio1': path.resolve(__dirname, './src/templates/portfolio1'),
     },
   },
   server: {

@@ -3,15 +3,27 @@ import { TemplateMetadata } from "../types/portfolio";
 
 export const TEMPLATE_REGISTRY: TemplateMetadata[] = [
   {
+    id: "portfolio1",
+    name: "Portfolio 1 (Full 3D & Keyboard)",
+    category: "Developer",
+    description: "The complete Portfolio 1 experience with interactive 3D Spline keyboard, particles background, smooth scrolling, and dynamic terminal.",
+    badge: "Official Portfolio 1",
+    previewImage: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+    accentColor: "#8b5cf6",
+    tags: ["3D Spline", "Interactive Keyboard", "Particles", "Portfolio 1"],
+    author: "Portfolio 1 Studio",
+    targetPortfolioFolder: "portfolio1",
+  },
+  {
     id: "dark_developer",
-    name: "Dark Developer 3D",
+    name: "Dark Developer Canvas",
     category: "Developer",
     description: "Cyberpunk dark mode with glowing accents, interactive tech stack matrix, and terminal aesthetic.",
     badge: "Most Popular",
-    previewImage: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+    previewImage: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
     accentColor: "#8b5cf6",
-    tags: ["Dark Mode", "3D Elements", "Cyberpunk", "Developer"],
-    author: "Portfolio 1 & 3 Engine",
+    tags: ["Dark Mode", "Terminal", "Cyberpunk", "Developer"],
+    author: "Portfolio Studio",
     targetPortfolioFolder: "portfolio1",
   },
   {

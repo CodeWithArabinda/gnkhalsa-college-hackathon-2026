@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 
 // LAZY LOADING FOR PORTFOLIO TEMPLATES
 // Only loads the chunk for the selected template when needed!
+const Portfolio1Template = lazy(() => import("../../templates/Portfolio1Template"));
 const DarkDeveloperTemplate = lazy(() => import("../../templates/DarkDeveloperTemplate"));
 const GlassModernTemplate = lazy(() => import("../../templates/GlassModernTemplate"));
 const MinimalistCleanTemplate = lazy(() => import("../../templates/MinimalistCleanTemplate"));
@@ -16,10 +17,12 @@ export interface TemplateRendererProps {
 }
 
 export default function TemplateRenderer({ portfolio, className = "" }: TemplateRendererProps) {
-  const selectedTemplate = portfolio.selected_template || "dark_developer";
+  const selectedTemplate = portfolio.selected_template || "portfolio1";
 
   const renderTemplateComponent = () => {
     switch (selectedTemplate) {
+      case "portfolio1":
+        return <Portfolio1Template portfolio={portfolio} />;
       case "dark_developer":
         return <DarkDeveloperTemplate portfolio={portfolio} />;
       case "glass_modern":
@@ -31,7 +34,7 @@ export default function TemplateRenderer({ portfolio, className = "" }: Template
       case "creative_playful":
         return <CreativePlayfulTemplate portfolio={portfolio} />;
       default:
-        return <DarkDeveloperTemplate portfolio={portfolio} />;
+        return <Portfolio1Template portfolio={portfolio} />;
     }
   };
 
