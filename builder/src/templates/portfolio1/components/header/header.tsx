@@ -49,7 +49,7 @@ const Header = ({ loader }: HeaderProps) => {
           </Button>
         </Link>
 
-        {isHome && process.env.NEXT_PUBLIC_WS_URL && <OnlineUsers />}
+        {isHome && typeof process !== "undefined" && process?.env?.NEXT_PUBLIC_WS_URL && <OnlineUsers />}
         <Button
           variant={"ghost"}
           onClick={() => setIsActive(!isActive)}

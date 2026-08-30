@@ -11,6 +11,10 @@ export default defineConfig({
       '@portfolio1': path.resolve(__dirname, './src/templates/portfolio1'),
     },
   },
+  define: {
+    'process.env': {},
+    global: 'window',
+  },
   server: {
     port: 5180,
   },
