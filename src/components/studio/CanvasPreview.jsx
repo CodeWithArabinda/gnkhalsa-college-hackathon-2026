@@ -477,17 +477,18 @@ export default function CanvasPreview({
 
         {/* Canvas Render Body (Dynamic Multi-Archetype Renderer) */}
         {(() => {
-          const archetype = schema.archetype || 'neo-brutalist';
-          const isCyber = archetype === 'cyber-ai';
+          const archetype = schema.archetype || 'bento-minimal';
+          const isCyber = archetype === 'cyber-terminal' || archetype === 'cyber-ai';
           const isBento = archetype === 'bento-minimal';
-          const isEditorial = archetype === 'editorial-studio';
-          const isNeoBrutalist = archetype === 'neo-brutalist' || (!isCyber && !isBento && !isEditorial);
+          const isBrutalist = archetype === 'neo-brutalist';
+          const isWarm = archetype === 'warm-editorial' || archetype === 'editorial-studio';
 
           return (
             <div className={`flex-1 overflow-y-auto relative transition-colors duration-300 ${
-              isCyber ? 'bg-[#0a0d14] text-white font-mono' :
-              isBento ? 'bg-slate-50 text-slate-900 font-sans' :
-              isEditorial ? 'bg-white text-zinc-900 font-serif' :
+              isCyber ? 'bg-[#090D16] text-white font-mono' :
+              isBento ? 'bg-[#F8FAFC] text-slate-900 font-sans' :
+              isBrutalist ? 'bg-[#FFFDF5] text-black font-sans' :
+              isWarm ? 'bg-[#FDFBF7] text-[#2C2621] font-serif' :
               'bg-white text-slate-900 font-sans'
             }`}>
               

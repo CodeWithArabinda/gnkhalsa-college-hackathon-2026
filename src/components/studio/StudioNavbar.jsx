@@ -52,7 +52,7 @@ export default function StudioNavbar({
             onClick={() => onMorphArchetype && onMorphArchetype('bento-minimal')}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
               activeArchetype === 'bento-minimal'
-                ? 'bg-[#FFE600] text-black border-2 border-black shadow-[1px_1px_0px_#000]'
+                ? 'bg-slate-900 text-white border-2 border-black shadow-[1px_1px_0px_#000]'
                 : 'text-slate-700 hover:text-black border-2 border-transparent'
             }`}
           >
@@ -73,14 +73,26 @@ export default function StudioNavbar({
 
           <button
             type="button"
-            onClick={() => onMorphArchetype && onMorphArchetype('humanist-light')}
+            onClick={() => onMorphArchetype && onMorphArchetype('neo-brutalist')}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
-              activeArchetype === 'humanist-light' || activeArchetype === 'neo-brutalist'
-                ? 'bg-[#ff5100] text-white border-2 border-black shadow-[1px_1px_0px_#000]'
+              activeArchetype === 'neo-brutalist'
+                ? 'bg-[#FFE600] text-black border-2 border-black shadow-[1px_1px_0px_#000]'
                 : 'text-slate-700 hover:text-black border-2 border-transparent'
             }`}
           >
-            🏛 Humanist Studio
+            💛 Neo Brutalist
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onMorphArchetype && onMorphArchetype('warm-editorial')}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+              activeArchetype === 'warm-editorial' || activeArchetype === 'humanist-light'
+                ? 'bg-[#C2410C] text-white border-2 border-black shadow-[1px_1px_0px_#000]'
+                : 'text-slate-700 hover:text-black border-2 border-transparent'
+            }`}
+          >
+            📖 Warm Editorial
           </button>
         </div>
       </div>
