@@ -76,11 +76,6 @@ export const socialLinks: TSocial[] = [
     url: "mailto:nilesh.gupta.dev@gmail.com",
     icon: "email",
   },
-  {
-    name: "Website",
-    url: "https://nileshgupta.dev",
-    icon: "website",
-  },
 ];
 
 export const services: TService[] = [
