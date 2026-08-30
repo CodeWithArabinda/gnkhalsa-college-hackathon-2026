@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import {
   Plus, Sparkles, Image as ImageIcon, Link as LinkIcon, Palette, Type,
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Box,
-  Trash2, ChevronDown, Minus, Plus as PlusIcon, Code, Grid
+  Trash2, ChevronDown, Minus, Plus as PlusIcon, Code, Grid, Upload
 } from 'lucide-react';
 
 const FONTS = [
@@ -27,9 +27,10 @@ export default function StudioToolbar({
   onAddLink,
   onDeleteSelected
 }) {
-  const [showAddMenu, setShowAddMenu] = useState(false);
-  const [showFontMenu, setShowFontMenu] = useState(false);
-  const [showColorMenu, setShowColorMenu] = useState(false);
+  const [showAddMenu, setShowAddMenu] = React.useState(false);
+  const [showFontMenu, setShowFontMenu] = React.useState(false);
+  const [showColorMenu, setShowColorMenu] = React.useState(false);
+  const fileInputRef = useRef(null);
 
   const currentFontSize = elementStyle?.fontSize || 16;
   const currentFontFamily = elementStyle?.fontFamily || 'Space Grotesk, sans-serif';
@@ -45,9 +46,30 @@ export default function StudioToolbar({
     }
   };
 
+  const handleFileSelect = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (onReplaceImage) {
+        onReplaceImage(evt.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="bg-[#12141D] border-b border-black px-4 py-2 flex items-center justify-between z-30 shrink-0 text-white select-none overflow-x-auto shadow-md">
       
+      {/* Hidden File Input for Native Image Uploads */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       {/* Left Core Actions Ribbon */}
       <div className="flex items-center space-x-2 shrink-0">
         
@@ -110,10 +132,10 @@ export default function StudioToolbar({
         {/* 🖼 Replace Image */}
         <button
           type="button"
-          onClick={() => onReplaceImage && onReplaceImage(selectedElement)}
+          onClick={() => fileInputRef.current && fileInputRef.current.click()}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1A1D27] hover:bg-[#252836] border border-white/10 rounded-xl text-xs font-mono text-slate-200 hover:text-white transition-all"
         >
-          <ImageIcon className="w-3.5 h-3.5 text-[#38BDF8]" />
+          <Upload className="w-3.5 h-3.5 text-[#38BDF8]" />
           <span>Replace Image</span>
         </button>
 

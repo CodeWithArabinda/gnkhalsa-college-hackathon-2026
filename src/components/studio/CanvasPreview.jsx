@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import {
   Sparkles, Mail, ExternalLink, Edit3, GripVertical, AlignLeft, AlignCenter, AlignRight,
   ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move,
-  Pencil, X, Link as LinkIcon, Tag
+  Pencil, X, Link as LinkIcon, Tag, Upload
 } from 'lucide-react';
 import CanvasBuildingState from './CanvasBuildingState';
 
@@ -89,7 +89,7 @@ function EditableCanvasItem({
         borderRadius: st.borderRadius ? `${st.borderRadius}px` : undefined
       }}
     >
-      {/* FLOATING ACTION PILL (Sits cleanly ABOVE the top border -top-9 left-0 to prevent text overlap) */}
+      {/* FLOATING ACTION PILL (Sits cleanly ABOVE top border at -top-9 left-0 to prevent text overlap) */}
       {(isSelected || isHovered) && (
         <div className="absolute -top-9 left-0 z-50 bg-[#181A24] border-2 border-black rounded-xl px-2 py-1 shadow-2xl flex items-center gap-1.5 text-xs font-mono text-white pointer-events-auto">
           {/* Badge Tag */}
@@ -153,6 +153,8 @@ export default function CanvasPreview({
   const [editModalData, setEditModalData] = useState(null);
   const projectsRef = useRef(null);
   const contactRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [targetBlockForUpload, setTargetBlockForUpload] = useState(null);
 
   if (!schema) return null;
 
@@ -174,6 +176,31 @@ export default function CanvasPreview({
     }
   };
 
+  const triggerFileUpload = (blockId) => {
+    setTargetBlockForUpload(blockId);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const base64Url = evt.target.result;
+      const blockId = targetBlockForUpload || schema.blocks.find(b => b.type === 'HeroBlock')?.id;
+      if (blockId) {
+        handleInlineChange(blockId, 'content.avatarUrl', base64Url);
+      }
+      if (editModalData && editModalData.type === 'avatar') {
+        setEditModalData(prev => ({ ...prev, url: base64Url }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const scrollToProjects = () => {
     if (projectsRef.current) {
       projectsRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -184,6 +211,45 @@ export default function CanvasPreview({
     if (contactRef.current) {
       contactRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Helper to render Full Headline with Dynamic Accent Word Highlighting
+  const renderFullHeadline = (nameValue, blockId) => {
+    let fullText = nameValue || "I'm Alex Rivera.";
+    if (!fullText.includes("I'm") && !fullText.includes("Im")) {
+      fullText = `I'm ${fullText}.`;
+    }
+
+    const words = fullText.trim().split(' ');
+    if (words.length <= 1) {
+      return (
+        <span
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={(e) => handleInlineChange(blockId, 'content.name', e.target.innerText)}
+          className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none"
+        >
+          {fullText}
+        </span>
+      );
+    }
+
+    const mainPart = words.slice(0, -1).join(' ');
+    const accentPart = words[words.length - 1];
+
+    return (
+      <span
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={(e) => handleInlineChange(blockId, 'content.name', e.target.innerText)}
+        className="outline-none"
+      >
+        <span className="text-white">{mainPart} </span>
+        <span className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent">
+          {accentPart}
+        </span>
+      </span>
+    );
   };
 
   // Dedicated Context-Aware Schema Edit Payload Generator
@@ -256,12 +322,14 @@ export default function CanvasPreview({
         text: block.content?.headline || ''
       });
     } else if (key === 'hero-name') {
+      const rawName = block.content?.name || 'Alex Rivera';
+      const fullHeadline = rawName.includes("I'm") ? rawName : `I'm ${rawName}.`;
       setEditModalData({
         type: 'text-single',
-        label: 'Headline Name',
+        label: 'Headline Title',
         blockId,
         fieldPath: 'content.name',
-        text: block.content?.name || ''
+        text: fullHeadline
       });
     } else if (key === 'hero-bio') {
       setEditModalData({
@@ -371,6 +439,15 @@ export default function CanvasPreview({
       onClick={() => onSelectElement && onSelectElement(null)}
       className="flex-1 bg-[#0F1117] bg-grid-pattern-dark overflow-y-auto p-4 sm:p-8 flex flex-col items-center justify-start relative select-none"
     >
+      {/* Hidden Native File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* Background Ambient Glow Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-amber-600/10 rounded-full blur-[140px]" />
@@ -464,16 +541,7 @@ export default function CanvasPreview({
                           blockIndex={index}
                         >
                           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                            I'm{' '}
-                            <span
-                              contentEditable
-                              suppressContentEditableWarning
-                              onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
-                              className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none"
-                            >
-                              {block.content.name}
-                            </span>
-                            .
+                            {renderDynamicHeadline(block.content.name, block.id, handleInlineChange)}
                           </h1>
                         </EditableCanvasItem>
 
@@ -495,14 +563,14 @@ export default function CanvasPreview({
                           <div
                             onClick={(e) => {
                               e.stopPropagation();
-                              onReplaceImage && onReplaceImage(block);
+                              triggerFileUpload(block.id);
                             }}
                             className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center cursor-pointer hover:border-[#38BDF8] transition-all relative group/img overflow-hidden shadow-xl"
                             style={{ backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})` }}
                           >
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-mono text-white gap-1">
-                              <ImageIcon className="w-4 h-4 text-[#38BDF8]" />
-                              <span>Replace Image</span>
+                              <Upload className="w-5 h-5 text-[#38BDF8]" />
+                              <span>Upload Image</span>
                             </div>
                           </div>
                         </EditableCanvasItem>
@@ -959,21 +1027,32 @@ export default function CanvasPreview({
 
               {/* Avatar Image Form */}
               {editModalData.type === 'avatar' && (
-                <div>
-                  <label className="block text-slate-400 mb-1">Image URL:</label>
-                  <input
-                    type="url"
-                    value={editModalData.url}
-                    onChange={(e) => setEditModalData({ ...editModalData, url: e.target.value })}
-                    className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Image Web URL:</label>
+                    <input
+                      type="url"
+                      value={editModalData.url}
+                      onChange={(e) => setEditModalData({ ...editModalData, url: e.target.value })}
+                      className="w-full bg-[#0F1117] border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#38BDF8]"
+                    />
+                  </div>
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => triggerFileUpload(editModalData.blockId)}
+                      className="w-full py-2 bg-[#38BDF8]/10 hover:bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/30 rounded-xl font-mono text-xs flex items-center justify-center gap-2 transition-all"
+                    >
+                      <Upload className="w-4 h-4" /> Upload Local Image File
+                    </button>
+                  </div>
+                </>
               )}
 
               {/* Text Single / Multi Form */}
               {(editModalData.type === 'text-single' || editModalData.type === 'text-multi') && (
                 <div>
-                  <label className="block text-slate-400 mb-1">Content:</label>
+                  <label className="block text-slate-400 mb-1">Full Text String:</label>
                   {editModalData.type === 'text-multi' ? (
                     <textarea
                       rows={4}
