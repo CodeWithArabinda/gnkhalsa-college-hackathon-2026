@@ -1,22 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Bot, User, RefreshCw, Wand2, ArrowRight } from 'lucide-react';
+import { Send, Sparkles, MessageSquare, History, X, Plus, Mic, Wand2, User, RefreshCw, Layers, Palette, HelpCircle, Bot } from 'lucide-react';
 import PlanningCard from './PlanningCard';
-import { useStudioTheme } from '../../context/ThemeContext';
 
-const QUICK_PROMPTS = [
-  "✨ Make theme Dark Cinematic",
-  "⚡ Add React, Node & Tailwind skills",
-  "🚀 Rewrite bio to sound senior",
-  "🎨 Add project: AI Copilot Studio"
+const QUICK_GRID_ACTIONS = [
+  { id: 'generate', label: 'Generate', icon: RefreshCw, prompt: '✨ Generate a new modern hero layout for developer portfolio.' },
+  { id: 'add', label: 'Add', icon: Plus, prompt: '⚡ Add a new project section block with live GitHub links.' },
+  { id: 'design', label: 'Design', icon: Palette, prompt: '🎨 Apply a sleek Dark Cinematic design theme with neon accents.' },
+  { id: 'howto', label: 'How to?', icon: HelpCircle, prompt: '📄 How do I customize my portfolio slug and domain?' }
 ];
 
 export default function CopilotChat({ schema, onApplyPrompt, isGenerating: externalGenerating }) {
-  const { isLight } = useStudioTheme();
   const [messages, setMessages] = useState([
     {
       id: "m1",
       role: "assistant",
-      text: "Hey! I'm your StackFolio Copilot. Ask me to rewrite your bio, change layout themes, add new projects, or update skills!"
+      text: "Hey KSHITIJ! I'm Aria, your StackFolio AI Copilot. Ask me to rewrite your bio, change layout themes, add new projects, or update skills!"
     }
   ]);
   const [input, setInput] = useState("");
@@ -74,142 +72,155 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
   };
 
   return (
-    <aside className={`w-full lg:w-96 flex flex-col h-full shrink-0 select-none transition-colors duration-200 ${
-      isLight ? 'bg-white border-l-2 border-slate-200 text-slate-900 shadow-xl' : 'bg-[#12141D] border-l-2 border-black text-white'
-    }`}>
+    <aside className="w-full lg:w-[332px] bg-white border-l border-slate-200 flex flex-col h-full shrink-0 text-slate-900 select-none shadow-sm z-30">
       
-      {/* Copilot Header */}
-      <div className={`p-4 border-b flex items-center justify-between transition-colors ${
-        isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#181A24] border-white/10'
-      }`}>
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#FFE600] border border-black flex items-center justify-center text-black shadow-[2px_2px_0px_0px_#000]">
-            <Bot className="w-4 h-4" />
+      {/* Wix Aria Top Header */}
+      <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center font-bold shadow-xs">
+            <Sparkles className="w-3.5 h-3.5" />
           </div>
-          <div>
-            <h3 className={`font-heading font-extrabold text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>AI Copilot</h3>
-            <p className="font-mono text-[10px] text-[#00FFA3] flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00FFA3] animate-pulse" /> Active & Ready
-            </p>
-          </div>
+          <span className="font-heading font-extrabold text-sm text-slate-900 tracking-tight">Aria</span>
+          <span className="text-[10px] font-mono bg-blue-50 text-[#0053ff] px-1.5 py-0.2 rounded border border-blue-200 font-bold">
+            Copilot
+          </span>
         </div>
 
-        <div className={`text-[10px] font-mono rounded-lg px-2 py-1 ${
-          isLight ? 'bg-slate-200 text-slate-700 border border-slate-300' : 'text-slate-400 bg-white/5 border border-white/10'
-        }`}>
-          v2.4
+        <div className="flex items-center space-x-1 text-slate-500">
+          <button type="button" className="p-1 hover:bg-slate-200 rounded-md" title="Chat history">
+            <History className="w-4 h-4" />
+          </button>
+          <button type="button" className="p-1 hover:bg-slate-200 rounded-md" title="Close Aria">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* Message Feed */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`flex items-start space-x-2.5 ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
-          >
-            <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                m.role === 'assistant'
-                  ? 'bg-[#FF6B1A] text-black border border-black'
-                  : isLight ? 'bg-slate-200 text-slate-800 border border-slate-300' : 'bg-white/10 text-white border border-white/20'
-              }`}
-            >
-              {m.role === 'assistant' ? <Wand2 className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
-            </div>
-
-            <div
-              className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
-                m.role === 'assistant'
-                  ? isLight
-                    ? 'bg-slate-100 border border-slate-300 text-slate-800 shadow-sm'
-                    : 'bg-[#1D202D] border border-white/10 text-slate-200 shadow-md'
-                  : 'bg-[#FFE600] text-black font-medium border border-black shadow-[2px_2px_0px_0px_#000]'
-              }`}
-            >
-              {m.text}
+      {/* Main Scrollable Body */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 font-sans text-xs">
+        
+        {/* Mascot Welcome Card (Wix Aria div.fromOpacityEnter-w33Vvr Style) */}
+        <div className="bg-gradient-to-b from-[#eef4ff] to-[#dfeaff] border border-blue-100 rounded-2xl p-4 text-center shadow-xs relative overflow-hidden">
+          
+          {/* Mascot Emblem Sphere */}
+          <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-md relative">
+            <div className="flex items-center space-x-1">
+              <span className="w-1.5 h-1.5 bg-[#00FFA3] rounded-full animate-ping" />
+              <span className="w-1.5 h-1.5 bg-[#38BDF8] rounded-full animate-pulse" />
             </div>
           </div>
-        ))}
 
-        {/* Step-by-Step AI Planning Card */}
-        <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
+          <h3 className="text-base font-extrabold text-[#081a5e] tracking-tight mt-2">Hello KSHITIJ</h3>
+          <p className="text-xs text-slate-600 font-medium mb-3">What can I help you with?</p>
 
-        {isGenerating && (
-          <div className="flex items-center space-x-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#FF6B1A] text-black border border-black flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 animate-spin" />
-            </div>
-            <div className={`rounded-2xl p-3 font-mono text-[11px] flex items-center gap-2 ${
-              isLight ? 'bg-slate-100 border border-slate-300 text-slate-700' : 'bg-[#1D202D] border border-white/10 text-slate-400'
-            }`}>
-              <span className="w-2 h-2 rounded-full bg-[#FF6B1A] animate-ping" />
-              Updating schema & layout blocks...
-            </div>
+          {/* 4 Grid Action Pills */}
+          <div className="grid grid-cols-2 gap-2">
+            {QUICK_GRID_ACTIONS.map((act) => {
+              const IconComp = act.icon;
+              return (
+                <button
+                  key={act.id}
+                  type="button"
+                  onClick={() => handleSend(act.prompt)}
+                  className="bg-white/90 hover:bg-white text-slate-800 font-semibold text-xs py-2 px-2.5 rounded-xl border border-blue-200/60 shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow-sm"
+                >
+                  <IconComp className="w-3.5 h-3.5 text-[#0053ff]" />
+                  <span>{act.label}</span>
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Quick Prompt Pills */}
-      <div className={`p-3 border-t space-y-2 ${
-        isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#161822] border-white/10'
-      }`}>
-        <p className={`text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 ${
-          isLight ? 'text-slate-600' : 'text-slate-400'
-        }`}>
-          <Sparkles className="w-3 h-3 text-[#FFE600]" /> Quick Prompt Actions
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {QUICK_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              onClick={() => handleSend(prompt)}
-              className={`text-[10px] font-mono border rounded-lg px-2.5 py-1 transition-all text-left ${
-                isLight
-                  ? 'bg-white hover:bg-[#FFE600] border-slate-300 text-slate-800 hover:text-black'
-                  : 'bg-white/5 hover:bg-[#FFE600] border-white/10 text-slate-300 hover:text-black'
-              }`}
+        {/* Message Feed */}
+        <div className="space-y-3 pt-1">
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`flex items-start space-x-2 ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
             >
-              {prompt}
-            </button>
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs ${
+                  m.role === 'assistant'
+                    ? 'bg-[#0053ff] text-white shadow-xs'
+                    : 'bg-slate-200 text-slate-800 border border-slate-300'
+                }`}
+              >
+                {m.role === 'assistant' ? <Sparkles className="w-3 h-3" /> : <User className="w-3 h-3" />}
+              </div>
+
+              <div
+                className={`p-3 rounded-2xl max-w-[88%] leading-relaxed ${
+                  m.role === 'assistant'
+                    ? 'bg-slate-100 border border-slate-200 text-slate-800 shadow-xs'
+                    : 'bg-[#0053ff] text-white font-medium shadow-xs'
+                }`}
+              >
+                {m.text}
+              </div>
+            </div>
           ))}
+
+          {/* Step-by-Step AI Planning Card */}
+          <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
+
+          {isGenerating && (
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center">
+                <Sparkles className="w-3 h-3 animate-spin" />
+              </div>
+              <div className="bg-slate-100 border border-slate-200 rounded-2xl p-2.5 text-slate-600 font-mono text-[11px] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-ping" />
+                Drafting high-impact layout...
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
+
       </div>
 
-      {/* Input Box */}
-      <div className={`p-3 border-t ${
-        isLight ? 'bg-slate-100 border-slate-300' : 'bg-[#0F1117] border-black'
-      }`}>
+      {/* Bottom Chat Input Dock */}
+      <div className="p-3 border-t border-slate-200 bg-slate-50 space-y-2">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className={`flex items-center space-x-2 border rounded-xl p-1.5 focus-within:border-[#FFE600] transition-colors ${
-            isLight ? 'bg-white border-slate-300' : 'bg-[#1A1D27] border-white/15'
-          }`}
+          className="bg-white border border-slate-300 focus-within:border-[#0053ff] rounded-xl p-2 shadow-xs transition-colors space-y-2"
         >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask AI Copilot to edit portfolio..."
-            className={`flex-1 bg-transparent px-3 text-xs focus:outline-none ${
-              isLight ? 'text-slate-900 placeholder-slate-400' : 'text-white placeholder-slate-500'
-            }`}
+            placeholder="Describe what you want to change..."
+            className="w-full bg-transparent px-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium"
           />
 
-          <button
-            type="submit"
-            disabled={!input.trim() || isGenerating}
-            className="p-2 bg-[#FFE600] hover:bg-[#ffed4d] disabled:opacity-40 text-black rounded-lg border border-black shadow-[1.5px_1.5px_0px_0px_#000] transition-all"
-          >
-            <Send className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center justify-between border-t border-slate-100 pt-1.5">
+            <div className="flex items-center space-x-1 text-slate-400">
+              <button type="button" className="p-1 hover:bg-slate-100 rounded text-slate-500" title="Attach file or context">
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+              <button type="button" className="p-1 hover:bg-slate-100 rounded text-slate-500" title="Voice prompt">
+                <Mic className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!input.trim() || isGenerating}
+              className="p-1.5 bg-[#0053ff] hover:bg-[#0043cc] disabled:opacity-40 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </form>
+
+        <p className="text-[10px] text-center text-slate-400 font-sans">
+          AI can make mistakes. Always double-check the results.
+        </p>
       </div>
 
     </aside>
