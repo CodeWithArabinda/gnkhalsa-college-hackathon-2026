@@ -62,7 +62,6 @@ export default function DashboardPage() {
     { id: 'overview', label: 'AI Site Generator', icon: Sparkles },
     { id: 'studio', label: 'Portfolio Studio', icon: Edit3, isDirectRoute: true },
     { id: 'templates', label: 'Design Templates', icon: Palette },
-    { id: 'parser', label: 'Upload Resume (AI)', icon: FileText, isAction: true },
     { id: 'analytics', label: 'Recruiter Analytics', icon: BarChart2 },
     { id: 'settings', label: 'Account Settings', icon: Settings }
   ];
@@ -116,20 +115,6 @@ export default function DashboardPage() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.id;
-
-              if (item.isAction) {
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setIsUploadModalOpen(true)}
-                    className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl border-2 border-black bg-[#4DEEEA] font-black text-xs shadow-[3px_3px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-black cursor-pointer"
-                  >
-                    <Icon className="w-4 h-4 text-black" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              }
 
               return (
                 <button
@@ -186,16 +171,6 @@ export default function DashboardPage() {
               ⚡ Gemini 2.5 Flash
             </div>
 
-            {/* Relocated Resume Upload Button */}
-            <button
-              type="button"
-              onClick={() => setIsUploadModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-1.5 bg-[#FFE600] text-black border-2 border-black font-mono text-xs font-bold rounded-lg shadow-[2px_2px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer"
-            >
-              <span>📄</span>
-              <span>Ingest Resume</span>
-            </button>
-
             <button
               type="button"
               onClick={() => window.open('/preview', '_blank')}
@@ -223,7 +198,7 @@ export default function DashboardPage() {
           {/* Unified AI Generator + Template Showcase (Overview & Templates tabs) */}
           {(activeNav === 'overview' || activeNav === 'templates') && (
             <div className="space-y-6">
-              <AriaSiteGenerator />
+              <AriaSiteGenerator onTriggerResumeUpload={() => setIsUploadModalOpen(true)} />
               <TemplateGallery />
             </div>
           )}

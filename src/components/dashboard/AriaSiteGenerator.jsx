@@ -138,6 +138,16 @@ export default function AriaSiteGenerator({ onTriggerResumeUpload }) {
                 selectedModel={selectedModel}
                 onSelect={setSelectedModel}
               />
+
+              {/* Hero Upload Resume Button */}
+              <button
+                type="button"
+                onClick={() => onTriggerResumeUpload && onTriggerResumeUpload()}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-black font-mono text-xs font-bold border-2 border-black rounded-xl shadow-[2px_2px_0px_#000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer"
+              >
+                <span>📄</span>
+                <span>Upload Resume</span>
+              </button>
             </div>
 
             {/* Generate Site Trigger */}
