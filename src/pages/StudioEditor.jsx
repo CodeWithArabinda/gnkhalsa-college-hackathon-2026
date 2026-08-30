@@ -32,6 +32,22 @@ export default function StudioEditor() {
 
   const schema = history.present;
 
+  // Hydrate freshly generated AI schema on mount
+  useEffect(() => {
+    const justGenerated = localStorage.getItem('stackfolio_just_generated');
+    if (justGenerated === 'true') {
+      localStorage.removeItem('stackfolio_just_generated');
+      try {
+        const savedSchema = localStorage.getItem('stackfolio_portfolio_schema') || localStorage.getItem('stackfolio_studio_draft');
+        if (savedSchema) {
+          setHistory({ past: [], present: JSON.parse(savedSchema), future: [] });
+        }
+      } catch (e) {
+        console.error("Schema hydration error:", e);
+      }
+    }
+  }, []);
+
   // Push new state snapshot to history stack
   const updateSchemaState = (newSchemaOrFn) => {
     setSaveStatus('saving');
