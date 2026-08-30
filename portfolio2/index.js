@@ -120,5 +120,25 @@ sections.forEach((sec) => {
 
 })
 
+// Dynamic Portfolio Data Handler
+function applyPortfolioData(data) {
+  if (!data) return;
+  const name = data.full_name || data.name;
+  if (name) {
+    document.querySelectorAll(".portfolio-author-name").forEach(el => el.textContent = name);
+    document.title = `${name} | Developer Portfolio`;
+  }
+  const headline = data.headline || data.role;
+  if (headline) {
+    document.querySelectorAll(".portfolio-role").forEach(el => el.textContent = headline);
+  }
+}
+
+window.setPortfolioData = applyPortfolioData;
+if (window.portfolio) {
+  applyPortfolioData(window.portfolio);
+}
+
+
 
 
