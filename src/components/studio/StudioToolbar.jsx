@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import {
   Plus, Sparkles, Image as ImageIcon, Link as LinkIcon, Palette, Type,
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Box,
-  Trash2, ChevronDown, Minus, Plus as PlusIcon, Code, Grid, Upload
+  Trash2, ChevronDown, Minus, Plus as PlusIcon, Code, Grid, Upload, Maximize2, Crop
 } from 'lucide-react';
 
 const FONTS = [
@@ -39,6 +39,7 @@ export default function StudioToolbar({
   const isItalic = elementStyle?.fontStyle === 'italic';
   const isUnderline = elementStyle?.textDecoration === 'underline';
   const textAlign = elementStyle?.textAlign || 'left';
+  const isImageElement = selectedElement?.key === 'hero-avatar' || selectedElement?.label?.toLowerCase().includes('image');
 
   const updateStyle = (key, val) => {
     if (onUpdateElementStyle) {
@@ -154,6 +155,46 @@ export default function StudioToolbar({
       {/* Center Formatting Ribbon */}
       <div className="flex items-center space-x-1 border-x border-white/10 px-3 mx-2 shrink-0">
         
+        {/* Dedicated Image Formatting Tools */}
+        {isImageElement && (
+          <div className="flex items-center space-x-2 mr-2 bg-[#1A1D27] p-1 rounded-xl border border-[#38BDF8]/30 font-mono text-xs">
+            <span className="text-[10px] text-[#38BDF8] font-bold uppercase px-1">Size:</span>
+            <button
+              type="button"
+              onClick={() => { updateStyle('width', 144); updateStyle('height', 144); }}
+              className="px-2 py-0.5 hover:bg-white/10 rounded text-slate-300 hover:text-white font-bold"
+              title="Small (144px)"
+            >
+              S
+            </button>
+            <button
+              type="button"
+              onClick={() => { updateStyle('width', 240); updateStyle('height', 240); }}
+              className="px-2 py-0.5 hover:bg-white/10 rounded text-slate-300 hover:text-white font-bold"
+              title="Medium (240px)"
+            >
+              M
+            </button>
+            <button
+              type="button"
+              onClick={() => { updateStyle('width', 360); updateStyle('height', 360); }}
+              className="px-2 py-0.5 hover:bg-white/10 rounded text-slate-300 hover:text-white font-bold"
+              title="Large (360px)"
+            >
+              L
+            </button>
+            <div className="w-px h-3 bg-white/20" />
+            <button
+              type="button"
+              onClick={() => updateStyle('borderRadius', (elementStyle?.borderRadius || 0) === 9999 ? 24 : 9999)}
+              className="px-2 py-0.5 hover:bg-white/10 rounded text-amber-400 font-bold"
+              title="Toggle Circle/Box"
+            >
+              Circle
+            </button>
+          </div>
+        )}
+
         {/* Color Picker */}
         <div className="relative">
           <button

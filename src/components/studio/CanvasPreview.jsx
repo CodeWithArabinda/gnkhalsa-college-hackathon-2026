@@ -66,6 +66,53 @@ function EditableCanvasItem({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
+  // Corner Drag-to-Resize Handler
+  const handleResizeMouseDown = (e, corner) => {
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialWidth = st.width || 144;
+    const initialHeight = st.height || 144;
+
+    const handleResizeMove = (me) => {
+      const dx = me.clientX - startX;
+      const dy = me.clientY - startY;
+
+      let newWidth = initialWidth;
+      let newHeight = initialHeight;
+
+      if (corner === 'br') {
+        newWidth = Math.min(800, Math.max(120, initialWidth + dx));
+        newHeight = Math.min(800, Math.max(120, initialHeight + dy));
+      } else if (corner === 'bl') {
+        newWidth = Math.min(800, Math.max(120, initialWidth - dx));
+        newHeight = Math.min(800, Math.max(120, initialHeight + dy));
+      } else if (corner === 'tr') {
+        newWidth = Math.min(800, Math.max(120, initialWidth + dx));
+        newHeight = Math.min(800, Math.max(120, initialHeight - dy));
+      } else if (corner === 'tl') {
+        newWidth = Math.min(800, Math.max(120, initialWidth - dx));
+        newHeight = Math.min(800, Math.max(120, initialHeight - dy));
+      }
+
+      if (onUpdateElementStyle) {
+        onUpdateElementStyle(elementKey, (prev = {}) => ({
+          ...prev,
+          width: Math.round(newWidth),
+          height: Math.round(newHeight)
+        }));
+      }
+    };
+
+    const handleResizeUp = () => {
+      window.removeEventListener('mousemove', handleResizeMove);
+      window.removeEventListener('mouseup', handleResizeUp);
+    };
+
+    window.addEventListener('mousemove', handleResizeMove);
+    window.addEventListener('mouseup', handleResizeUp);
+  };
+
   return (
     <div
       onMouseEnter={() => setHoveredElementKey(elementKey)}
@@ -80,6 +127,8 @@ function EditableCanvasItem({
       } ${className}`}
       style={{
         transform: `translate3d(${st.x || 0}px, ${st.y || 0}px, 0)`,
+        width: st.width ? `${st.width}px` : undefined,
+        height: st.height ? `${st.height}px` : undefined,
         color: st.color || undefined,
         fontSize: st.fontSize ? `${st.fontSize}px` : undefined,
         fontFamily: st.fontFamily || undefined,
@@ -125,6 +174,36 @@ function EditableCanvasItem({
             <Wand2 className="w-3 h-3 text-black" /> Aria Polish
           </button>
         </div>
+      )}
+
+      {/* 4 ACTIVE CORNER RESIZE HANDLES */}
+      {isSelected && (
+        <>
+          {/* Top-Left */}
+          <div
+            onMouseDown={(e) => handleResizeMouseDown(e, 'tl')}
+            className="absolute -top-2 -left-2 w-3.5 h-3.5 bg-white border-2 border-[#FF6B1A] rounded-full shadow-lg cursor-nwse-resize z-50 hover:scale-125 transition-transform pointer-events-auto"
+            title="Resize Top-Left"
+          />
+          {/* Top-Right */}
+          <div
+            onMouseDown={(e) => handleResizeMouseDown(e, 'tr')}
+            className="absolute -top-2 -right-2 w-3.5 h-3.5 bg-white border-2 border-[#FF6B1A] rounded-full shadow-lg cursor-nesw-resize z-50 hover:scale-125 transition-transform pointer-events-auto"
+            title="Resize Top-Right"
+          />
+          {/* Bottom-Left */}
+          <div
+            onMouseDown={(e) => handleResizeMouseDown(e, 'bl')}
+            className="absolute -bottom-2 -left-2 w-3.5 h-3.5 bg-white border-2 border-[#FF6B1A] rounded-full shadow-lg cursor-nesw-resize z-50 hover:scale-125 transition-transform pointer-events-auto"
+            title="Resize Bottom-Left"
+          />
+          {/* Bottom-Right */}
+          <div
+            onMouseDown={(e) => handleResizeMouseDown(e, 'br')}
+            className="absolute -bottom-2 -right-2 w-3.5 h-3.5 bg-white border-2 border-[#FF6B1A] rounded-full shadow-lg cursor-nwse-resize z-50 hover:scale-125 transition-transform pointer-events-auto"
+            title="Resize Bottom-Right"
+          />
+        </>
       )}
 
       {children}
@@ -512,7 +591,7 @@ export default function CanvasPreview({
                       </EditableCanvasItem>
 
                       {/* 2. Hero Title & Avatar Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-6 items-center">
+                      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
                         
                         {/* Name / Headline */}
                         <EditableCanvasItem
@@ -560,7 +639,12 @@ export default function CanvasPreview({
                               triggerFileUpload(block.id);
                             }}
                             className="w-36 h-36 rounded-2xl border-2 border-white/20 bg-cover bg-center cursor-pointer hover:border-[#38BDF8] transition-all relative group/img overflow-hidden shadow-xl"
-                            style={{ backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})` }}
+                            style={{
+                              backgroundImage: `url(${block.content.avatarUrl || '/photo/Sarang.png'})`,
+                              width: (schema?.elementStyles?.['hero-avatar']?.width) ? `${schema.elementStyles['hero-avatar'].width}px` : undefined,
+                              height: (schema?.elementStyles?.['hero-avatar']?.height) ? `${schema.elementStyles['hero-avatar'].height}px` : undefined,
+                              borderRadius: (schema?.elementStyles?.['hero-avatar']?.borderRadius) ? `${schema.elementStyles['hero-avatar'].borderRadius}px` : undefined
+                            }}
                           >
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-mono text-white gap-1">
                               <Upload className="w-5 h-5 text-[#38BDF8]" />
