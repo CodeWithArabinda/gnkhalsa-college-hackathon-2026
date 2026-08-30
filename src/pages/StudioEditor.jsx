@@ -8,7 +8,7 @@ import StudioSettingsModal from '../components/studio/StudioSettingsModal';
 import ConnectDomainModal from '../components/studio/ConnectDomainModal';
 import { useStudioTheme } from '../context/ThemeContext';
 import { initialPortfolioSchema } from '../types/schema';
-import { processUserPrompt } from '../lib/geminiBuilder';
+import { generatePortfolioSchema, processUserPrompt, morphSchemaArchetype } from '../lib/geminiBuilder';
 
 export default function StudioEditor() {
   const { studioTheme } = useStudioTheme();
@@ -344,6 +344,7 @@ export default function StudioEditor() {
         canRedo={history.future.length > 0}
         saveStatus={saveStatus}
         onResetDefault={handleResetDefault}
+        onMorphArchetype={(target) => updateSchemaState(morphSchemaArchetype(schema, target))}
       />
 
       {/* Main Studio Workspace: 230px Left Sidebar + Center Canvas + 332px Right Copilot */}

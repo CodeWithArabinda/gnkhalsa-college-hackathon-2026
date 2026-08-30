@@ -1,85 +1,150 @@
 import { initialPortfolioSchema } from '../types/schema';
 
 /**
- * Anti-repetition memory cache & archetype classification.
+ * Step A: Deterministic 2-Stage Intent Classifier
  */
-export function determineArchetype(promptText = '', excludedArchetypes = []) {
+export function determineArchetype(promptText = '') {
   const p = promptText.toLowerCase();
 
-  const options = ['cyber-terminal', 'bento-minimal', 'editorial-studio', 'neo-brutalist'];
-  const available = options.filter(opt => !excludedArchetypes.includes(opt));
-  const fallbackChoice = available.length > 0 ? available[0] : 'neo-brutalist';
-
-  if ((p.includes('ai') || p.includes('ml') || p.includes('python') || p.includes('cyber') || p.includes('terminal') || p.includes('torch')) && !excludedArchetypes.includes('cyber-terminal')) {
-    return 'cyber-terminal';
-  }
-  if ((p.includes('bento') || p.includes('minimal') || p.includes('apple') || p.includes('vercel') || p.includes('ios')) && !excludedArchetypes.includes('bento-minimal')) {
+  if (p.includes('apple') || p.includes('bento') || p.includes('minimal') || p.includes('clean') || p.includes('figma') || p.includes('designer') || p.includes('ios') || p.includes('product')) {
     return 'bento-minimal';
   }
-  if ((p.includes('editorial') || p.includes('studio') || p.includes('agency') || p.includes('luxury') || p.includes('fashion')) && !excludedArchetypes.includes('editorial-studio')) {
-    return 'editorial-studio';
+  if (p.includes('ai') || p.includes('python') || p.includes('pytorch') || p.includes('terminal') || p.includes('cyber') || p.includes('telemetry') || p.includes('distributed') || p.includes('backend') || p.includes('cuda') || p.includes('vector')) {
+    return 'cyber-terminal';
+  }
+  if (p.includes('bold') || p.includes('brutalist') || p.includes('startup') || p.includes('neo') || p.includes('yellow') || p.includes('creative') || p.includes('funky')) {
+    return 'neo-brutalist';
   }
   
-  return fallbackChoice;
+  return 'humanist-light';
 }
 
 /**
- * Generate a full AI Portfolio Schema based on user prompt, model choice, and anti-repetition history.
+ * Step B: Enforce Strict Variant & Theme Mappings per Archetype
+ */
+export function getArchetypeConfig(archetype) {
+  switch (archetype) {
+    case 'cyber-terminal':
+    case 'cyber-ai':
+      return {
+        archetype: 'cyber-terminal',
+        theme: {
+          preset: "cyber-terminal",
+          bgStyle: "dark-terminal",
+          primaryColor: "#00f5ff",
+          accentColor: "#10b981",
+          textColor: "#ffffff",
+          cardBg: "#0f172a",
+          borderColor: "#1e293b",
+          borderRadius: "rounded-xl"
+        },
+        variants: {
+          hero: 'cyber-terminal',
+          works: 'terminal-repos',
+          pillars: 'system-telemetry',
+          story: 'timeline-milestones',
+          contact: 'cli-terminal-connect'
+        }
+      };
+
+    case 'bento-minimal':
+      return {
+        archetype: 'bento-minimal',
+        theme: {
+          preset: "bento-minimal",
+          bgStyle: "bento-slate",
+          primaryColor: "#0f172a",
+          accentColor: "#2563eb",
+          textColor: "#0f172a",
+          cardBg: "#ffffff",
+          borderColor: "#e2e8f0",
+          borderRadius: "rounded-3xl"
+        },
+        variants: {
+          hero: 'centered-bento',
+          works: 'apple-bento',
+          pillars: 'tech-matrix',
+          story: 'minimal-manifesto',
+          contact: 'floating-dock'
+        }
+      };
+
+    case 'humanist-light':
+    case 'editorial-studio':
+    case 'neo-brutalist':
+    default:
+      return {
+        archetype: 'humanist-light',
+        theme: {
+          preset: "humanist-light",
+          bgStyle: "clean-white",
+          primaryColor: "#ff5100",
+          accentColor: "#0f172a",
+          textColor: "#0f172a",
+          cardBg: "#ffffff",
+          borderColor: "#e2e8f0",
+          borderRadius: "rounded-2xl"
+        },
+        variants: {
+          hero: 'split-portrait',
+          works: 'numbered-grid',
+          pillars: 'pastel-cards',
+          story: 'editorial-split',
+          contact: 'split-form'
+        }
+      };
+  }
+}
+
+/**
+ * Switch archetype of an existing schema in 1-click without losing content.
+ */
+export function morphSchemaArchetype(currentSchema, targetArchetype) {
+  const config = getArchetypeConfig(targetArchetype);
+  const newBlocks = currentSchema.blocks?.map(block => {
+    let newVar = block.layoutVariant;
+    if (block.type === 'HeroBlock') newVar = config.variants.hero;
+    if (block.type === 'ProjectGridBlock') newVar = config.variants.works;
+    if (block.type === 'PillarsBlock' || block.type === 'SkillsBlock') newVar = config.variants.pillars;
+    if (block.type === 'StoryBlock') newVar = config.variants.story;
+    if (block.type === 'ContactBlock') newVar = config.variants.contact;
+
+    return {
+      ...block,
+      layoutVariant: newVar
+    };
+  }) || [];
+
+  return {
+    ...currentSchema,
+    archetype: config.archetype,
+    theme: config.theme,
+    blocks: newBlocks
+  };
+}
+
+/**
+ * Generate a full AI Portfolio Schema based on user prompt using Gemini REST API or Presets.
  */
 export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiKey = null) {
   const keyToUse = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
-
-  // Read anti-repetition history
-  let history = [];
-  try {
-    const rawHist = localStorage.getItem('stackfolio_archetype_history');
-    if (rawHist) history = JSON.parse(rawHist);
-  } catch (e) {}
-
-  const archetype = determineArchetype(userPrompt, history);
-
-  // Update history
-  const updatedHistory = [archetype, ...history.filter(a => a !== archetype)].slice(0, 3);
-  try {
-    localStorage.setItem('stackfolio_archetype_history', JSON.stringify(updatedHistory));
-  } catch (e) {}
+  const archetype = determineArchetype(userPrompt);
+  const config = getArchetypeConfig(archetype);
 
   let resolvedModel = modelId;
   if (!modelId || modelId === 'auto') {
     resolvedModel = userPrompt.length > 300 ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
   }
 
-  // Model-specific Section Depth
   const isPro = resolvedModel === 'gemini-2.5-pro';
-
-  // Explicit Layout Variant Mapping per Archetype
-  let selectedHeroVar = 'split-portrait';
-  let selectedWorksVar = 'numbered-grid';
-  let selectedPillarsVar = 'pastel-cards';
-  let selectedStoryVar = 'editorial-split';
-  let selectedContactVar = 'split-form';
-
-  if (archetype === 'cyber-terminal' || archetype === 'cyber-ai') {
-    selectedHeroVar = 'cyber-terminal';
-    selectedWorksVar = 'terminal-repos';
-    selectedPillarsVar = 'system-telemetry';
-    selectedStoryVar = 'timeline-milestones';
-    selectedContactVar = 'cli-terminal-connect';
-  } else if (archetype === 'bento-minimal') {
-    selectedHeroVar = 'centered-bento';
-    selectedWorksVar = 'apple-bento';
-    selectedPillarsVar = 'tech-matrix';
-    selectedStoryVar = 'minimal-manifesto';
-    selectedContactVar = 'floating-dock';
-  }
 
   if (keyToUse && keyToUse !== "your_gemini_api_key_here") {
     try {
-      const systemPrompt = `You are StackFolio AI, an elite generative web architect. Convert the user's prompt into a clean, modern, fully populated JSON schema for a developer/designer portfolio website. Excluded archetypes: [${history.join(', ')}]. Selected archetype: ${archetype}. Model Depth: ${resolvedModel}. Return ONLY a valid JSON object matching the exact schema structure without Markdown formatting or backticks.`;
+      const systemPrompt = `You are StackFolio AI, an elite generative web architect. Convert the user's prompt into a clean, modern JSON schema for a portfolio website matching archetype "${config.archetype}". Return ONLY valid JSON matching constraints.`;
 
       const schemaTemplate = {
-        archetype,
-        theme: getThemeForArchetype(archetype),
+        archetype: config.archetype,
+        theme: config.theme,
         settings: {
           siteTitle: "Developer Portfolio",
           customDomain: "kshitijpilankar.dev"
@@ -88,17 +153,17 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
           {
             id: "hero",
             type: "hero",
-            layoutVariant: selectedHeroVar,
+            layoutVariant: config.variants.hero,
             badge: "Creative Developer & Designer",
             headline: "I'm Kshitij Pilankar.",
-            bio: "Building high-impact digital experiences with modern web technologies and design systems.",
+            bio: "Building high-impact digital experiences with modern web technologies.",
             primaryBtn: { label: "Explore Projects", link: "#projects" },
             secondaryBtn: { label: "Contact Me", link: "#contact" }
           },
           {
             id: "projects",
             type: "project-grid",
-            layoutVariant: selectedWorksVar,
+            layoutVariant: config.variants.works,
             title: "Selected Works",
             subtitle: "Selected software and design showcases",
             items: [
@@ -123,7 +188,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
           {
             id: "skills",
             type: "skills-matrix",
-            layoutVariant: selectedPillarsVar,
+            layoutVariant: config.variants.pillars,
             title: "Engineering Excellence",
             categories: [
               { name: "FRONTEND", skills: ["React", "Vite", "Tailwind CSS", "GSAP"] },
@@ -135,7 +200,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
             {
               id: "story",
               type: "story",
-              layoutVariant: selectedStoryVar,
+              layoutVariant: config.variants.story,
               title: "The Architect",
               bio: "Engineering software requires an uncompromised balance between aesthetic precision and technical integrity."
             }
@@ -143,7 +208,7 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
           {
             id: "contact",
             type: "contact-footer",
-            layoutVariant: selectedContactVar,
+            layoutVariant: config.variants.contact,
             headline: "Let's Build Something Together",
             subtext: "Available for full-time opportunities and creative projects.",
             email: "kshitijpilankar@gmail.com",
@@ -158,14 +223,14 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
             role: "user",
             parts: [
               {
-                text: `${systemPrompt}\n\nARCHETYPE: ${archetype}\nREQUIRED SCHEMA STRUCTURE CONSTRAINTS:\n${JSON.stringify(schemaTemplate, null, 2)}\n\nUSER PROMPT:\n${userPrompt}`
+                text: `${systemPrompt}\n\nARCHETYPE: ${config.archetype}\nREQUIRED SCHEMA STRUCTURE CONSTRAINTS:\n${JSON.stringify(schemaTemplate, null, 2)}\n\nUSER PROMPT:\n${userPrompt}`
               }
             ]
           }
         ],
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.35
+          temperature: 0.3
         }
       };
 
@@ -184,77 +249,22 @@ export async function generatePortfolioSchema(userPrompt, modelId = 'auto', apiK
         const parsed = JSON.parse(cleanedText);
 
         if (parsed && (parsed.sections || parsed.blocks)) {
-          return formatSchemaResponse(parsed, userPrompt, archetype, selectedHeroVar, selectedWorksVar, selectedPillarsVar, selectedStoryVar, selectedContactVar, isPro);
+          return formatSchemaResponse(parsed, userPrompt, config, isPro);
         }
       }
     } catch (err) {
-      console.warn(`Gemini API call error (${resolvedModel}), using synthesized fallback schema:`, err.message);
+      console.warn(`Gemini API call error (${resolvedModel}), using synthesized fallback preset:`, err.message);
     }
   }
 
-  return synthesizeFallbackSchema(userPrompt, archetype, selectedHeroVar, selectedWorksVar, selectedPillarsVar, selectedStoryVar, selectedContactVar, isPro);
+  // Step C: Fallback Preset Engine
+  return synthesizePresetFallback(userPrompt, config, isPro);
 }
 
 /**
- * Get preset theme design tokens for a given archetype.
+ * Synchronize parsed schema response with archetype config.
  */
-function getThemeForArchetype(archetype) {
-  switch (archetype) {
-    case 'cyber-terminal':
-    case 'cyber-ai':
-      return {
-        preset: "cyber-terminal",
-        bgStyle: "dark-terminal",
-        primaryColor: "#00f5ff",
-        accentColor: "#10b981",
-        textColor: "#ffffff",
-        cardBg: "#0f172a",
-        borderColor: "#1e293b",
-        borderRadius: "rounded-xl"
-      };
-    case 'bento-minimal':
-      return {
-        preset: "bento-minimal",
-        bgStyle: "bento-slate",
-        primaryColor: "#0053ff",
-        accentColor: "#a855f7",
-        textColor: "#0f172a",
-        cardBg: "#ffffff",
-        borderColor: "#e2e8f0",
-        borderRadius: "rounded-3xl"
-      };
-    case 'editorial-studio':
-      return {
-        preset: "editorial-studio",
-        bgStyle: "clean-white",
-        primaryColor: "#18181b",
-        accentColor: "#71717a",
-        textColor: "#09090b",
-        cardBg: "#fafafa",
-        borderColor: "#e4e4e7",
-        borderRadius: "rounded-none"
-      };
-    case 'neo-brutalist':
-    default:
-      return {
-        preset: "neo-brutalist",
-        bgStyle: "architectural-grid",
-        primaryColor: "#FFE600",
-        accentColor: "#FF5100",
-        textColor: "#000000",
-        cardBg: "#FFFFFF",
-        borderColor: "#000000",
-        borderRadius: "rounded-2xl"
-      };
-  }
-}
-
-/**
- * Format and synchronize schema response for both sections and block structures.
- */
-function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksVar, pillarsVar, storyVar, contactVar, isPro) {
-  const archetype = parsed.archetype || archetypeOverride || determineArchetype(prompt);
-  const theme = parsed.theme || getThemeForArchetype(archetype);
+function formatSchemaResponse(parsed, prompt, config, isPro) {
   const sections = parsed.sections || [];
 
   const heroSec = sections.find(s => s.id === 'hero' || s.type === 'hero') || {};
@@ -267,7 +277,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
     {
       id: "block-hero",
       type: "HeroBlock",
-      layoutVariant: heroSec.layoutVariant || heroVar || 'split-portrait',
+      layoutVariant: config.variants.hero,
       content: {
         name: heroSec.headline || "I'm Kshitij Pilankar.",
         headline: heroSec.badge || "Creative Developer & Designer",
@@ -280,7 +290,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
     {
       id: "block-projects",
       type: "ProjectGridBlock",
-      layoutVariant: projectSec.layoutVariant || worksVar || 'numbered-grid',
+      layoutVariant: config.variants.works,
       content: {
         title: projectSec.title || "Selected Works",
         subtitle: projectSec.subtitle || "Selected software and design showcases",
@@ -307,7 +317,7 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
     {
       id: "block-pillars",
       type: "PillarsBlock",
-      layoutVariant: skillSec.layoutVariant || pillarsVar || 'pastel-cards',
+      layoutVariant: config.variants.pillars,
       content: {
         title: skillSec.title || "Engineering Excellence",
         categories: skillSec.categories || [
@@ -321,17 +331,17 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
       {
         id: "block-story",
         type: "StoryBlock",
-        layoutVariant: storySec.layoutVariant || storyVar || 'editorial-split',
+        layoutVariant: config.variants.story,
         content: {
-          title: "The Architect",
-          bio: "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."
+          title: storySec.title || "The Architect",
+          bio: storySec.bio || "Engineering digital software requires an uncompromised balance between aesthetic precision and technical integrity."
         }
       }
     ] : []),
     {
       id: "block-contact",
       type: "ContactBlock",
-      layoutVariant: contactSec.layoutVariant || contactVar || 'split-form',
+      layoutVariant: config.variants.contact,
       content: {
         title: contactSec.headline || "Let's Build Something Together",
         subtitle: contactSec.subtext || "Available for full-time opportunities, technical leadership roles, and high-impact design system engineering.",
@@ -349,13 +359,13 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
   ];
 
   return {
-    archetype,
+    archetype: config.archetype,
     metadata: {
       slug: "kshitij-pilankar",
       title: parsed.settings?.siteTitle || "Developer Portfolio",
       customDomain: parsed.settings?.customDomain || "kshitijpilankar.dev"
     },
-    theme,
+    theme: config.theme,
     sections,
     blocks,
     elementStyles: {}
@@ -363,28 +373,33 @@ function formatSchemaResponse(parsed, prompt, archetypeOverride, heroVar, worksV
 }
 
 /**
- * Synthesize a customized dynamic schema locally if API key is missing or call fails.
+ * Step C: Multi-Preset Fallback Engine for offline/API-key missing runs
  */
-function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsVar, storyVar, contactVar, isPro) {
-  let heroHeadline = "Creative Fullstack Developer & Architect";
-  let heroBio = "Building high-impact digital products, scalable systems, and interactive web experiences.";
-
+function synthesizePresetFallback(prompt, config, isPro) {
   let projectItems = [
     {
       id: "p1",
-      title: "3D Space Canvas",
+      title: "3D Space Canvas Engine",
       description: "Interactive WebGL portfolio template with real-time video scrubbing.",
-      metrics: "Winner ★ 1st Place",
       tags: ["React", "WebGL", "GSAP"],
-      link: "https://github.com"
+      link: "https://github.com",
+      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop"
     },
     {
       id: "p2",
-      title: "StackFolio AI Studio Copilot",
+      title: "StackFolio Studio Copilot",
       description: "Conversational website builder with live preview frame and inline edits.",
-      metrics: "1.2k+ Generated",
       tags: ["TypeScript", "Tailwind", "AI"],
-      link: "https://github.com"
+      link: "https://github.com",
+      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop"
+    },
+    {
+      id: "p3",
+      title: "Distributed Telemetry Stream",
+      description: "Real-time microservice latency monitor with WebSocket hooks.",
+      tags: ["Node.js", "Docker", "Redis"],
+      link: "https://github.com",
+      imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop"
     }
   ];
 
@@ -395,8 +410,8 @@ function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsV
   ];
 
   const fallbackData = {
-    archetype,
-    theme: getThemeForArchetype(archetype),
+    archetype: config.archetype,
+    theme: config.theme,
     settings: {
       siteTitle: "Kshitij Pilankar — Portfolio",
       customDomain: "kshitijpilankar.dev"
@@ -404,18 +419,18 @@ function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsV
     sections: [
       {
         id: "hero",
-        type: "hero-split",
-        layoutVariant: heroVar,
-        badge: heroHeadline,
+        type: "hero",
+        layoutVariant: config.variants.hero,
+        badge: "Creative Developer & Designer",
         headline: "I'm Kshitij Pilankar.",
-        bio: heroBio,
+        bio: "Building high-impact digital experiences with modern web technologies and design systems.",
         primaryBtn: { label: "Explore Projects", link: "#projects" },
         secondaryBtn: { label: "Contact Me", link: "#contact" }
       },
       {
         id: "projects",
         type: "project-grid",
-        layoutVariant: worksVar,
+        layoutVariant: config.variants.works,
         title: "Selected Works",
         subtitle: "Selected software and design showcases",
         items: projectItems
@@ -423,14 +438,14 @@ function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsV
       {
         id: "skills",
         type: "skills-matrix",
-        layoutVariant: pillarsVar,
+        layoutVariant: config.variants.pillars,
         title: "Engineering Excellence",
         categories: skillCategories
       },
       {
         id: "contact",
         type: "contact-footer",
-        layoutVariant: contactVar,
+        layoutVariant: config.variants.contact,
         headline: "Let's Build Something Together",
         subtext: "Available for full-time opportunities, technical leadership roles, and high-impact design system engineering.",
         email: "kshitijpilankar@gmail.com",
@@ -439,7 +454,7 @@ function synthesizeFallbackSchema(prompt, archetype, heroVar, worksVar, pillarsV
     ]
   };
 
-  return formatSchemaResponse(fallbackData, prompt, archetype, heroVar, worksVar, pillarsVar, storyVar, contactVar, isPro);
+  return formatSchemaResponse(fallbackData, prompt, config, isPro);
 }
 
 /**

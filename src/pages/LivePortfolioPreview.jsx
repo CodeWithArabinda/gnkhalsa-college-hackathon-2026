@@ -56,6 +56,7 @@ export default function LivePortfolioPreview() {
       {/* Persistent Site Header Navbar */}
       <SiteHeaderNavbar
         title={schema?.metadata?.title || "Kshitij Pilankar"}
+        archetype={schema?.archetype}
         scrollToProjects={() => {
           const el = document.getElementById('projects-section');
           if (el) el.scrollIntoView({ behavior: 'smooth' });

@@ -497,6 +497,7 @@ export default function CanvasPreview({
               {/* Persistent Top Site Header Navbar */}
               <SiteHeaderNavbar
                 title={schema?.metadata?.title || "Kshitij Pilankar"}
+                archetype={schema?.archetype}
                 scrollToProjects={scrollToProjects}
                 scrollToContact={scrollToContact}
               />
