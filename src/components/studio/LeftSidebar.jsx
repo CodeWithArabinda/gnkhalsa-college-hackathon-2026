@@ -29,10 +29,9 @@ export default function LeftSidebar({
   onOpenSettings,
   selectedElement
 }) {
-  const [activeDrawer, setActiveDrawer] = useState(null); // 'add' | 'styles' | 'pages' | 'media' | 'layers' | 'help' | null
+  const [activeDrawer, setActiveDrawer] = useState(null);
   const drawerRef = useRef(null);
 
-  // Auto-dismiss drawer on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (drawerRef.current && !drawerRef.current.contains(e.target)) {
@@ -52,10 +51,10 @@ export default function LeftSidebar({
 
   return (
     <>
-      {/* 230px Gemini / ChatGPT Style Full-Width Labeled Left Sidebar */}
+      {/* 230px Light Studio Labeled Left Sidebar */}
       <aside
         id="left-studio-sidebar"
-        className="w-[230px] bg-white dark:bg-[#121216] border-r border-slate-200 dark:border-zinc-800 flex flex-col justify-between h-full z-30 select-none shrink-0"
+        className="w-[230px] bg-white text-slate-700 border-r border-slate-200 flex flex-col justify-between h-full z-30 select-none shrink-0"
       >
         {/* Top Navigation Items */}
         <div className="p-3 space-y-1 overflow-y-auto font-sans text-xs">
@@ -74,11 +73,11 @@ export default function LeftSidebar({
                   onClick={() => toggleDrawer(item.id)}
                   className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all cursor-pointer text-left text-xs ${
                     isActive
-                      ? 'bg-blue-50 dark:bg-blue-950/40 text-[#0053ff] dark:text-blue-400 font-bold shadow-2xs'
-                      : 'text-slate-700 dark:text-zinc-300 font-semibold hover:bg-slate-100 dark:hover:bg-zinc-800/80 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-blue-50 text-[#0053ff] font-bold border-r-2 border-[#0053ff] shadow-2xs'
+                      : 'text-slate-700 font-semibold hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
-                  <div className={`p-1 rounded-lg ${isActive ? 'bg-[#0053ff] text-white' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'}`}>
+                  <div className={`p-1 rounded-lg ${isActive ? 'bg-[#0053ff] text-white' : 'bg-slate-100 text-slate-600'}`}>
                     <IconComp className={`w-4 h-4 ${isActive ? 'text-white' : item.iconColor}`} />
                   </div>
                   <span className="truncate">{item.label}</span>
@@ -92,11 +91,11 @@ export default function LeftSidebar({
         <UserProfileDropup onOpenSettings={onOpenSettings} />
       </aside>
 
-      {/* Slide-Out Flyout Drawer Panel (Positioned right of the 230px sidebar) */}
+      {/* Slide-Out Flyout Drawer Panel */}
       {activeDrawer && (
         <div
           ref={drawerRef}
-          className="w-[300px] bg-white dark:bg-[#181A24] border-r border-slate-200 dark:border-zinc-800 shadow-2xl h-[calc(100vh-48px)] fixed left-[230px] top-[48px] z-20 overflow-y-auto p-4 transition-all duration-200 animate-in fade-in slide-in-from-left-2"
+          className="w-[300px] bg-white border-r border-slate-200 shadow-2xl h-[calc(100vh-48px)] fixed left-[230px] top-[48px] z-20 overflow-y-auto p-4 transition-all duration-200 animate-in fade-in slide-in-from-left-2"
         >
           {activeDrawer === 'add' && (
             <AddElementsDrawer

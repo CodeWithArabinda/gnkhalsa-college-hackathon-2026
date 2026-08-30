@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, MessageSquare, History, X, Plus, Mic, Wand2, User, RefreshCw, Palette, HelpCircle } from 'lucide-react';
+import { Send, Sparkles, History, X, Plus, Mic, User, RefreshCw, Palette, HelpCircle, Bot } from 'lucide-react';
 import PlanningCard from './PlanningCard';
 
 const QUICK_GRID_ACTIONS = [
@@ -23,6 +23,10 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
   const messagesEndRef = useRef(null);
 
   const isGenerating = externalGenerating !== undefined ? externalGenerating : internalGenerating;
+
+  // View state calculation: 'idle' | 'planning' | 'chat'
+  const isChatActive = messages.length > 1;
+  const viewMode = isGenerating ? 'planning' : isChatActive ? 'chat' : 'idle';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,7 +80,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
     <aside className="w-full lg:w-[332px] bg-[#f8fafc] border-l border-slate-200 flex flex-col h-full shrink-0 text-slate-900 select-none shadow-sm z-30">
       
       {/* Top Header */}
-      <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-white">
+      <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
         <div className="flex items-center space-x-2">
           <div className="w-6 h-6 rounded-full bg-[#0053ff] text-white flex items-center justify-center font-bold shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
@@ -97,40 +101,59 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
         </div>
       </div>
 
-      {/* Scrollable Body */}
+      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 font-sans text-xs">
         
-        {/* Mascot Welcome Card */}
-        <div className="bg-gradient-to-b from-[#eef4ff] to-[#dfeaff] border border-blue-100 rounded-2xl p-4 text-center shadow-xs relative overflow-hidden">
-          <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-md relative">
-            <div className="flex items-center space-x-1">
-              <span className="w-1.5 h-1.5 bg-[#00FFA3] rounded-full animate-ping" />
-              <span className="w-1.5 h-1.5 bg-[#38BDF8] rounded-full animate-pulse" />
+        {/* 1. IDLE MODE: Full Mascot Welcome Card */}
+        {viewMode === 'idle' && (
+          <div className="bg-gradient-to-b from-[#eef4ff] to-[#dfeaff] border border-blue-100 rounded-2xl p-4 text-center shadow-xs relative overflow-hidden animate-in fade-in duration-200">
+            <div className="w-12 h-12 rounded-full bg-slate-900 text-white font-black mx-auto flex items-center justify-center shadow-md relative">
+              <div className="flex items-center space-x-1">
+                <span className="w-1.5 h-1.5 bg-[#00FFA3] rounded-full animate-ping" />
+                <span className="w-1.5 h-1.5 bg-[#38BDF8] rounded-full animate-pulse" />
+              </div>
+            </div>
+
+            <h3 className="text-base font-extrabold text-[#081a5e] tracking-tight mt-2">Hello KSHITIJ</h3>
+            <p className="text-xs text-slate-600 font-medium mb-3">What can I help you with?</p>
+
+            <div className="grid grid-cols-2 gap-2">
+              {QUICK_GRID_ACTIONS.map((act) => {
+                const IconComp = act.icon;
+                return (
+                  <button
+                    key={act.id}
+                    type="button"
+                    onClick={() => handleSend(act.prompt)}
+                    className="bg-white/90 hover:bg-white text-slate-800 font-semibold text-xs py-2 px-2.5 rounded-xl border border-blue-200/60 shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow-sm cursor-pointer"
+                  >
+                    <IconComp className="w-3.5 h-3.5 text-[#0053ff]" />
+                    <span>{act.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        )}
 
-          <h3 className="text-base font-extrabold text-[#081a5e] tracking-tight mt-2">Hello KSHITIJ</h3>
-          <p className="text-xs text-slate-600 font-medium mb-3">What can I help you with?</p>
-
-          <div className="grid grid-cols-2 gap-2">
-            {QUICK_GRID_ACTIONS.map((act) => {
-              const IconComp = act.icon;
-              return (
-                <button
-                  key={act.id}
-                  type="button"
-                  onClick={() => handleSend(act.prompt)}
-                  className="bg-white/90 hover:bg-white text-slate-800 font-semibold text-xs py-2 px-2.5 rounded-xl border border-blue-200/60 shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow-sm cursor-pointer"
-                >
-                  <IconComp className="w-3.5 h-3.5 text-[#0053ff]" />
-                  <span>{act.label}</span>
-                </button>
-              );
-            })}
+        {/* 2. CHAT / PLANNING MODE: Compact Top Chip Header */}
+        {viewMode !== 'idle' && (
+          <div className="flex items-center justify-between px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-xl text-xs font-semibold text-[#0053ff] animate-in fade-in duration-150">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#0053ff] animate-pulse" />
+              <span>Aria Assistant Active</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMessages([messages[0]])}
+              className="text-[10px] text-slate-500 hover:text-slate-900 underline"
+            >
+              Reset Chat
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Message History Feed */}
+        {/* Message Stream */}
         <div className="space-y-3 pt-1">
           {messages.map((m) => (
             <div
@@ -159,8 +182,10 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
             </div>
           ))}
 
-          {/* Progress Planning Card */}
-          <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
+          {/* 3. PLANNING MODE: Collapsible Animated Step Checklist */}
+          {isGenerating && (
+            <PlanningCard isGenerating={isGenerating} lastPrompt={input} />
+          )}
 
           {isGenerating && (
             <div className="flex items-center space-x-2">
@@ -180,7 +205,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       </div>
 
       {/* Bottom Chat Input Dock */}
-      <div className="p-3 border-t border-slate-200 bg-white space-y-2">
+      <div className="p-3 border-t border-slate-200 bg-white space-y-2 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -188,7 +213,6 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
           }}
           className="bg-slate-50 border border-slate-200 focus-within:border-[#0053ff] focus-within:bg-white rounded-xl p-2 shadow-2xs transition-colors space-y-1.5"
         >
-          {/* Active Context Badge */}
           {activeContextBadge && (
             <div className="inline-flex items-center gap-1 bg-blue-50 text-[#0053ff] text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200">
               <span>{activeContextBadge}</span>

@@ -237,12 +237,12 @@ export default function CanvasPreview({
   const getFrameWidth = () => {
     switch (deviceMode) {
       case 'mobile':
-        return 'w-[390px]';
+        return 'w-full max-w-[375px] shadow-2xl';
       case 'tablet':
-        return 'w-[768px]';
+        return 'w-full max-w-[768px] shadow-2xl';
       case 'desktop':
       default:
-        return 'w-full max-w-[1280px]';
+        return 'w-full max-w-5xl shadow-2xl';
     }
   };
 
@@ -388,7 +388,7 @@ export default function CanvasPreview({
       {/* Frame Wrapper (Wix Harmony Light Preview Window) */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`${getFrameWidth()} transition-all duration-300 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col`}
+        className={`${getFrameWidth()} transition-all duration-300 ease-in-out bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col`}
       >
         {/* Frame Top Browser Header */}
         <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center justify-between shrink-0 text-slate-700">
