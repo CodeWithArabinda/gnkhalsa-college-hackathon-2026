@@ -468,56 +468,86 @@ export default function CanvasPreview({
           </div>
         </div>
 
-        {/* Canvas Render Body (Default Light Theme) */}
-        <div className="flex-1 overflow-y-auto text-slate-900 bg-white relative">
-          
-          {/* Real-time AI Generation Overlay */}
-          {isGenerating && <CanvasBuildingState />}
+        {/* Canvas Render Body (Dynamic Multi-Archetype Renderer) */}
+        {(() => {
+          const archetype = schema.archetype || 'neo-brutalist';
+          const isCyber = archetype === 'cyber-ai';
+          const isBento = archetype === 'bento-minimal';
+          const isEditorial = archetype === 'editorial-studio';
+          const isNeoBrutalist = archetype === 'neo-brutalist' || (!isCyber && !isBento && !isEditorial);
 
-          {schema.blocks && schema.blocks.length > 0 ? (
-            schema.blocks.map((block, index) => {
-              return (
-                <div key={block.id} className="relative border-b border-slate-100 last:border-b-0 group/section">
-                  
-                  {/* Floating Blue Section Tag Badge */}
-                  <div className="absolute top-2 left-3 z-20">
-                    <span className="px-2 py-0.5 bg-blue-100 text-[#0053ff] text-[11px] font-bold rounded shadow-2xs">
-                      [ {block.type.replace('Block', '')} ]
-                    </span>
-                  </div>
+          return (
+            <div className={`flex-1 overflow-y-auto relative transition-colors duration-300 ${
+              isCyber ? 'bg-[#0a0d14] text-white font-mono' :
+              isBento ? 'bg-slate-50 text-slate-900 font-sans' :
+              isEditorial ? 'bg-white text-zinc-900 font-serif' :
+              'bg-white text-slate-900 font-sans'
+            }`}>
+              
+              {/* Real-time AI Generation Overlay */}
+              {isGenerating && <CanvasBuildingState />}
 
-                  {/* Block 1: HeroBlock (Wix Harmony Modern Light Layout) */}
-                  {block.type === 'HeroBlock' && (
-                    <section className="p-8 sm:p-16 flex flex-col justify-center space-y-6 min-h-[460px] relative overflow-hidden bg-gradient-to-b from-blue-50/40 via-white to-white">
+              {schema.blocks && schema.blocks.length > 0 ? (
+                schema.blocks.map((block, index) => {
+                  return (
+                    <div key={block.id} className={`relative border-b last:border-b-0 group/section ${
+                      isCyber ? 'border-cyan-500/20' : isEditorial ? 'border-zinc-200' : 'border-slate-100'
+                    }`}>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center pt-4">
-                        
-                        <div className="space-y-4">
-                          {/* 1. Tagline */}
-                          <EditableCanvasItem
-                            elementKey="hero-tagline"
-                            label="Tagline"
-                            schema={schema}
-                            selectedElement={selectedElement}
-                            hoveredElementKey={hoveredElementKey}
-                            setHoveredElementKey={setHoveredElementKey}
-                            onSelectElement={onSelectElement}
-                            onUpdateElementStyle={onUpdateElementStyle}
-                            onPolishWithAI={onPolishWithAI}
-                            onOpenEditModal={handleOpenEditModal}
-                            blockId={block.id}
-                            blockIndex={index}
-                            className="self-start inline-block"
-                          >
-                            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-blue-50 border border-blue-200/60 rounded-full text-xs font-semibold text-[#0053ff]">
-                              <Sparkles className="w-3.5 h-3.5 text-[#ff5100]" />
-                              <span
-                                contentEditable
-                                suppressContentEditableWarning
-                                onBlur={(e) => handleInlineChange(block.id, 'content.headline', e.target.innerText)}
-                                className="outline-none"
+                      {/* Floating Section Tag Badge */}
+                      <div className="absolute top-2 left-3 z-20">
+                        <span className={`px-2 py-0.5 text-[11px] font-bold rounded shadow-2xs ${
+                          isCyber ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-mono' :
+                          isBento ? 'bg-indigo-100 text-indigo-700 font-sans' :
+                          isEditorial ? 'bg-zinc-100 text-zinc-800 font-mono uppercase' :
+                          'bg-[#FFE600] text-black border-2 border-black font-mono font-black shadow-[1.5px_1.5px_0px_#000]'
+                        }`}>
+                          [ {block.type.replace('Block', '')} ]
+                        </span>
+                      </div>
+
+                      {/* Block 1: HeroBlock (Multi-Archetype Dynamic Layout) */}
+                      {block.type === 'HeroBlock' && (
+                        <section className={`p-8 sm:p-16 flex flex-col justify-center space-y-6 min-h-[460px] relative overflow-hidden ${
+                          isCyber ? 'bg-gradient-to-b from-[#0f172a]/60 via-[#0a0d14] to-[#0a0d14]' :
+                          isBento ? 'bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/20' :
+                          isEditorial ? 'bg-white' :
+                          'bg-gradient-to-b from-yellow-50/40 via-white to-white'
+                        }`}>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-center pt-4">
+                            
+                            <div className="space-y-4">
+                              {/* 1. Tagline */}
+                              <EditableCanvasItem
+                                elementKey="hero-tagline"
+                                label="Tagline"
+                                schema={schema}
+                                selectedElement={selectedElement}
+                                hoveredElementKey={hoveredElementKey}
+                                setHoveredElementKey={setHoveredElementKey}
+                                onSelectElement={onSelectElement}
+                                onUpdateElementStyle={onUpdateElementStyle}
+                                onPolishWithAI={onPolishWithAI}
+                                onOpenEditModal={handleOpenEditModal}
+                                blockId={block.id}
+                                blockIndex={index}
+                                className="self-start inline-block"
                               >
-                                {block.content.headline}
+                                <div className={`inline-flex items-center space-x-2 px-3.5 py-1 text-xs font-semibold ${
+                                  isCyber ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-full shadow-[0_0_15px_rgba(0,245,255,0.15)] font-mono' :
+                                  isBento ? 'bg-blue-50 text-[#0053ff] border border-blue-200/60 rounded-full' :
+                                  isEditorial ? 'bg-zinc-100 text-zinc-900 border border-zinc-300 rounded-none font-mono uppercase tracking-widest' :
+                                  'bg-[#FFE600] text-black border-2 border-black rounded-full font-black shadow-[2px_2px_0px_#000]'
+                                }`}>
+                                  <Sparkles className={`w-3.5 h-3.5 ${isCyber ? 'text-cyan-400' : 'text-[#ff5100]'}`} />
+                                  <span
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleInlineChange(block.id, 'content.headline', e.target.innerText)}
+                                    className="outline-none"
+                                  >
+                                    {block.content.headline}
                               </span>
                             </div>
                           </EditableCanvasItem>
@@ -738,17 +768,33 @@ export default function CanvasPreview({
                             blockId={block.id}
                             blockIndex={index}
                           >
-                            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-xs hover:shadow-md transition-shadow">
+                            <div className={`p-5 space-y-3 transition-all ${
+                              isCyber ? 'bg-[#0f172a] border border-cyan-500/30 rounded-xl shadow-[0_0_15px_rgba(0,245,255,0.05)] hover:border-cyan-400' :
+                              isBento ? 'bg-white border border-slate-200/80 rounded-3xl shadow-sm hover:shadow-md' :
+                              isEditorial ? 'bg-zinc-50 border border-zinc-200 rounded-none hover:bg-zinc-100' :
+                              'bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_#000000] hover:shadow-[6px_6px_0px_#000000] hover:-translate-y-1'
+                            }`}>
                               <div className="flex justify-between items-start">
-                                <h3 className="font-bold text-base text-slate-900">{item.title}</h3>
-                                <a href={item.link || '#'} target="_blank" rel="noreferrer" className="text-[#0053ff] p-1">
+                                <h3 className={`font-bold text-base ${isCyber ? 'text-white font-mono' : isEditorial ? 'text-zinc-900 font-serif' : 'text-slate-900'}`}>{item.title}</h3>
+                                <a href={item.link || '#'} target="_blank" rel="noreferrer" className={isCyber ? 'text-cyan-400 p-1' : 'text-[#0053ff] p-1'}>
                                   <ExternalLink className="w-4 h-4" />
                                 </a>
                               </div>
-                              <p className="text-xs text-slate-600 leading-relaxed font-sans">{item.description}</p>
-                              <div className="flex flex-wrap gap-1.5">
+                              <p className={`text-xs leading-relaxed ${isCyber ? 'text-slate-300 font-mono' : 'text-slate-600'}`}>{item.description}</p>
+                              
+                              {item.metrics && (
+                                <div className="inline-block bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded">
+                                  {item.metrics}
+                                </div>
+                              )}
+
+                              <div className="flex flex-wrap gap-1.5 pt-1">
                                 {item.tags?.map((t) => (
-                                  <span key={t} className="px-2 py-0.5 bg-blue-50 text-[#0053ff] text-[10px] font-mono rounded font-bold">
+                                  <span key={t} className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded ${
+                                    isCyber ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' :
+                                    isNeoBrutalist ? 'bg-[#FFE600] text-black border border-black shadow-[1px_1px_0px_#000]' :
+                                    'bg-blue-50 text-[#0053ff]'
+                                  }`}>
                                     {t}
                                   </span>
                                 ))}
@@ -915,7 +961,9 @@ export default function CanvasPreview({
               );
             })
           ) : null}
-        </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* DEDICATED CONTEXT-AWARE EDIT MODAL */}
