@@ -477,12 +477,15 @@ export default function CanvasPreview({
 
         {/* Canvas Render Body (Dynamic Multi-Archetype Renderer) */}
         {(() => {
-          const activeArchetype = schema?.archetype || 'humanist-light';
-          const isBento = activeArchetype === 'bento-minimal';
-          const isCyber = activeArchetype === 'cyber-terminal' || activeArchetype === 'cyber-ai';
-          const isBrutalist = activeArchetype === 'neo-brutalist';
-          const isEditorial = activeArchetype === 'warm-editorial' || activeArchetype === 'editorial-studio';
-          const isHumanist = activeArchetype === 'humanist-light';
+          const archetype = schema?.archetype || 'warm-editorial';
+          const isEditorial = archetype === 'warm-editorial' || archetype === 'editorial-studio';
+          const isNeoBrutalist = archetype === 'neo-brutalist';
+          const isCyberTerminal = archetype === 'cyber-terminal' || archetype === 'cyber-ai';
+          const isBentoMinimal = archetype === 'bento-minimal';
+          const isCyber = isCyberTerminal;
+          const isBento = isBentoMinimal;
+          const isBrutalist = isNeoBrutalist;
+          const isHumanist = archetype === 'humanist-light';
 
           return (
             <div className={`flex-1 overflow-y-auto relative transition-colors duration-300 ${
