@@ -23,20 +23,14 @@ const App = () => {
   return (
     <BrowserRouter>
       <div className="bg-primary relative z-0 selection:bg-[#915EFF] selection:text-white">
-        {/* 01. NAVIGATION & 02. HERO / INTRODUCTION */}
+        {/* 01. HERO PATTERN CONTAINER (HERO THROUGH SKILLS & TECH STACK) */}
         <div className="bg-hero-pattern bg-cover bg-center bg-no-repeat">
           <Navbar />
           <Hero />
+          <About />
+          <Works />
+          <Tech />
         </div>
-
-        {/* 03. ABOUT ME */}
-        <About />
-
-        {/* 04. FEATURED PROJECTS ⭐ */}
-        <Works />
-
-        {/* 05. SKILLS & TECHNOLOGIES */}
-        <Tech />
 
         {/* 06. CONTACT / CTA */}
         <div className="relative z-0">
