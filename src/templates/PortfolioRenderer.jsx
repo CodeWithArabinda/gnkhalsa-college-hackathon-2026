@@ -11,7 +11,7 @@ import CinematicSpaceTemplate from './CinematicSpaceTemplate';
 import NeoBrutalistTemplate from './NeoBrutalistTemplate';
 import DarkTerminalTemplate from './DarkTerminalTemplate';
 import MinimalEditorialTemplate from './MinimalEditorialTemplate';
-import Portfolio1Template from './Portfolio1Template';
+import Portfolio1Template from './portfolio1/index';
 
 /**
  * Template registry mapping `selected_template` keys to React components.
