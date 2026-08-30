@@ -214,41 +214,32 @@ export default function CanvasPreview({
   };
 
   // Helper to render Full Headline with Dynamic Accent Word Highlighting
-  const renderFullHeadline = (nameValue, blockId) => {
-    let fullText = nameValue || "I'm Alex Rivera.";
-    if (!fullText.includes("I'm") && !fullText.includes("Im")) {
+  const renderDynamicHeadline = (headingText, accentColor = "#ff6b1a") => {
+    if (!headingText) return null;
+    let fullText = headingText;
+    if (!fullText.includes("I'm") && !fullText.includes("Im") && !fullText.includes("I am")) {
       fullText = `I'm ${fullText}.`;
     }
-
-    const words = fullText.trim().split(' ');
-    if (words.length <= 1) {
-      return (
-        <span
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => handleInlineChange(blockId, 'content.name', e.target.innerText)}
-          className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent outline-none"
-        >
-          {fullText}
-        </span>
-      );
+    const words = fullText.trim().split(" ");
+    if (words.length === 1) {
+      return <span className="text-white">{words[0]}</span>;
     }
-
-    const mainPart = words.slice(0, -1).join(' ');
-    const accentPart = words[words.length - 1];
+    const lastWord = words[words.length - 1];
+    const firstWords = words.slice(0, -1).join(" ");
 
     return (
-      <span
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={(e) => handleInlineChange(blockId, 'content.name', e.target.innerText)}
-        className="outline-none"
-      >
-        <span className="text-white">{mainPart} </span>
-        <span className="bg-gradient-to-r from-white via-amber-100 to-[#FF6B1A] bg-clip-text text-transparent">
-          {accentPart}
+      <>
+        <span className="text-white">{firstWords} </span>
+        <span
+          style={{
+            background: `linear-gradient(to right, #ffffff, ${accentColor})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          {lastWord}
         </span>
-      </span>
+      </>
     );
   };
 
@@ -540,8 +531,13 @@ export default function CanvasPreview({
                           blockId={block.id}
                           blockIndex={index}
                         >
-                          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                            {renderDynamicHeadline(block.content.name, block.id, handleInlineChange)}
+                          <h1
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleInlineChange(block.id, 'content.name', e.target.innerText)}
+                            className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight outline-none"
+                          >
+                            {renderDynamicHeadline(block.content.name, schema?.metadata?.accentColor || "#FF6B1A")}
                           </h1>
                         </EditableCanvasItem>
 
