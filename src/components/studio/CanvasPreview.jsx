@@ -301,29 +301,29 @@ export default function CanvasPreview({
 
   // Dedicated Context-Aware Schema Edit Payload Generator
   const handleOpenEditModal = (key, label, blockId) => {
-    const block = schema.blocks.find(b => b.id === blockId);
-    if (!block) return;
+    const block = schema.blocks?.find(b => b.id === blockId) || schema.blocks?.[0] || {};
+    const content = block.content || {};
 
     if (key === 'cta-primary') {
       setEditModalData({
         type: 'button-primary',
         label: 'Primary CTA Button',
         blockId,
-        btnText: block.content?.ctaText || 'Explore Projects'
+        text: content.ctaText || 'Explore Projects'
       });
     } else if (key === 'cta-secondary') {
       setEditModalData({
         type: 'button-secondary',
         label: 'Secondary CTA Button',
         blockId,
-        btnText: block.content?.secondaryCta || 'Contact Me'
+        text: content.secondaryCta || 'Contact Me'
       });
-    } else if (key === 'hero-avatar') {
+    } else if (key === 'hero-avatar' || key === 'nav-brand-logo') {
       setEditModalData({
         type: 'avatar',
-        label: 'Avatar / Hero Image',
+        label: label || 'Logo / Avatar Image',
         blockId,
-        url: block.content?.avatarUrl || '/photo/Sarang.png'
+        url: content.avatarUrl || schema?.metadata?.logoUrl || '/photo/Sarang.png'
       });
     } else if (key === 'hero-tagline') {
       setEditModalData({
@@ -331,27 +331,83 @@ export default function CanvasPreview({
         label: 'Tagline',
         blockId,
         fieldPath: 'content.headline',
-        text: block.content?.headline || ''
+        text: content.headline || 'Creative Developer & Designer'
       });
-    } else if (key === 'hero-name') {
+    } else if (key === 'hero-name' || key === 'nav-brand-name') {
       setEditModalData({
         type: 'text-single',
-        label: 'Headline Title',
+        label: 'Name / Headline Title',
         blockId,
         fieldPath: 'content.name',
-        text: block.content?.name || 'Engineering Digital Excellence'
+        text: content.name || schema?.hero?.name || 'Kshitij Pilankar'
       });
-    } else if (key === 'hero-bio') {
+    } else if (key === 'hero-bio' || key === 'story-bio') {
       setEditModalData({
         type: 'text-multi',
-        label: 'Bio Paragraph',
+        label: 'Bio / Story Paragraph',
         blockId,
         fieldPath: 'content.bio',
-        text: block.content?.bio || ''
+        text: content.bio || ''
       });
-    } else if (key.startsWith('project-card-')) {
-      const pIdx = parseInt(key.replace('project-card-', ''), 10);
-      const projectItem = block.content?.items?.[pIdx] || {};
+    } else if (key === 'works-header') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Selected Works Title',
+        blockId,
+        fieldPath: 'content.title',
+        text: content.title || 'Selected Works'
+      });
+    } else if (key === 'works-subtitle') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Selected Works Subtitle',
+        blockId,
+        fieldPath: 'content.subtitle',
+        text: content.subtitle || 'Selected software and design showcases'
+      });
+    } else if (key === 'pillars-header') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Skills Matrix Title',
+        blockId,
+        fieldPath: 'content.title',
+        text: content.title || 'Engineering Excellence'
+      });
+    } else if (key === 'story-title') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Story Title',
+        blockId,
+        fieldPath: 'content.title',
+        text: content.title || 'The Architect'
+      });
+    } else if (key === 'contact-title') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Contact Section Title',
+        blockId,
+        fieldPath: 'content.title',
+        text: content.title || "Let's Build Something Together"
+      });
+    } else if (key === 'contact-subtitle') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Contact Section Subtitle',
+        blockId,
+        fieldPath: 'content.subtitle',
+        text: content.subtitle || "Available for full-time opportunities..."
+      });
+    } else if (key === 'contact-email-btn') {
+      setEditModalData({
+        type: 'text-single',
+        label: 'Contact Email Address',
+        blockId,
+        fieldPath: 'content.email',
+        text: content.email || 'kshitijpilankar@gmail.com'
+      });
+    } else if (key.startsWith('project-item-')) {
+      const pIdx = parseInt(key.replace('project-item-', ''), 10);
+      const projectItem = content.items?.[pIdx] || {};
       setEditModalData({
         type: 'project-item',
         label: `Project Card: ${projectItem.title || 'Item'}`,
@@ -364,7 +420,7 @@ export default function CanvasPreview({
       });
     } else if (key.startsWith('skill-cat-')) {
       const cIdx = parseInt(key.replace('skill-cat-', ''), 10);
-      const catItem = block.content?.categories?.[cIdx] || {};
+      const catItem = content.categories?.[cIdx] || {};
       setEditModalData({
         type: 'skill-category',
         label: `Skill Category: ${catItem.name || 'Category'}`,
@@ -376,10 +432,9 @@ export default function CanvasPreview({
     } else {
       setEditModalData({
         type: 'generic',
-        label,
+        label: label || 'Edit Text',
         blockId,
-        title: block.content?.title || '',
-        subtitle: block.content?.subtitle || ''
+        text: selectedElement?.currentText || content.title || content.subtitle || label || ''
       });
     }
   };
@@ -387,12 +442,12 @@ export default function CanvasPreview({
   const handleSaveModal = () => {
     if (!editModalData) return;
     const { type, blockId } = editModalData;
-    const block = schema.blocks.find(b => b.id === blockId);
+    const block = schema.blocks?.find(b => b.id === blockId) || schema.blocks?.[0];
 
     if (type === 'button-primary') {
-      handleInlineChange(blockId, 'content.ctaText', editModalData.btnText);
+      handleInlineChange(blockId, 'content.ctaText', editModalData.text);
     } else if (type === 'button-secondary') {
-      handleInlineChange(blockId, 'content.secondaryCta', editModalData.btnText);
+      handleInlineChange(blockId, 'content.secondaryCta', editModalData.text);
     } else if (type === 'avatar') {
       handleInlineChange(blockId, 'content.avatarUrl', editModalData.url);
     } else if (type === 'text-single' || type === 'text-multi') {
@@ -404,7 +459,7 @@ export default function CanvasPreview({
         title: editModalData.title,
         description: editModalData.description,
         link: editModalData.link,
-        tags: editModalData.tags.split(',').map(t => t.trim()).filter(Boolean)
+        tags: editModalData.tags ? editModalData.tags.split(',').map(t => t.trim()).filter(Boolean) : []
       };
       handleInlineChange(blockId, 'content.items', updatedItems);
     } else if (type === 'skill-category' && block) {
@@ -412,12 +467,13 @@ export default function CanvasPreview({
       updatedCats[editModalData.catIndex] = {
         ...updatedCats[editModalData.catIndex],
         name: editModalData.name,
-        skills: editModalData.skills.split(',').map(s => s.trim()).filter(Boolean)
+        skills: editModalData.skills ? editModalData.skills.split(',').map(s => s.trim()).filter(Boolean) : []
       };
       handleInlineChange(blockId, 'content.categories', updatedCats);
     } else if (type === 'generic') {
-      if (editModalData.title !== undefined) handleInlineChange(blockId, 'content.title', editModalData.title);
-      if (editModalData.subtitle !== undefined) handleInlineChange(blockId, 'content.subtitle', editModalData.subtitle);
+      if (editModalData.text !== undefined && blockId) {
+        handleInlineChange(blockId, 'content.title', editModalData.text);
+      }
     }
 
     setEditModalData(null);
