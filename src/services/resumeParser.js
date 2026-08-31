@@ -136,7 +136,11 @@ export async function parseResumeWithOCR(file, options = {}) {
   }
 
   // 2. Base URL resolution from environment configuration
-  const rawApiUrl = import.meta.env.VITE_OCR_API_URL || 'http://localhost:8000';
+  let rawApiUrl = import.meta.env.VITE_OCR_API_URL;
+  if (!rawApiUrl) {
+    const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    rawApiUrl = isLocalhost ? 'http://localhost:8000' : '';
+  }
   const ocrApiUrl = rawApiUrl.replace(/\/+$/, '');
   const endpoint = `${ocrApiUrl}/api/v1/resume/process`;
 

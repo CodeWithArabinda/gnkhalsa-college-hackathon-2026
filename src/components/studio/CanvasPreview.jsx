@@ -10,6 +10,7 @@ import PillarsSection from './sections/PillarsSection';
 import StorySection from './sections/StorySection';
 import ContactSection from './sections/ContactSection';
 import FooterSection from './sections/FooterSection';
+import PortfolioRenderer from '../../templates/PortfolioRenderer';
 
 /* ═══════════════════════════════════════════════
    UNIVERSAL EDITABLE CANVAS ITEM WRAPPER
@@ -137,13 +138,12 @@ function EditableCanvasItem({
       onMouseEnter={() => setHoveredElementKey(elementKey)}
       onMouseLeave={() => setHoveredElementKey(null)}
       onMouseDown={handleMouseDown}
-      className={`relative cursor-grab active:cursor-grabbing transition-all rounded ${
-        isSelected
-          ? 'border-2 border-[#0053ff] ring-2 ring-[#0053ff]/30 z-30 shadow-[0_0_15px_rgba(0,83,255,0.2)]'
-          : isHovered
+      className={`relative cursor-grab active:cursor-grabbing transition-all rounded ${isSelected
+        ? 'border-2 border-[#0053ff] ring-2 ring-[#0053ff]/30 z-30 shadow-[0_0_15px_rgba(0,83,255,0.2)]'
+        : isHovered
           ? 'border border-[#0053ff]/50 z-20'
           : ''
-      } ${className}`}
+        } ${className}`}
       style={{
         transform: `translate3d(${st.x || 0}px, ${st.y || 0}px, 0)`,
         width: st.width ? `${st.width}px` : undefined,
@@ -244,6 +244,7 @@ export default function CanvasPreview({
   onOpenDomainModal,
   customDomain
 }) {
+  const [canvasViewMode, setCanvasViewMode] = useState('template');
   const [hoveredElementKey, setHoveredElementKey] = useState(null);
   const [editModalData, setEditModalData] = useState(null);
   const projectsRef = useRef(null);
@@ -516,11 +517,35 @@ export default function CanvasPreview({
             <span className="w-2.5 h-2.5 rounded-full bg-green-500 border border-black/40" />
           </div>
 
+          {/* Canvas View Switcher Pill Tabs: [ 🎨 Live Template ] | [ 🧱 Block Editor ] */}
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-black/20">
+            <button
+              type="button"
+              onClick={() => setCanvasViewMode('template')}
+              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all cursor-pointer ${canvasViewMode === 'template'
+                  ? 'bg-black text-white shadow-[1px_1px_0px_#000]'
+                  : 'text-slate-700 hover:text-black'
+                }`}
+            >
+              🎨 Live Template
+            </button>
+            <button
+              type="button"
+              onClick={() => setCanvasViewMode('blocks')}
+              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all cursor-pointer ${canvasViewMode === 'blocks'
+                  ? 'bg-black text-white shadow-[1px_1px_0px_#000]'
+                  : 'text-slate-700 hover:text-black'
+                }`}
+            >
+              🧱 Block Editor
+            </button>
+          </div>
+
           {/* Compact Domain Pill */}
           <button
             type="button"
             onClick={() => onOpenDomainModal && onOpenDomainModal()}
-            className="bg-[#FFE600] border border-black px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold truncate max-w-[150px] sm:max-w-[240px] shadow-[1px_1px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer flex items-center gap-1"
+            className="bg-[#FFE600] border border-black px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold truncate max-w-[120px] sm:max-w-[200px] shadow-[1px_1px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer flex items-center gap-1"
             title="Connect Custom Domain"
           >
             {customDomain ? (
@@ -532,16 +557,56 @@ export default function CanvasPreview({
               <span className="truncate">{schema?.branding?.slug || schema?.metadata?.slug || "webdevportfolio.io"}</span>
             )}
           </button>
-
-          {/* Canvas Status */}
-          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-neutral-500 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline-block" />
-            <span className="hidden sm:inline">CANVAS</span>
-          </div>
         </div>
 
-        {/* Canvas Render Body (Dynamic Multi-Archetype Renderer) */}
+        {/* Canvas Render Body (Dynamic Multi-Archetype Renderer & Live Portfolio Templates) */}
         {(() => {
+          if (canvasViewMode === 'template') {
+            const rawSelectedTemplate = schema?.selected_template || schema?.archetype || 'portfolio1';
+            const heroBlock = schema?.blocks?.find((b) => b.type === 'HeroBlock');
+            const projectBlock = schema?.blocks?.find((b) => b.type === 'ProjectGridBlock');
+            const pillarsBlock = schema?.blocks?.find((b) => b.type === 'PillarsBlock' || b.type === 'SkillsBlock');
+            const contactBlock = schema?.blocks?.find((b) => b.type === 'ContactBlock');
+
+            const normalizedPortfolio = {
+              ...schema,
+              id: schema?.id || 'studio-draft',
+              selected_template: rawSelectedTemplate,
+              archetype: schema?.archetype || rawSelectedTemplate,
+              full_name: heroBlock?.content?.name || schema?.metadata?.title || "Developer",
+              headline: heroBlock?.content?.headline || "Full-Stack Software Engineer",
+              bio: heroBlock?.content?.bio || "",
+              email: contactBlock?.content?.email || "",
+              profile: {
+                full_name: heroBlock?.content?.name || schema?.metadata?.title || "Developer",
+                headline: heroBlock?.content?.headline || "Full-Stack Software Engineer",
+                bio: heroBlock?.content?.bio || "",
+                email: contactBlock?.content?.email || "",
+                avatar_url: heroBlock?.content?.avatarUrl || ""
+              },
+              projects: projectBlock?.content?.items?.map((item, i) => ({
+                id: item.id || `p-${i}`,
+                title: item.title || item.name || "Project",
+                description: item.description || item.summary || "",
+                technologies: item.tags || item.technologies || [],
+                live_url: item.link || item.demoUrl || item.live_url || "",
+                github_url: item.github_url || item.repo_url || "",
+                image_url: item.imageUrl || item.image || item.image_url || ""
+              })) || [],
+              skills: pillarsBlock?.content?.categories?.flatMap(c => c.skills || []) || [],
+              experiences: schema?.experiences || [],
+              education: schema?.education || [],
+              achievements: schema?.achievements || []
+            };
+
+            return (
+              <div className="flex-1 overflow-y-auto overflow-x-hidden w-full relative bg-[#090D16] min-h-[680px]">
+                {isGenerating && <CanvasBuildingState />}
+                <PortfolioRenderer portfolio={normalizedPortfolio} viewMode={deviceMode} />
+              </div>
+            );
+          }
+
           const archetype = schema?.archetype || 'warm-editorial';
           const isEditorial = archetype === 'warm-editorial' || archetype === 'editorial-studio';
           const isNeoBrutalist = archetype === 'neo-brutalist';
@@ -553,14 +618,13 @@ export default function CanvasPreview({
           const isHumanist = archetype === 'humanist-light';
 
           return (
-            <div className={`flex-1 overflow-y-auto overflow-x-hidden w-full relative transition-colors duration-300 ${
-              isCyber ? 'bg-[#090D16] text-white font-mono' :
+            <div className={`flex-1 overflow-y-auto overflow-x-hidden w-full relative transition-colors duration-300 ${isCyber ? 'bg-[#090D16] text-[#FFFFFF] font-mono' :
               isBento ? 'bg-[#F8FAFC] text-slate-900 font-sans' :
-              isBrutalist ? 'bg-[#FFFDF5] text-black font-sans' :
-              isEditorial ? 'bg-[#FDFBF7] text-[#2C2621] font-serif' :
-              'bg-white text-slate-900 font-sans'
-            }`}>
-              
+                isBrutalist ? 'bg-[#FFFDF5] text-black font-sans' :
+                  isEditorial ? 'bg-[#FDFBF7] text-[#2C2621] font-serif' :
+                    'bg-white text-slate-900 font-sans'
+              }`}>
+
               {/* Real-time AI Generation Overlay */}
               {isGenerating && <CanvasBuildingState />}
 
@@ -576,9 +640,8 @@ export default function CanvasPreview({
               {schema.blocks && schema.blocks.length > 0 ? (
                 schema.blocks.map((block, index) => {
                   return (
-                    <div key={block.id} className={`relative border-b last:border-b-0 group/section ${
-                      isCyber ? 'border-cyan-500/20' : isEditorial ? 'border-[#E7DEC8]' : isBrutalist ? 'border-black' : 'border-slate-100'
-                    }`}>
+                    <div key={block.id} className={`relative border-b last:border-b-0 group/section ${isCyber ? 'border-cyan-500/20' : isEditorial ? 'border-[#E7DEC8]' : isBrutalist ? 'border-black' : 'border-slate-100'
+                      }`}>
 
                       {/* Block 1: HeroBlock */}
                       {block.type === 'HeroBlock' && (
@@ -700,10 +763,10 @@ export default function CanvasPreview({
                       )}
 
 
-                </div>
-              );
-            })
-          ) : null}
+                    </div>
+                  );
+                })
+              ) : null}
             </div>
           );
         })()}
