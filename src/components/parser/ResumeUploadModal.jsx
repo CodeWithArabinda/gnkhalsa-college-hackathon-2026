@@ -1,209 +1,238 @@
-import React, { useState } from 'react';
-import { Upload, X, FileText, Loader2, AlertCircle, Sparkles } from 'lucide-react';
-import { parseResumeWithGemini } from '../../services/resumeParser';
+import React, { useState, useRef } from 'react';
+import { 
+  FileText, 
+  UploadCloud, 
+  X, 
+  Sparkles, 
+  CheckCircle2, 
+  AlertCircle, 
+  Loader2 
+} from 'lucide-react';
+import { parseResumeWithOCR } from '../../services/resumeParser';
 import { validateParsedResume, transformToPortfolioSchema } from '../../services/gapEngine';
 import GapResolutionModal from './GapResolutionModal';
 
-export default function ResumeUploadModal({ isOpen, onClose, onSuccess }) {
-  const [file, setFile] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [parsing, setParsing] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState(null);
+export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsedSuccess }) {
+  const [dragActive, setDragActive] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const fileInputRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
-  // Gap Resolution Engine States
+  // Gap Resolution Modal States
   const [showGapModal, setShowGapModal] = useState(false);
   const [parsedRawData, setParsedRawData] = useState(null);
   const [detectedGaps, setDetectedGaps] = useState([]);
 
   if (!isOpen) return null;
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
+  const handleCallbackSuccess = (schema) => {
+    if (onSuccess) onSuccess(schema);
+    if (onParsedSuccess) onParsedSuccess(schema);
   };
 
-  const handleDragLeave = (e) => {
+  const handleFile = (file) => {
+    if (!file) return;
+
+    const isPdf = file.name?.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+    if (isPdf) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMsg('File size exceeds 5MB limit. Please upload a smaller PDF.');
+        setSelectedFile(null);
+        return;
+      }
+      setSelectedFile(file);
+      setErrorMsg(null);
+    } else {
+      setErrorMsg('Please select a valid PDF file (max 5MB). The StackFolio OCR Engine specializes in PDF resumes.');
+    }
+  };
+
+  const handleDrag = (e) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    validateAndSetFile(droppedFile);
-  };
-
-  const handleFileSelect = (e) => {
-    const selectedFile = e.target.files[0];
-    validateAndSetFile(selectedFile);
-  };
-
-  const validateAndSetFile = (f) => {
-    setError(null);
-    if (!f) return;
-
-    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-    if (!validTypes.includes(f.type) && !f.name.endsWith('.pdf')) {
-      setError('Invalid file format. Please upload a PDF or PNG/JPG image resume.');
-      return;
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
     }
-
-    if (f.size > 5 * 1024 * 1024) {
-      setError('File size exceeds 5MB limit.');
-      return;
-    }
-
-    setFile(f);
   };
 
   const handleStartParsing = async () => {
-    if (!file) return;
+    if (!selectedFile || isProcessing) return;
 
-    setParsing(true);
-    setError(null);
-    setStatusMessage('Reading document & Base64 encoding...');
-    setProgress(20);
+    setIsProcessing(true);
+    setErrorMsg(null);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
-      setStatusMessage('Sending file to Gemini 2.5 Flash Multimodal OCR API...');
-      setProgress(50);
+      // Call Python OCR Model API pipeline
+      const parsedData = await parseResumeWithOCR(selectedFile, {
+        signal: controller.signal,
+        timeoutMs: 30000
+      });
 
-      const parsedData = await parseResumeWithGemini(file);
-      
-      setStatusMessage('Validating portfolio schema fields...');
-      setProgress(85);
-
+      // Validate required portfolio fields
       const validation = validateParsedResume(parsedData);
 
-      setProgress(100);
-
       if (!validation.isValid) {
-        // Missing required fields detected -> Open Gap Resolution Modal
         setParsedRawData(parsedData);
         setDetectedGaps(validation.missingFields);
         setShowGapModal(true);
-        setParsing(false);
+        setIsProcessing(false);
       } else {
-        // Complete resume data -> Transform & Route to Studio immediately
-        const schema = transformToPortfolioSchema(parsedData);
-        if (onSuccess) onSuccess(schema);
+        const finalSchema = transformToPortfolioSchema(parsedData);
+        handleCallbackSuccess(finalSchema);
         onClose();
       }
     } catch (err) {
-      console.error('Gemini OCR Parsing error:', err);
-      setError(err.message || 'Failed to parse resume file with Gemini 2.5 Flash.');
-      setParsing(false);
+      console.error('StackFolio OCR Processing error:', err);
+      setErrorMsg(err.message || 'Failed to extract resume payload. Please ensure Python OCR server is running.');
+      setIsProcessing(false);
+    } finally {
+      abortControllerRef.current = null;
     }
   };
 
   const handleGapResolved = (finalSchema) => {
     setShowGapModal(false);
-    if (onSuccess) onSuccess(finalSchema);
+    handleCallbackSuccess(finalSchema);
     onClose();
   };
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-[#FFFDF8] border-3 border-black p-6 rounded-2xl max-w-lg w-full shadow-brutal-lg space-y-6 animate-fadeIn relative">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+        {/* Modal Container */}
+        <div className="w-full max-w-lg bg-[#FAF9F5] border-2 border-black rounded-2xl shadow-[6px_6px_0px_#000] p-6 relative overflow-hidden">
           
-          {/* Modal Header */}
-          <div className="flex justify-between items-center pb-3 border-b-2 border-black">
-            <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 rounded-lg bg-[#FFE600] border-2 border-black flex items-center justify-center text-black font-black text-xs shadow-[1.5px_1.5px_0px_0px_#000]">
-                📄
+          {/* Header Bar */}
+          <div className="flex items-center justify-between pb-4 border-b-2 border-black mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[#FFE600] border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
+                <FileText className="w-4 h-4 text-black stroke-[2.5]"/>
               </div>
-              <h3 className="font-heading font-black text-lg text-black">Upload Resume to Auto-Fill</h3>
+              <h2 className="text-lg font-black tracking-tight text-black font-mono">
+                UPLOAD RESUME TO AUTO-FILL
+              </h2>
             </div>
             <button
               onClick={onClose}
-              disabled={parsing}
-              className="p-1 text-slate-500 hover:text-black border border-black rounded-lg hover:bg-slate-100 transition-colors"
+              disabled={isProcessing}
+              className="w-8 h-8 rounded-lg border-2 border-black bg-white hover:bg-neutral-100 flex items-center justify-center shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-black stroke-[2.5]"/>
             </button>
           </div>
 
-          {/* Error message */}
-          {error && (
-            <div className="bg-[#FF70A6] border-2 border-black p-3 rounded-lg flex items-center space-x-2 text-xs font-bold text-black shadow-[2px_2px_0px_0px_#000]">
-              <AlertCircle className="w-4 h-4 shrink-0 text-black" />
-              <span>{error}</span>
+          {/* Engine Pipeline Badge & Subtitle */}
+          <div className="mb-5 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFE600] border border-black text-[11px] font-mono font-bold text-black shadow-[1.5px_1.5px_0px_#000]">
+                <Sparkles className="w-3 h-3 fill-black"/>
+                StackFolio OCR Engine
+              </span>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded border border-neutral-300 bg-white text-neutral-600 font-semibold">
+                PyMuPDF Fast-Path
+              </span>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold">
+                ● API Ready
+              </span>
+            </div>
+            <p className="text-xs text-neutral-600 font-medium leading-relaxed">
+              Automatically extract full profile schema, skills matrix, projects, and work history using custom Python OCR model.
+            </p>
+          </div>
+
+          {/* Error Alert */}
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-100 border-2 border-red-500 rounded-xl text-red-900 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600"/>
+              <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Parsing Progress Bar view */}
-          {parsing ? (
-            <div className="bg-white border-2 border-black p-6 rounded-xl space-y-4 shadow-[3px_3px_0px_0px_#000] text-center">
-              <Loader2 className="w-10 h-10 animate-spin text-black mx-auto" />
+          {/* Dropzone Card */}
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`w-full p-6 rounded-xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center text-center bg-white ${
+              dragActive 
+                ? 'border-black bg-amber-50 scale-[0.99]' 
+                : 'border-black/30 hover:border-black hover:bg-neutral-50/80 shadow-[3px_3px_0px_#00000010]'
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            />
+
+            <div className="w-14 h-14 rounded-2xl bg-[#FFE600] border-2 border-black flex items-center justify-center mb-3 shadow-[3px_3px_0px_#000]">
+              <UploadCloud className="w-7 h-7 text-black stroke-[2.5]"/>
+            </div>
+
+            {selectedFile ? (
               <div className="space-y-1">
-                <h4 className="font-heading font-black text-sm text-black">{statusMessage}</h4>
-                <p className="text-xs font-mono text-slate-500">Gemini 2.5 Flash Pipeline ({progress}%)</p>
-              </div>
-              <div className="w-full bg-slate-100 border border-black rounded-full h-3 overflow-hidden">
-                <div
-                  className="bg-[#00FFA3] h-full transition-all duration-300 border-r border-black"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          ) : (
-            /* Drag and Drop Zone */
-            <div className="space-y-4">
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`border-3 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center space-y-3 ${
-                  isDragging
-                    ? 'bg-[#FFE600]/20 border-black scale-[0.99]'
-                    : 'bg-white border-black/30 hover:border-black hover:bg-slate-50'
-                }`}
-                onClick={() => document.getElementById('resume-file-input').click()}
-              >
-                <input
-                  id="resume-file-input"
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-
-                <div className="w-12 h-12 rounded-xl bg-[#4DEEEA] border-2 border-black flex items-center justify-center text-black shadow-[2px_2px_0px_0px_#000]">
-                  <Upload className="w-6 h-6" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-100 border border-emerald-500 text-emerald-900 text-xs font-mono font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600"/>
+                  {selectedFile.name}
                 </div>
-
-                {file ? (
-                  <div className="space-y-1">
-                    <div className="font-heading font-black text-sm text-black flex items-center justify-center gap-1.5">
-                      <FileText className="w-4 h-4 text-slate-700" />
-                      <span>{file.name}</span>
-                    </div>
-                    <p className="text-xs font-mono text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB • Ready</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    <h4 className="font-heading font-black text-sm text-black">Drag & drop your resume PDF or Image</h4>
-                    <p className="text-xs font-medium text-slate-500">Supports PDF, PNG, JPG (Max 5MB)</p>
-                  </div>
-                )}
+                <p className="text-[11px] text-neutral-500 font-mono">
+                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Ready to Parse
+                </p>
               </div>
+            ) : (
+              <div>
+                <p className="text-sm font-black text-black font-mono mb-1">
+                  Drag & Drop your Resume PDF here
+                </p>
+                <p className="text-xs text-neutral-500 font-medium">
+                  or click to browse files (PDF only • Max 5MB)
+                </p>
+              </div>
+            )}
+          </div>
 
-              {/* Parse Action Button */}
-              <button
-                type="button"
-                onClick={handleStartParsing}
-                disabled={!file || parsing}
-                className="w-full inline-flex items-center justify-center space-x-2 bg-[#FFE600] text-black font-heading font-black text-sm py-3.5 border-2 border-black rounded-xl shadow-brutal hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all disabled:opacity-50 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-black" />
-                <span>Extract Resume with Gemini 2.5 Flash 🚀</span>
-              </button>
-            </div>
-          )}
+          {/* Action Button */}
+          <div className="mt-5">
+            <button
+              type="button"
+              disabled={!selectedFile || isProcessing}
+              onClick={handleStartParsing}
+              className={`w-full py-3 px-4 rounded-xl border-2 border-black font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+                selectedFile && !isProcessing
+                  ? 'bg-[#FFE600] text-black shadow-[3px_3px_0px_#000] hover:bg-[#FADB00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer'
+                  : 'bg-neutral-200 text-neutral-400 border-neutral-300 cursor-not-allowed shadow-none'
+              }`}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-black"/>
+                  <span>Extracting with OCR Engine...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 fill-black"/>
+                  <span>Extract Resume with StackFolio OCR 🚀</span>
+                </>
+              )}
+            </button>
+          </div>
 
         </div>
       </div>

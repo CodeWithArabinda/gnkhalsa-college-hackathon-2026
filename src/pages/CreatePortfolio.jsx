@@ -4,7 +4,7 @@ import { Sparkles, Wand2, ArrowRight, Layers, Monitor, ChevronLeft, Zap, Code, S
 
 const RECOMMENDED_TEMPLATES = [
   {
-    id: 'cinematic',
+    id: 'cinematic_space',
     name: 'Cinematic Nebula',
     badge: 'NEW',
     accent: '#FF6B1A',
@@ -47,6 +47,7 @@ export default function CreatePortfolio() {
   };
 
   const handleSelectTemplate = (templateId) => {
+    localStorage.setItem('stackfolio_selected_template', templateId);
     navigate('/studio');
   };
 

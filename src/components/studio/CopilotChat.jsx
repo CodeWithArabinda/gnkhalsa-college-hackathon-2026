@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Sparkles, History, X, Plus, Mic, User, RefreshCw, Palette, HelpCircle } from 'lucide-react';
 import PlanningCard from './PlanningCard';
 import ModelSelectorDropdown from '../common/ModelSelectorDropdown';
@@ -21,20 +21,20 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
   const isGenerating = externalGenerating !== undefined ? externalGenerating : internalGenerating;
   const isChatActive = messages.length > 0;
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isGenerating]);
+  }, [messages, isGenerating, scrollToBottom]);
 
-  const handleSend = async (textToSend) => {
+  const handleSend = useCallback(async (textToSend) => {
     const query = textToSend || input;
     if (!query.trim() || isGenerating) return;
 
     const userMsg = {
-      id: `u-${Date.now()}`,
+      id: `u-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       role: "user",
       text: query
     };
@@ -50,7 +50,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
       }
 
       const botMsg = {
-        id: `b-${Date.now()}`,
+        id: `b-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         role: "assistant",
         text: responseText || "I've applied your changes to the live canvas preview!"
       };
@@ -67,7 +67,7 @@ export default function CopilotChat({ schema, onApplyPrompt, isGenerating: exter
     } finally {
       setInternalGenerating(false);
     }
-  };
+  }, [input, isGenerating, onApplyPrompt, selectedModel]);
 
   return (
     <aside className="w-full lg:w-[332px] bg-white border-l-[2.5px] border-black flex flex-col h-full shrink-0 text-slate-900 select-none shadow-[-4px_0px_0px_#000000] z-30 font-sans">

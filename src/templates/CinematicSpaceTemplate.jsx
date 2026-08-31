@@ -245,8 +245,6 @@ export default function CinematicSpaceTemplate({ portfolio }) {
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [showcaseIdx, setShowcaseIdx] = useState(null);
 
-  if (!portfolio) return null;
-
   const {
     full_name = 'Developer',
     headline = 'Digital Experience Designer',
@@ -263,7 +261,7 @@ export default function CinematicSpaceTemplate({ portfolio }) {
     projects = [],
     skills = [],
     achievements = []
-  } = portfolio;
+  } = portfolio || {};
 
   const userAvatar = avatar_url || profile_image_url || '/photo/Sarang.png';
   const userEmail = contact_email || email;
@@ -309,7 +307,7 @@ export default function CinematicSpaceTemplate({ portfolio }) {
 
   // Format projects array for 3D wheel gallery
   const formattedProjects = useMemo(() => {
-    const rawList = projects.length > 0 ? projects : [
+    const rawList = (projects && projects.length > 0) ? projects : [
       { id: 'p1', title: 'Creative Studio Platform', description: 'Next.js & WebGL interactive experience', technologies: ['React', 'WebGL', 'GSAP'], category: 'WEBSITE' },
       { id: 'p2', title: 'AI Workspace Engine', description: 'Real-time intelligent dashboard interface', technologies: ['TypeScript', 'Tailwind', 'AI'], category: 'DESIGNS' },
       { id: 'p3', title: 'Portfolio Architecture', description: 'Modular multi-layout SaaS engine', technologies: ['Vite', 'Supabase', 'React'], category: 'MOBILE' }
@@ -339,6 +337,8 @@ export default function CinematicSpaceTemplate({ portfolio }) {
       text: p.text
     }));
   }, [filteredProjects]);
+
+  if (!portfolio) return null;
 
   const categories = ['ALL', 'WEBSITE', 'DESIGNS', 'MOBILE'];
 

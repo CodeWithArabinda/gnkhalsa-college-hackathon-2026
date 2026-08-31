@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
-  Sparkles, Mail, ExternalLink, Edit3, GripVertical, AlignLeft, AlignCenter, AlignRight,
-  ChevronUp, ChevronDown, Copy, Trash2, Wand2, Scissors, Image as ImageIcon, RotateCw, Move,
-  Pencil, X, Link as LinkIcon, Tag, Upload, Scissors as CutIcon, Palette
+  Wand2, Image as ImageIcon, Move, Pencil, X
 } from 'lucide-react';
 import CanvasBuildingState from './CanvasBuildingState';
 import SiteHeaderNavbar from './sections/SiteHeaderNavbar';

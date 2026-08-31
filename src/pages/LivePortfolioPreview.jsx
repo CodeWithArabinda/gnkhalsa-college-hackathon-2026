@@ -10,33 +10,30 @@ import StorySection from '../components/studio/sections/StorySection';
 import ContactSection from '../components/studio/sections/ContactSection';
 import FooterSection from '../components/studio/sections/FooterSection';
 
+const loadSchemaFromStorage = () => {
+  try {
+    const savedStudio = localStorage.getItem('stackfolio_studio_draft');
+    if (savedStudio) {
+      return JSON.parse(savedStudio);
+    }
+    const savedPortfolio = localStorage.getItem('stackfolio_portfolio_schema') || localStorage.getItem('stackfolio_active_draft');
+    if (savedPortfolio) {
+      return JSON.parse(savedPortfolio);
+    }
+  } catch (e) {
+    console.error("Error reading live preview schema:", e);
+  }
+  return initialPortfolioSchema;
+};
+
 export default function LivePortfolioPreview() {
-  const [schema, setSchema] = useState(null);
+  const [schema, setSchema] = useState(() => loadSchemaFromStorage());
   const navigate = useNavigate();
 
-  const loadSchema = () => {
-    try {
-      const savedStudio = localStorage.getItem('stackfolio_studio_draft');
-      if (savedStudio) {
-        setSchema(JSON.parse(savedStudio));
-        return;
-      }
-      const savedPortfolio = localStorage.getItem('stackfolio_portfolio_schema') || localStorage.getItem('stackfolio_active_draft');
-      if (savedPortfolio) {
-        setSchema(JSON.parse(savedPortfolio));
-        return;
-      }
-    } catch (e) {
-      console.error("Error reading live preview schema:", e);
-    }
-    setSchema(initialPortfolioSchema);
-  };
-
   useEffect(() => {
-    loadSchema();
     const handleStorageChange = (e) => {
       if (e.key === 'stackfolio_studio_draft' || e.key === 'stackfolio_portfolio_schema') {
-        loadSchema();
+        setSchema(loadSchemaFromStorage());
       }
     };
     window.addEventListener('storage', handleStorageChange);

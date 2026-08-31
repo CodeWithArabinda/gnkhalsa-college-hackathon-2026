@@ -151,3 +151,93 @@ const { data, error } = await supabase.storage
   .from('resumes')
   .upload(filePath, file);
 ```
+
+---
+
+## 5. Python Resume OCR Model API Contract
+
+### 5.1 Process Resume PDF (`POST /api/v1/resume/process`)
+
+- **URL:** `${VITE_OCR_API_URL}/api/v1/resume/process` (default: `http://localhost:8000/api/v1/resume/process`)
+- **HTTP Method:** `POST`
+- **Content-Type:** `multipart/form-data`
+- **Body:**
+  - `file`: `UploadFile` (PDF binary payload, `.pdf` or `application/pdf`, max size 5MB)
+- **Response Format (200 OK):**
+```json
+{
+  "success": true,
+  "draft": {
+    "profile": {
+      "full_name": "Aarya Shah",
+      "headline": "Full Stack Engineer",
+      "bio": "Passionate developer with 3+ years experience.",
+      "location": "Mumbai, India",
+      "email": "aarya@example.com",
+      "github_url": "https://github.com/aaryashah",
+      "linkedin_url": "https://linkedin.com/in/aaryashah"
+    },
+    "experiences": [
+      {
+        "company": "TechNova",
+        "role": "Software Engineer",
+        "start_date": "2023",
+        "end_date": "Present",
+        "description": "Built multi-tenant SaaS applications",
+        "display_order": 0
+      }
+    ],
+    "education": [
+      {
+        "institution": "University of Mumbai",
+        "degree": "BCA",
+        "field": "Computer Applications",
+        "start_year": "2021",
+        "end_year": "2024",
+        "description": "Graduated with top honors",
+        "display_order": 0
+      }
+    ],
+    "projects": [
+      {
+        "title": "CloudIDE",
+        "description": "Browser-based code development environment",
+        "technologies": ["React", "Node.js"],
+        "github_url": "https://github.com/aaryashah/cloudide",
+        "live_url": "https://cloudide.dev",
+        "display_order": 0
+      }
+    ],
+    "skills": [
+      { "name": "React", "category": "Technical", "level": "Intermediate", "display_order": 0 },
+      { "name": "Node.js", "category": "Technical", "level": "Intermediate", "display_order": 0 }
+    ],
+    "achievements": []
+  },
+  "processing": {
+    "extractor": "pymupdf",
+    "ocr_used": false,
+    "quality_score": 0.95,
+    "quality_status": "GOOD",
+    "page_count": 1,
+    "char_count": 850,
+    "duration_ms": 120.5
+  }
+}
+```
+
+### 5.2 Health Check (`GET /health`)
+
+- **URL:** `${VITE_OCR_API_URL}/health`
+- **Method:** `GET`
+- **Response:**
+```json
+{
+  "status": "healthy",
+  "service": "StackFolio Resume Intelligence",
+  "version": "1.0.0",
+  "fast_path_extractor": "PyMuPDF",
+  "ocr_fallback_engine": "Unlimited-OCR"
+}
+```
+

@@ -121,3 +121,38 @@ stackfolio/
 To prevent code duplication and layout drift, both the Dashboard Live Preview and the Public URL `/p/:slug` render through the identical component: `<TemplateRenderer portfolio={data} />`.
 - In **Dashboard Preview**, the component is wrapped in `<DeviceFrameWrapper mode={desktop|mobile}>`.
 - In **Public Route**, the component is rendered full-screen with native responsive Tailwind classes.
+
+---
+
+## 5. Python Resume OCR Model API Architecture
+
+```
+User Resume PDF
+      ↓
+ResumeUploadModal.jsx / ResumeUploadWidget.jsx
+      ↓
+parseResumeWithOCR() (in resumeParser.js)
+      ↓
+HTTP POST /api/v1/resume/process (VITE_OCR_API_URL, default http://localhost:8000)
+      ↓
+┌─────────────────────────────────────────────────────────┐
+│              PYTHON OCR MODEL API (FastAPI)             │
+│                                                         │
+│   1. File Validation (MIME application/pdf, <= 5MB)     │
+│   2. PyMuPDF Fast-Path Extractor (<150ms)               │
+│   3. Extraction Quality Engine (Score threshold: 0.65)   │
+│   4. OCR Fallback (Unlimited-OCR Adapter if score low)  │
+│   5. Deterministic Zero-Hallucination Parser            │
+│   6. Resume Normalizer (Deduplication, Sanitization)    │
+│   7. Portfolio Validator → Returns PortfolioDraft       │
+└────────────────────────────┬────────────────────────────┘
+                             ↓
+              ProcessResumeResponse JSON
+                             ↓
+           transformDraftToParsedData() Adapter
+                             ↓
+           validateParsedResume() / gapEngine.js
+                             ↓
+          PortfolioContext / Studio Editor / Supabase
+```
+

@@ -1,28 +1,13 @@
 /**
- * Gemini 2.5 Flash Multimodal OCR Extraction Service
- * Converts uploaded PDF or Image resume files into Base64 format
- * and queries Gemini 2.5 Flash API to extract standardized JSON.
+ * StackFolio Resume Intelligence Client Service
+ * Interfaces directly with the custom Python OCR Model API (FastAPI backend).
+ * Sends uploaded PDF resume files to the Python OCR pipeline, parses the
+ * resulting PortfolioDraft JSON payload, and converts it into StackFolio schema format.
  */
 
 /**
- * Convert File object to Base64 data string
- */
-export function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result;
-      const base64Data = result.includes(',') ? result.split(',')[1] : result;
-      const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
-      resolve({ base64Data, mimeType });
-    };
-    reader.onerror = (error) => reject(error);
-  });
-}
-
-/**
- * Clean and parse JSON output from Gemini response string
+ * Clean and parse JSON output from LLM/service response strings if needed.
+ * Retained for backwards compatibility with ariaService and gapEngine.
  */
 export function cleanJsonOutput(text) {
   if (!text) return null;
@@ -35,7 +20,7 @@ export function cleanJsonOutput(text) {
   try {
     return JSON.parse(cleaned);
   } catch (err) {
-    console.warn('Failed to parse Gemini JSON output directly:', err, text);
+    console.warn('Failed to parse JSON output directly:', err, text);
     const startIdx = cleaned.indexOf('{');
     const endIdx = cleaned.lastIndexOf('}');
     if (startIdx !== -1 && endIdx !== -1) {
@@ -50,133 +35,191 @@ export function cleanJsonOutput(text) {
 }
 
 /**
- * Primary Gemini Multimodal OCR Extraction Function
- * @param {File} file - PDF, PNG, JPG, or JPEG file
- * @param {string} [apiKey] - Optional explicit Gemini API Key
+ * Adapter function: Transforms Python PortfolioDraft schema into
+ * standard StackFolio parsedData object expected by gapEngine and Studio.
+ *
+ * @param {Object} draft - PortfolioDraft object returned by Python OCR API
+ * @returns {Object} Standardized parsedData payload
  */
-export async function parseResumeWithGemini(file, apiKey = null) {
-  const keyToUse = apiKey || import.meta.env.VITE_GEMINI_API_KEY;
-  if (!file) throw new Error('No resume file provided for OCR extraction.');
+export function transformDraftToParsedData(draft) {
+  if (!draft) return null;
 
-  // Convert file to base64 data format for Gemini API
-  const { base64Data, mimeType } = await fileToBase64(file);
+  const profile = draft.profile || {};
+  const experiences = Array.isArray(draft.experiences) ? draft.experiences : [];
+  const education = Array.isArray(draft.education) ? draft.education : [];
+  const projects = Array.isArray(draft.projects) ? draft.projects : [];
+  const skills = Array.isArray(draft.skills) ? draft.skills : [];
 
-  const extractionPrompt = `You are a precision OCR and document intelligence engine.
-Analyze this resume document image/PDF directly. 
-Extract the EXACT candidate information written on the document text. 
-DO NOT use the file name as the candidate's name.
+  const extractedSkills = skills
+    .map((s) => (typeof s === 'string' ? s : s.name || ''))
+    .filter(Boolean);
 
-Return ONLY a raw JSON object (no markdown fences) matching this structure:
-{
-  "hero": {
-    "name": "Exact Name written at top of resume (e.g. SRIHARSH ADITYA)",
-    "title": "Exact Role or Headline (e.g. Software Engineering Intern / Full Stack Developer)",
-    "bio": "2-sentence professional bio synthesized from their experience",
-    "avatarUrl": ""
-  },
-  "skills": ["Array of skills found, e.g. Node.js, ExpressJS, MongoDB, React, C++, JavaScript"],
-  "projects": [
-    {
-      "title": "Exact Project Name (e.g. BUY-N-SELL)",
-      "description": "Project summary with achievements",
-      "techStack": ["NodeJS", "MongoDB", "ExpressJS"],
-      "demoUrl": "",
-      "githubUrl": ""
-    }
-  ],
-  "experience": [
-    {
-      "role": "Exact Role (e.g. SOFTWARE ENGINEERING INTERN)",
-      "company": "Exact Company (e.g. PUDLE)",
-      "period": "FEB 2021 - PRESENT",
-      "description": "Key bullet achievements"
-    }
-  ],
-  "contact": {
-    "email": "Email address from resume or ''",
-    "socialLinks": {
-      "github": "Github URL or username from resume",
-      "linkedin": "Linkedin URL or username from resume",
-      "twitter": ""
-    }
-  }
-}`;
+  const formattedProjects = projects.map((p) => ({
+    title: p.title || '',
+    description: p.description || '',
+    techStack: Array.isArray(p.technologies) ? p.technologies : [],
+    demoUrl: p.live_url || '',
+    githubUrl: p.github_url || ''
+  }));
 
-  if (!keyToUse || keyToUse === "your_gemini_api_key_here") {
-    console.warn("No Gemini API key provided. Returning unpopulated structure for Gap Engine resolution.");
+  const formattedExperiences = experiences.map((e) => {
+    const dates = [e.start_date, e.end_date].filter(Boolean).join(' - ');
     return {
-      hero: { name: "", title: "", bio: "", avatarUrl: "" },
-      skills: [],
-      projects: [],
-      experience: [],
-      contact: { email: "", socialLinks: { github: "", linkedin: "", twitter: "" } }
+      role: e.role || '',
+      company: e.company || '',
+      period: dates || '',
+      description: e.description || ''
     };
-  }
+  });
 
-  const MODELS = ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const formattedEducation = education.map((edu) => {
+    const dates = [edu.start_year, edu.end_year].filter(Boolean).join(' - ');
+    return {
+      institution: edu.institution || '',
+      degree: edu.degree || '',
+      field: edu.field || '',
+      period: dates || '',
+      description: edu.description || ''
+    };
+  });
 
-  const requestBody = {
-    contents: [
-      {
-        parts: [
-          { text: extractionPrompt },
-          {
-            inline_data: {
-              mime_type: mimeType,
-              data: base64Data,
-            },
-          },
-        ],
-      },
-    ],
-    generationConfig: {
-      response_mime_type: "application/json",
-      temperature: 0.1,
+  return {
+    hero: {
+      name: profile.full_name || '',
+      title: profile.headline || '',
+      bio: profile.bio || '',
+      avatarUrl: ''
     },
-  };
-
-  let response = null;
-  let lastError = null;
-
-  for (const model of MODELS) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-      if (res.ok) {
-        response = res;
-        break;
-      } else {
-        const errText = await res.text();
-        console.warn(`Gemini API Model ${model} returned ${res.status}:`, errText);
-        lastError = `Gemini API Error (${res.status}): ${errText}`;
+    skills: extractedSkills,
+    projects: formattedProjects,
+    experience: formattedExperiences,
+    education: formattedEducation,
+    contact: {
+      email: profile.email || '',
+      socialLinks: {
+        github: profile.github_url || '',
+        linkedin: profile.linkedin_url || '',
+        twitter: ''
       }
-    } catch (err) {
-      console.warn(`Fetch error for model ${model}:`, err);
-      lastError = err.message;
     }
+  };
+}
+
+/**
+ * Primary Resume Extraction Function using Custom Python OCR Model API.
+ *
+ * @param {File} file - PDF Resume document file
+ * @param {Object} [options] - Additional request options (signal, timeoutMs)
+ * @returns {Promise<Object>} Standardized parsedData object
+ */
+export async function parseResumeWithOCR(file, options = {}) {
+  const { signal: externalSignal, timeoutMs = 30000 } = options;
+
+  if (!file) {
+    throw new Error('No resume PDF file provided for extraction.');
   }
 
-  if (!response) {
-    throw new Error(lastError || "Failed to execute Gemini Multimodal OCR API request.");
+  // 1. Client-Side Format & Size Pre-Validation
+  const filename = file.name || '';
+  const isPdf = file.type === 'application/pdf' || filename.toLowerCase().endsWith('.pdf');
+
+  if (!isPdf) {
+    throw new Error('Invalid file format. The StackFolio OCR Engine supports PDF documents (.pdf).');
   }
 
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error("Gemini 2.5 Flash API error:", response.status, errText);
-    throw new Error(`Gemini Multimodal OCR Error (${response.status}): ${errText}`);
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('File size exceeds 5MB limit. Please upload a smaller PDF resume.');
   }
 
-  const result = await response.json();
-  const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-  const parsed = cleanJsonOutput(rawText);
-
-  if (!parsed || !parsed.hero) {
-    throw new Error("Failed to parse valid candidate JSON from resume document OCR.");
+  if (file.size === 0) {
+    throw new Error('Uploaded PDF file is empty (0 bytes).');
   }
 
-  return parsed;
+  // 2. Base URL resolution from environment configuration
+  const rawApiUrl = import.meta.env.VITE_OCR_API_URL || 'http://localhost:8000';
+  const ocrApiUrl = rawApiUrl.replace(/\/+$/, '');
+  const endpoint = `${ocrApiUrl}/api/v1/resume/process`;
+
+  // 3. Construct FormData payload
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // 4. Timeout and Abort Signal Setup
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      clearTimeout(timeoutId);
+      throw new Error('OCR Parsing request canceled by user.');
+    }
+    externalSignal.addEventListener('abort', () => controller.abort());
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      let errorMessage = `OCR Model API Error (${res.status})`;
+      try {
+        const errorData = await res.json();
+        if (typeof errorData.detail === 'string') {
+          errorMessage = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+          errorMessage = errorData.detail.map((e) => e.msg || e.detail).join('; ');
+        }
+      } catch (e) {
+        // Fallback to HTTP status text if non-JSON error
+        errorMessage = res.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await res.json();
+
+    if (!data || !data.success || !data.draft) {
+      throw new Error('OCR API response structure is malformed or missing PortfolioDraft.');
+    }
+
+    // 5. Transform PortfolioDraft to standard StackFolio parsedData
+    const parsedData = transformDraftToParsedData(data.draft);
+    if (data.processing) {
+      parsedData._processing = data.processing;
+    }
+
+    return parsedData;
+  } catch (err) {
+    clearTimeout(timeoutId);
+
+    if (err.name === 'AbortError') {
+      if (externalSignal?.aborted) {
+        throw new Error('OCR Parsing request canceled by user.');
+      }
+      throw new Error(`OCR Parsing request timed out after ${timeoutMs / 1000}s.`);
+    }
+
+    // Check for network connection failures (service offline, CORS blocked, etc.)
+    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+      throw new Error(
+        `Unable to connect to StackFolio OCR Model API at ${ocrApiUrl}. Please verify the Python API server is running.`
+      );
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * Backwards Compatibility Wrapper:
+ * Redirects legacy calls from parseResumeWithGemini to parseResumeWithOCR.
+ */
+export async function parseResumeWithGemini(file, apiKey = null, options = {}) {
+  console.warn('parseResumeWithGemini is deprecated for resume OCR. Forwarding request to Python parseResumeWithOCR pipeline.');
+  return parseResumeWithOCR(file, options);
 }

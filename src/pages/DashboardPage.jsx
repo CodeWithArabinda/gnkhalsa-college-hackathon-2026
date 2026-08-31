@@ -13,20 +13,17 @@ import UserProfileDropup from '../components/studio/UserProfileDropup';
 import {
   Sparkles,
   Edit3,
-  FileText,
   Palette,
   BarChart2,
   Settings,
-  LogOut,
   Globe,
   Loader2,
-  ChevronRight,
-  Play
+  ChevronRight
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const {
     portfolio,
     loading: portfolioLoading,

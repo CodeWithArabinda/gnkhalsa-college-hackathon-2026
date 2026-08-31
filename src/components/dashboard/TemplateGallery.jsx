@@ -1,97 +1,18 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, ArrowRight, Sparkles, Upload } from 'lucide-react';
+import { Eye, ArrowRight, Upload } from 'lucide-react';
 import { getArchetypeConfig } from '../../lib/geminiBuilder';
-
-const TEMPLATE_PRESETS = [
-  {
-    id: 'portfolio1',
-    archetype: 'cyber-terminal',
-    name: 'PORTFOLIO1 (3D INTERACTIVE)',
-    category: 'Developer & Tech',
-    badge: 'NEW 3D ENGINE',
-    badgeColor: 'bg-[#00F5FF]',
-    description: '3D interactive developer showcase powered by React, GSAP, Lenis smooth scrolling, Spline canvas, and Radix dialogs.',
-    previewBg: 'bg-gradient-to-b from-[#07090e] via-[#0e1424] to-[#05080e]',
-    textColor: 'text-cyan-400'
-  },
-  {
-    id: 'autono',
-    archetype: 'neo-brutalist',
-    name: 'AUTONO',
-    category: 'Developer & Tech',
-    badge: 'NEO-BRUTALIST',
-    badgeColor: 'bg-[#FFE600]',
-    description: 'Clean Minimal Editorial Tech theme with off-white canvas, sharp typography, and hard-edge shadow CTA buttons.',
-    previewBg: 'bg-gradient-to-b from-slate-100 to-white',
-    textColor: 'text-black'
-  },
-  {
-    id: 'arian-grand',
-    archetype: 'warm-editorial',
-    name: 'ARIAN GRAND / DESIGNER CV',
-    category: 'Creative Studio',
-    badge: 'POPULAR',
-    badgeColor: 'bg-[#93c5fd]',
-    description: 'Warm peach-to-orange gradient aesthetic with rich avatar focus, floating tech badges, and social triggers.',
-    previewBg: 'bg-gradient-to-tr from-amber-100 via-orange-50 to-pink-100',
-    textColor: 'text-black'
-  },
-  {
-    id: 'darle-studio',
-    archetype: 'warm-editorial',
-    name: 'DARLE STUDIO',
-    category: 'Creative Studio',
-    badge: 'FEATURED',
-    badgeColor: 'bg-[#86efac]',
-    description: 'Cobalt royal blue agency showcase with high-contrast project grid and interactive metrics matrix.',
-    previewBg: 'bg-gradient-to-b from-blue-900 to-slate-950',
-    textColor: 'text-white'
-  },
-  {
-    id: 'dark-obsidian',
-    archetype: 'cyber-terminal',
-    name: 'DARK OBSIDIAN / TERMINAL',
-    category: 'Developer & Tech',
-    badge: 'CYBER',
-    badgeColor: 'bg-[#fca5a5]',
-    description: 'Cyber dark mode with monospaced cyan borders, terminal window headers, and neon amber badges.',
-    previewBg: 'bg-[#0b0e14]',
-    textColor: 'text-emerald-400'
-  },
-  {
-    id: 'bento-modular',
-    archetype: 'bento-minimal',
-    name: 'BENTO MODULAR',
-    category: 'Bento & Minimal',
-    badge: 'VERCEL STYLE',
-    badgeColor: 'bg-[#fef08a]',
-    description: 'Apple/Vercel-inspired glassmorphic bento grid cards with dynamic column spans and subtle borders.',
-    previewBg: 'bg-slate-900',
-    textColor: 'text-white'
-  },
-  {
-    id: 'cinematic-nebula',
-    archetype: 'bento-minimal',
-    name: 'CINEMATIC NEBULA',
-    category: 'Bento & Minimal',
-    badge: 'NEW',
-    badgeColor: 'bg-[#c084fc]',
-    description: 'Deep space dark canvas with warm amber radial gradients, glass navbar, and floating project cards.',
-    previewBg: 'bg-gradient-to-b from-zinc-950 via-zinc-900 to-black',
-    textColor: 'text-amber-400'
-  }
-];
+import { TEMPLATE_LIST } from '../../templates/PortfolioRenderer';
 
 const CATEGORIES = [
-  'All (6)',
+  'All',
   'Developer & Tech',
   'Bento & Minimal',
   'Creative Studio'
 ];
 
 export default function TemplateGallery({ onSelectArchetype }) {
-  const [activeCategory, setActiveCategory] = useState('All (6)');
+  const [activeCategory, setActiveCategory] = useState('All');
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -115,13 +36,16 @@ export default function TemplateGallery({ onSelectArchetype }) {
     reader.readAsText(file);
   };
 
-  const filteredTemplates = TEMPLATE_PRESETS.filter(t => {
-    if (activeCategory.startsWith('All')) return true;
-    return t.category === activeCategory;
+  const filteredTemplates = TEMPLATE_LIST.filter(t => {
+    if (activeCategory === 'All') return true;
+    if (activeCategory === 'Developer & Tech') return t.category === 'developer';
+    if (activeCategory === 'Bento & Minimal') return t.category === 'minimal';
+    if (activeCategory === 'Creative Studio') return t.category === 'creative' || t.category === 'brutalist';
+    return true;
   });
 
   const handleSelectTemplate = (template) => {
-    const targetArchetype = template.archetype || 'neo-brutalist';
+    const targetArchetype = template.archetype?.toLowerCase().replace(/\s+/g, '-') || 'neo-brutalist';
     
     if (onSelectArchetype) {
       onSelectArchetype(targetArchetype);
@@ -131,6 +55,7 @@ export default function TemplateGallery({ onSelectArchetype }) {
 
     const presetSchema = {
       archetype: config.archetype,
+      selected_template: template.id,
       metadata: {
         slug: "kshitij-pilankar",
         title: `${template.name} — Portfolio`,
@@ -191,7 +116,7 @@ export default function TemplateGallery({ onSelectArchetype }) {
           }
         },
         {
-          id: "block-[#story]",
+          id: "block-story",
           type: "StoryBlock",
           layoutVariant: config.variants.story,
           content: {
@@ -237,10 +162,10 @@ export default function TemplateGallery({ onSelectArchetype }) {
         </h2>
         <button
           type="button"
-          onClick={() => setActiveCategory('All (6)')}
+          onClick={() => setActiveCategory('All')}
           className="text-xs font-black text-black hover:text-[#0053ff] flex items-center gap-1 cursor-pointer"
         >
-          <span>SEE ALL ({TEMPLATE_PRESETS.length})</span>
+          <span>SEE ALL ({TEMPLATE_LIST.length})</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -250,6 +175,13 @@ export default function TemplateGallery({ onSelectArchetype }) {
         <div className="flex flex-wrap gap-2.5">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat;
+            const count = cat === 'All' ? TEMPLATE_LIST.length : TEMPLATE_LIST.filter(t => {
+              if (cat === 'Developer & Tech') return t.category === 'developer';
+              if (cat === 'Bento & Minimal') return t.category === 'minimal';
+              if (cat === 'Creative Studio') return t.category === 'creative' || t.category === 'brutalist';
+              return true;
+            }).length;
+
             return (
               <button
                 key={cat}
@@ -261,7 +193,7 @@ export default function TemplateGallery({ onSelectArchetype }) {
                     : 'bg-white text-black shadow-[2.5px_2.5px_0px_#000000] hover:bg-slate-50'
                 }`}
               >
-                {cat}
+                {cat} ({count})
               </button>
             );
           })}
@@ -295,7 +227,10 @@ export default function TemplateGallery({ onSelectArchetype }) {
             className="bg-white border-[2.5px] border-black rounded-2xl p-4 shadow-[5px_5px_0px_#000000] flex flex-col justify-between hover:shadow-[7px_7px_0px_#000000] hover:-translate-y-1 transition-all duration-200 group"
           >
             {/* Mockup Window */}
-            <div className={`h-44 ${tmpl.previewBg} p-3 rounded-xl border-2 border-black relative flex flex-col justify-between overflow-hidden shadow-[2px_2px_0px_#000]`}>
+            <div
+              className="h-44 p-3 rounded-xl border-2 border-black relative flex flex-col justify-between overflow-hidden shadow-[2px_2px_0px_#000]"
+              style={{ backgroundColor: tmpl.bgPreview || '#0A0E17' }}
+            >
               
               {/* Browser Header */}
               <div className="flex items-center justify-between z-10">
@@ -304,14 +239,17 @@ export default function TemplateGallery({ onSelectArchetype }) {
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-black" />
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border border-black" />
                 </div>
-                <span className={`${tmpl.badgeColor} text-black border-2 border-black font-black text-[9px] px-2 py-0.5 rounded shadow-[1.5px_1.5px_0px_#000] uppercase`}>
-                  {tmpl.badge}
+                <span className="bg-[#FFE600] text-black border-2 border-black font-black text-[9px] px-2 py-0.5 rounded shadow-[1.5px_1.5px_0px_#000] uppercase">
+                  {tmpl.badge || 'TEMPLATE'}
                 </span>
               </div>
 
               {/* Mockup Title */}
               <div className="my-auto space-y-1.5 z-10">
-                <h4 className={`text-base font-black tracking-tight ${tmpl.textColor}`}>
+                <h4
+                  className="text-base font-black tracking-tight"
+                  style={{ color: tmpl.accent || '#00F5FF' }}
+                >
                   {tmpl.name}
                 </h4>
                 <div className="flex gap-1.5">
@@ -321,7 +259,7 @@ export default function TemplateGallery({ onSelectArchetype }) {
               </div>
 
               {/* Hover Trigger */}
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-2xs">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-2xs">
                 <button
                   type="button"
                   onClick={() => handleSelectTemplate(tmpl)}

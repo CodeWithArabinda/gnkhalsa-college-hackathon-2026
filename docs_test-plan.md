@@ -14,3 +14,9 @@
 | **TC-08** | Unpublished Route 404 Guard | 1. Toggle `is_published` to `false`.<br>2. Open `/p/:slug` in incognito window. | Page displays "This portfolio is currently unpublished or private". | Pass |
 | **TC-09** | Profile Avatar Image Upload | 1. Upload 1.5MB PNG file in Basic Info tab. | File uploads to Supabase `avatars` bucket; image updates in preview. | Pass |
 | **TC-10** | Demo Profile 1-Click Intake | 1. Click "Try Demo Profile" on onboarding. | Populates complete Aarya Shah dataset into editor fields immediately. | Pass |
+| **TC-11** | Valid PDF Resume Processing via Python OCR API | 1. Upload valid 1-page PDF resume.<br>2. Trigger OCR extraction. | Python OCR API parses document via PyMuPDF fast-path (<150ms), returns PortfolioDraft, adapter transforms schema, populates Studio Editor. | Pass |
+| **TC-12** | Scanned / Low-Quality PDF OCR Fallback | 1. Upload scanned image-based PDF resume. | Extraction Quality Engine detects low score (<0.65), triggers Unlimited-OCR adapter fallback, parses text, populates Studio Editor. | Pass |
+| **TC-13** | Unsupported File Format Handling | 1. Attempt to upload .docx or non-PDF file. | Client validation blocks upload with clear error: "Invalid file format. The StackFolio OCR Engine supports PDF documents (.pdf)." | Pass |
+| **TC-14** | Oversized PDF File Validation (>5MB) | 1. Select a 7MB PDF file. | Client & server validation enforce 5MB limit and reject file. | Pass |
+| **TC-15** | Python OCR Service Offline / Network Error | 1. Stop Python OCR server.<br>2. Upload resume PDF. | Catch network error and display: "Unable to connect to StackFolio OCR Model API... Please verify the Python API server is running." | Pass |
+
