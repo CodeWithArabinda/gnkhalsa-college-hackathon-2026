@@ -8,7 +8,7 @@ import {
   Sparkles, 
   CheckCircle2, 
   AlertCircle, 
-  Loader2,
+  Loader2, 
   RefreshCw 
 } from 'lucide-react';
 
@@ -27,18 +27,18 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
 
   const handleFile = (file) => {
     if (!file) return;
-
-    const isPdf = file.name?.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+    const isPdf = file.name?.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf' || file.type.startsWith('image/');
     if (isPdf) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg('File size exceeds 5MB limit. Please upload a smaller PDF resume.');
-        setSelectedFile(null);
+        setErrorMsg('File size exceeds 5MB limit. Please upload a smaller file.');
+        showToast('error', 'File too large (> 5MB).');
         return;
       }
       setSelectedFile(file);
       setErrorMsg(null);
     } else {
-      setErrorMsg('Please select a valid PDF file (max 5MB). The StackFolio OCR Engine specializes in PDF resumes.');
+      setErrorMsg('Please select a valid PDF or Image file (max 5MB).');
+      showToast('error', 'Invalid file type.');
     }
   };
 
@@ -58,7 +58,7 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
     }
   };
 
-  const handleStartParsing = async () => {
+  const handleExtractResume = async () => {
     if (!selectedFile || isProcessing) return;
 
     setIsProcessing(true);
@@ -85,8 +85,8 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
       setExtractedSummary(summary);
       showToast('success', 'Resume parsed with StackFolio OCR Engine!');
 
+      // Check for missing required portfolio fields
       const validation = validateParsedResume(parsedData);
-
       if (!validation.isValid && onGapDetected) {
         onGapDetected(parsedData, validation.missingFields);
         setIsProcessing(false);
@@ -102,8 +102,9 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
         onUploadSuccess(finalSchema, parsedData);
       }
     } catch (err) {
-      console.error('StackFolio OCR Processing error:', err);
-      setErrorMsg(err.message || 'Failed to extract resume payload. Please ensure Python OCR server is running.');
+      console.error('Error during OCR processing:', err);
+      setErrorMsg(err.message || 'Failed to extract text from PDF/Image resume.');
+      showToast('error', 'OCR PDF parsing failed.');
     } finally {
       setIsProcessing(false);
       abortControllerRef.current = null;
@@ -122,8 +123,11 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
   };
 
   return (
-    <div className="w-full bg-[#FAF9F5] border-2 border-black rounded-2xl shadow-[6px_6px_0px_#000] p-6 relative overflow-hidden space-y-5">
-      
+    <div
+      className={`w-full bg-[#FAF9F5] border-2 border-black rounded-2xl shadow-[6px_6px_0px_#000] p-6 relative overflow-hidden space-y-5 ${
+        inModal ? 'border-none shadow-none p-0 bg-transparent' : ''
+      }`}
+    >
       {/* Engine Pipeline Badge & Subtitle */}
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -151,8 +155,42 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
         </div>
       )}
 
-      {/* Dropzone Card */}
-      {!extractedSummary && (
+      {/* Extracted Summary Success Card */}
+      {extractedSummary ? (
+        <div className="p-4 bg-emerald-50 border-2 border-emerald-500 rounded-xl space-y-3 shadow-[3px_3px_0px_#10B981]">
+          <div className="flex items-center gap-2 text-emerald-900 font-mono font-bold text-xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>Resume Extracted for {extractedSummary.name}</span>
+          </div>
+          <div className="grid grid-cols-4 gap-2 text-center font-mono text-[11px]">
+            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
+              <div className="font-black text-emerald-700">{extractedSummary.experiencesCount}</div>
+              <div className="text-neutral-500 text-[10px]">Exp</div>
+            </div>
+            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
+              <div className="font-black text-emerald-700">{extractedSummary.projectsCount}</div>
+              <div className="text-neutral-500 text-[10px]">Projects</div>
+            </div>
+            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
+              <div className="font-black text-emerald-700">{extractedSummary.skillsCount}</div>
+              <div className="text-neutral-500 text-[10px]">Skills</div>
+            </div>
+            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
+              <div className="font-black text-emerald-700">{extractedSummary.educationCount}</div>
+              <div className="text-neutral-500 text-[10px]">Edu</div>
+            </div>
+          </div>
+          <div className="flex justify-end pt-1">
+            <button
+              onClick={handleReset}
+              className="px-3 py-1 bg-white border border-black text-xs font-mono font-bold rounded-lg shadow-[2px_2px_0px_#000] hover:bg-neutral-50 transition-all"
+            >
+              Upload Another
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Dropzone Card */
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -168,7 +206,7 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,application/pdf"
+            accept=".pdf,.png,.jpg,.jpeg"
             className="hidden"
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           />
@@ -193,45 +231,10 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
                 Drag & Drop your Resume PDF here
               </p>
               <p className="text-xs text-neutral-500 font-medium">
-                or click to browse files (PDF only • Max 5MB)
+                or click to browse files (PDF, PNG, JPG • Max 5MB)
               </p>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Success Summary View */}
-      {extractedSummary && (
-        <div className="p-4 bg-emerald-50 border-2 border-emerald-500 rounded-xl space-y-3">
-          <div className="flex items-center gap-2 text-emerald-900 font-mono font-black text-xs">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600"/>
-            <span>Resume Extracted for {extractedSummary.name}!</span>
-          </div>
-          <div className="grid grid-cols-4 gap-2 text-center font-mono text-[11px]">
-            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
-              <span className="block font-black text-emerald-700">{extractedSummary.experiencesCount}</span>
-              <span className="text-neutral-500">Exp</span>
-            </div>
-            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
-              <span className="block font-black text-emerald-700">{extractedSummary.projectsCount}</span>
-              <span className="text-neutral-500">Projects</span>
-            </div>
-            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
-              <span className="block font-black text-emerald-700">{extractedSummary.skillsCount}</span>
-              <span className="text-neutral-500">Skills</span>
-            </div>
-            <div className="p-2 bg-white border border-emerald-300 rounded-lg">
-              <span className="block font-black text-emerald-700">{extractedSummary.educationCount}</span>
-              <span className="text-neutral-500">Edu</span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="w-full py-1.5 bg-white border border-black rounded-lg text-xs font-mono font-bold text-black hover:bg-neutral-100 shadow-[1.5px_1.5px_0px_#000]"
-          >
-            Upload Another Resume PDF
-          </button>
         </div>
       )}
 
@@ -241,7 +244,7 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
           <button
             type="button"
             disabled={!selectedFile || isProcessing}
-            onClick={handleStartParsing}
+            onClick={handleExtractResume}
             className={`w-full py-3 px-4 rounded-xl border-2 border-black font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
               selectedFile && !isProcessing
                 ? 'bg-[#FFE600] text-black shadow-[3px_3px_0px_#000] hover:bg-[#FADB00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer'
@@ -262,7 +265,6 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
           </button>
         </div>
       )}
-
     </div>
   );
 }

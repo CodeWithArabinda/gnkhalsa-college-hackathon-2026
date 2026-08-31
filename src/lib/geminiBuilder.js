@@ -150,8 +150,7 @@ export function morphSchemaArchetype(currentSchema, targetArchetype) {
 
   return {
     ...currentSchema,
-    selected_template: targetArchetype,
-    archetype: config.archetype || targetArchetype,
+    archetype: config.archetype,
     theme: config.theme,
     blocks: newBlocks
   };

@@ -11,13 +11,7 @@ const CinematicSpaceTemplate = lazy(() => import('./CinematicSpaceTemplate'));
 const NeoBrutalistTemplate = lazy(() => import('./NeoBrutalistTemplate'));
 const DarkTerminalTemplate = lazy(() => import('./DarkTerminalTemplate'));
 const MinimalEditorialTemplate = lazy(() => import('./MinimalEditorialTemplate'));
-const ExecutiveSlateTemplate = lazy(() => import('./ExecutiveSlateTemplate'));
-const CreativeStudioTemplate = lazy(() => import('./CreativeStudioTemplate'));
 const Portfolio1Template = lazy(() => import('./portfolio1/index'));
-const Portfolio2Template = lazy(() => import('./templates/Portfolio2Template'));
-const Portfolio3Template = lazy(() => import('./templates/Portfolio3Template'));
-const Portfolio4Template = lazy(() => import('./templates/Portfolio4Template'));
-const Portfolio5Template = lazy(() => import('./templates/Portfolio5Template'));
 
 const TemplateFallback = () => (
   <div className="min-h-[400px] w-full flex flex-col items-center justify-center space-y-3 bg-[#0B0E14] text-white p-8 font-mono">
@@ -42,50 +36,6 @@ export const TEMPLATE_REGISTRY = {
     accent: '#00F5FF',
     bgPreview: '#07090E',
     badge: 'NEW 3D',
-  },
-  portfolio2: {
-    id: 'portfolio2',
-    component: Portfolio2Template,
-    name: 'Monochrome Minimal',
-    archetype: 'MONOCHROME MINIMAL',
-    description: 'Clean monochrome minimal layout with sharp typography, scroll reveal animations, and structured career timeline.',
-    category: 'minimal',
-    accent: '#000000',
-    bgPreview: '#FFFFFF',
-    badge: 'ORIGINAL',
-  },
-  portfolio3: {
-    id: 'portfolio3',
-    component: Portfolio3Template,
-    name: 'Glass Cyber',
-    archetype: 'GLASS CYBER',
-    description: 'Violet aurora dark mode canvas with glassmorphic cyber cards, interactive tabs, and ambient neon glow.',
-    category: 'developer',
-    accent: '#915EFF',
-    bgPreview: '#050816',
-    badge: 'ORIGINAL',
-  },
-  portfolio4: {
-    id: 'portfolio4',
-    component: Portfolio4Template,
-    name: 'IDE Terminal',
-    archetype: 'IDE TERMINAL',
-    description: 'Code editor layout with tabbed navigation, technology filter sidebar, and monospaced tech tags.',
-    category: 'developer',
-    accent: '#00C7FF',
-    bgPreview: '#0E1217',
-    badge: 'ORIGINAL',
-  },
-  portfolio5: {
-    id: 'portfolio5',
-    component: Portfolio5Template,
-    name: 'Doodle Cyber',
-    archetype: 'DOODLE CYBER',
-    description: 'Playful cyber doodle aesthetic with vector orbit graphics, cyan accents, and interactive tabbed showcases.',
-    category: 'creative',
-    accent: '#00C7FF',
-    bgPreview: '#0A0E17',
-    badge: 'ORIGINAL',
   },
   dark_developer: {
     id: 'dark_developer',
@@ -193,33 +143,9 @@ export const TEMPLATE_REGISTRY = {
     badge: 'NEW',
     reference: 'https://zsofia.pro/',
   },
-  executive_slate: {
-    id: 'executive_slate',
-    component: ExecutiveSlateTemplate,
-    name: 'Executive Slate',
-    archetype: 'EXECUTIVE CORPORATE',
-    description: 'Sophisticated slate dark executive layout with metallic accents, timeline leadership experiences, and core competencies.',
-    category: 'developer',
-    accent: '#3B82F6',
-    bgPreview: '#0F172A',
-    badge: 'NEW EXECUTIVE',
-  },
-  creative_studio: {
-    id: 'creative_studio',
-    component: CreativeStudioTemplate,
-    name: 'Creative Studio',
-    archetype: 'CREATIVE AGENCY',
-    description: 'High-impact creative agency showcase with neon purple canvas, bold project hero cards, and floating tech pills.',
-    category: 'creative',
-    accent: '#A855F7',
-    bgPreview: '#0A0A0F',
-    badge: 'NEW STUDIO',
-  },
 };
 
-export const TEMPLATE_LIST = Object.values(TEMPLATE_REGISTRY).filter(
-  (tmpl, index, self) => self.findIndex(t => t.id === tmpl.id) === index
-);
+export const TEMPLATE_LIST = Object.values(TEMPLATE_REGISTRY);
 
 /**
  * PortfolioRenderer: Dynamically mounts the selected template component.
@@ -249,22 +175,9 @@ export default function PortfolioRenderer({ portfolio, viewMode = 'desktop' }) {
     );
   }
 
-  const rawKey = portfolio.selected_template || portfolio.archetype || 'dark_developer';
+  const rawKey = portfolio.selected_template || 'dark_terminal';
   const normalizedKey = rawKey.replace(/-/g, '_');
-  const hyphenatedKey = rawKey.replace(/_/g, '-');
-
-  // Lookup sequence: raw -> normalized (snake) -> hyphenated -> aliases
-  let templateEntry = TEMPLATE_REGISTRY[rawKey] || TEMPLATE_REGISTRY[normalizedKey] || TEMPLATE_REGISTRY[hyphenatedKey];
-
-  // Additional archetype fallback mappings
-  if (!templateEntry) {
-    if (normalizedKey.includes('bento')) templateEntry = TEMPLATE_REGISTRY['bento_grid'];
-    else if (normalizedKey.includes('terminal') || normalizedKey.includes('cyber')) templateEntry = TEMPLATE_REGISTRY['dark_terminal'];
-    else if (normalizedKey.includes('brutalist')) templateEntry = TEMPLATE_REGISTRY['neo_brutalist'];
-    else if (normalizedKey.includes('editorial') || normalizedKey.includes('warm')) templateEntry = TEMPLATE_REGISTRY['minimal_editorial'];
-    else templateEntry = TEMPLATE_REGISTRY['dark_developer'];
-  }
-
+  const templateEntry = TEMPLATE_REGISTRY[normalizedKey] || TEMPLATE_REGISTRY[rawKey] || TEMPLATE_REGISTRY['dark_developer'];
   const ActiveTemplate = templateEntry.component;
 
   return (

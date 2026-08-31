@@ -3,8 +3,6 @@ import DeviceFrameWrapper from './DeviceFrameWrapper';
 import TemplateRenderer from '../templates/TemplateRenderer';
 import { Laptop, Smartphone } from 'lucide-react';
 
-import { TEMPLATE_LIST } from '../../templates/PortfolioRenderer';
-
 export default function LivePreviewContainer({ portfolio, onTemplateChange }) {
   const [deviceMode, setDeviceMode] = useState('desktop');
 
@@ -23,11 +21,8 @@ export default function LivePreviewContainer({ portfolio, onTemplateChange }) {
             onChange={onTemplateChange}
             className="bg-transparent text-black font-extrabold focus:outline-none cursor-pointer"
           >
-            {TEMPLATE_LIST.map((tmpl) => (
-              <option key={tmpl.id} value={tmpl.id}>
-                {tmpl.name}
-              </option>
-            ))}
+            <option value="dark_developer">Dark Developer</option>
+            <option value="light_corporate">Light Corporate</option>
           </select>
         </div>
 

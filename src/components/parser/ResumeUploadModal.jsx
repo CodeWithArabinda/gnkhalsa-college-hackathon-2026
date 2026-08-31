@@ -20,32 +20,19 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
   const fileInputRef = useRef(null);
   const abortControllerRef = useRef(null);
 
-  // Gap Resolution Modal States
+  // Gap Resolution Engine States
   const [showGapModal, setShowGapModal] = useState(false);
   const [parsedRawData, setParsedRawData] = useState(null);
   const [detectedGaps, setDetectedGaps] = useState([]);
 
   if (!isOpen) return null;
 
-  const handleCallbackSuccess = (schema) => {
-    if (onSuccess) onSuccess(schema);
-    if (onParsedSuccess) onParsedSuccess(schema);
-  };
-
   const handleFile = (file) => {
-    if (!file) return;
-
-    const isPdf = file.name?.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
-    if (isPdf) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg('File size exceeds 5MB limit. Please upload a smaller PDF.');
-        setSelectedFile(null);
-        return;
-      }
+    if (file && (file.type === 'application/pdf' || file.name.endsWith('.pdf') || file.type.startsWith('image/'))) {
       setSelectedFile(file);
       setErrorMsg(null);
     } else {
-      setErrorMsg('Please select a valid PDF file (max 5MB). The StackFolio OCR Engine specializes in PDF resumes.');
+      setErrorMsg('Please select a valid PDF or Image file (max 5MB).');
     }
   };
 
@@ -65,7 +52,7 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
     }
   };
 
-  const handleStartParsing = async () => {
+  const handleExtractResume = async () => {
     if (!selectedFile || isProcessing) return;
 
     setIsProcessing(true);
@@ -81,22 +68,24 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
         timeoutMs: 30000
       });
 
-      // Validate required portfolio fields
+      // Validate required portfolio schema fields
       const validation = validateParsedResume(parsedData);
-
       if (!validation.isValid) {
         setParsedRawData(parsedData);
         setDetectedGaps(validation.missingFields);
         setShowGapModal(true);
         setIsProcessing(false);
-      } else {
-        const finalSchema = transformToPortfolioSchema(parsedData);
-        handleCallbackSuccess(finalSchema);
-        onClose();
+        return;
       }
+
+      const finalSchema = transformToPortfolioSchema(parsedData);
+      const callback = onSuccess || onParsedSuccess;
+      if (callback) callback(finalSchema);
+      
+      handleCloseModal();
     } catch (err) {
-      console.error('StackFolio OCR Processing error:', err);
-      setErrorMsg(err.message || 'Failed to extract resume payload. Please ensure Python OCR server is running.');
+      console.error('OCR Resume Extraction error:', err);
+      setErrorMsg(err.message || 'Failed to extract resume payload from Python OCR API.');
       setIsProcessing(false);
     } finally {
       abortControllerRef.current = null;
@@ -105,7 +94,18 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
 
   const handleGapResolved = (finalSchema) => {
     setShowGapModal(false);
-    handleCallbackSuccess(finalSchema);
+    const callback = onSuccess || onParsedSuccess;
+    if (callback) callback(finalSchema);
+    handleCloseModal();
+  };
+
+  const handleCloseModal = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setSelectedFile(null);
+    setIsProcessing(false);
+    setErrorMsg(null);
     onClose();
   };
 
@@ -126,9 +126,9 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
               </h2>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleCloseModal}
               disabled={isProcessing}
-              className="w-8 h-8 rounded-lg border-2 border-black bg-white hover:bg-neutral-100 flex items-center justify-center shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer"
+              className="w-8 h-8 rounded-lg border-2 border-black bg-white hover:bg-neutral-100 flex items-center justify-center shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all cursor-pointer disabled:opacity-50"
             >
               <X className="w-4 h-4 text-black stroke-[2.5]"/>
             </button>
@@ -149,7 +149,7 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
               </span>
             </div>
             <p className="text-xs text-neutral-600 font-medium leading-relaxed">
-              Automatically extract full profile schema, skills matrix, projects, and work history using custom Python OCR model.
+              Automatically extract full profile schema, skills matrix, projects, and work history from your document.
             </p>
           </div>
 
@@ -177,7 +177,7 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,application/pdf"
+              accept=".pdf,.png,.jpg,.jpeg"
               className="hidden"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             />
@@ -202,7 +202,7 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
                   Drag & Drop your Resume PDF here
                 </p>
                 <p className="text-xs text-neutral-500 font-medium">
-                  or click to browse files (PDF only • Max 5MB)
+                  or click to browse files (PDF, PNG, JPG • Max 5MB)
                 </p>
               </div>
             )}
@@ -213,7 +213,7 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
             <button
               type="button"
               disabled={!selectedFile || isProcessing}
-              onClick={handleStartParsing}
+              onClick={handleExtractResume}
               className={`w-full py-3 px-4 rounded-xl border-2 border-black font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
                 selectedFile && !isProcessing
                   ? 'bg-[#FFE600] text-black shadow-[3px_3px_0px_#000] hover:bg-[#FADB00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer'

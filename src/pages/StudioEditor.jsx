@@ -338,7 +338,6 @@ export default function StudioEditor() {
       
       {/* Top Main Navigation (Wix Harmony Header) */}
       <StudioNavbar
-        schema={schema}
         deviceMode={deviceMode}
         setDeviceMode={setDeviceMode}
         onPublish={handlePublish}
