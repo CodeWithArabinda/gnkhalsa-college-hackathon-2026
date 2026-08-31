@@ -144,7 +144,7 @@ export const TEMPLATE_LIST = Object.values(TEMPLATE_REGISTRY);
  * PortfolioRenderer: Dynamically mounts the selected template component.
  * Used by both the Dashboard Live Preview Canvas and the Public /p/:slug route.
  */
-export default function PortfolioRenderer({ portfolio }) {
+export default function PortfolioRenderer({ portfolio, viewMode = 'desktop' }) {
   if (!portfolio) return null;
 
   // Blank state placeholder
@@ -173,5 +173,6 @@ export default function PortfolioRenderer({ portfolio }) {
   const templateEntry = TEMPLATE_REGISTRY[normalizedKey] || TEMPLATE_REGISTRY[rawKey] || TEMPLATE_REGISTRY['dark_developer'];
   const ActiveTemplate = templateEntry.component;
 
-  return <ActiveTemplate portfolio={portfolio} />;
+  return <ActiveTemplate portfolio={portfolio} viewMode={viewMode} />;
 }
+

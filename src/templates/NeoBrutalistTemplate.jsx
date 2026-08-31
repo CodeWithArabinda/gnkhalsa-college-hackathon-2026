@@ -1,7 +1,7 @@
 import React from 'react';
 import { Github, Linkedin, Mail, MapPin, ExternalLink, Briefcase, GraduationCap, Award } from 'lucide-react';
 
-export default function NeoBrutalistTemplate({ portfolio }) {
+export default function NeoBrutalistTemplate({ portfolio, viewMode = 'desktop' }) {
   if (!portfolio) return null;
 
   const {
@@ -20,33 +20,34 @@ export default function NeoBrutalistTemplate({ portfolio }) {
     achievements = []
   } = portfolio;
 
+  const isMobile = viewMode === 'mobile';
   const colors = ['bg-[#4DEEEA]', 'bg-[#FF70A6]', 'bg-[#A8FF78]', 'bg-[#FFE600]', 'bg-[#FFAA00]'];
 
   return (
-    <div className="min-h-screen bg-[#FFFDF8] text-[#0F172A] font-sans antialiased">
+    <div className="min-h-screen bg-[#FFFDF8] text-[#0F172A] font-sans antialiased w-full overflow-x-hidden">
       {/* Thick top accent */}
-      <div className="h-3 bg-[#FFE600] border-b-3 border-black" />
+      <div className="h-3 bg-[#FFE600] border-b-3 border-black w-full" />
 
-      <div className="p-6 sm:p-10 md:p-14 max-w-5xl mx-auto space-y-12">
+      <div className={`${isMobile ? 'p-4' : 'p-6 sm:p-10 md:p-14'} max-w-5xl mx-auto space-y-8 sm:space-y-12`}>
 
         {/* Hero Card */}
-        <div className="bg-white border-3 border-black p-8 rounded-2xl shadow-[6px_6px_0px_0px_#000]">
-          <div className="flex flex-col md:flex-row items-center gap-8">
+        <div className="bg-white border-3 border-black p-5 sm:p-8 rounded-2xl shadow-[4px_4px_0px_0px_#000] sm:shadow-[6px_6px_0px_0px_#000] w-full box-border">
+          <div className={`flex flex-col ${isMobile ? 'items-center text-center' : 'md:flex-row items-center text-center md:text-left'} gap-6 sm:gap-8`}>
             {profile_image_url && (
-              <div className="w-32 h-32 rounded-2xl overflow-hidden border-3 border-black shadow-[4px_4px_0px_0px_#FFE600] bg-[#FFE600] shrink-0">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-3 border-black shadow-[4px_4px_0px_0px_#FFE600] bg-[#FFE600] shrink-0">
                 <img src={profile_image_url} alt={full_name} className="w-full h-full object-cover" />
               </div>
             )}
-            <div className="space-y-3 text-center md:text-left flex-1">
-              <div className="inline-block bg-[#FF70A6] text-black font-extrabold px-3 py-1 border-2 border-black rounded-full text-xs uppercase rotate-[-2deg] shadow-[2px_2px_0px_0px_#000]">
+            <div className="space-y-3 flex-1">
+              <div className="inline-block bg-[#FF70A6] text-black font-extrabold px-3 py-1 border-2 border-black rounded-full text-[10px] sm:text-xs uppercase rotate-[-2deg] shadow-[2px_2px_0px_0px_#000]">
                 ★ Portfolio Spotlight
               </div>
-              <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight leading-none">{full_name}</h1>
-              <p className="text-lg font-heading font-bold text-[#0F172A]/80">{headline}</p>
-              <p className="text-sm text-slate-600 leading-relaxed max-w-2xl font-medium">{bio}</p>
+              <h1 className={`${isMobile ? 'text-3xl font-black' : 'text-4xl md:text-6xl font-heading font-black'} tracking-tight leading-none break-words`}>{full_name}</h1>
+              <p className="text-base sm:text-lg font-heading font-bold text-[#0F172A]/80">{headline}</p>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl font-medium">{bio}</p>
 
               {/* Social Stickers */}
-              <div className="flex flex-wrap gap-2.5 justify-center md:justify-start pt-2 font-mono">
+              <div className={`flex flex-wrap gap-2.5 ${isMobile ? 'justify-center' : 'justify-center md:justify-start'} pt-2 font-mono`}>
                 {location && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border-2 border-black rounded-md text-xs font-bold shadow-[2px_2px_0px_0px_#000]">
                     <MapPin className="w-3.5 h-3.5" /> {location}
@@ -74,22 +75,22 @@ export default function NeoBrutalistTemplate({ portfolio }) {
 
         {/* Projects */}
         {projects.length > 0 && (
-          <section className="space-y-6">
-            <h2 className="text-3xl font-heading font-black inline-block bg-[#FFE600] px-4 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[-1deg]">
+          <section className="space-y-6 w-full box-border">
+            <h2 className="text-2xl sm:text-3xl font-heading font-black inline-block bg-[#FFE600] px-4 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[-1deg]">
               Featured Projects
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+            <div className={`${isMobile ? 'flex flex-col gap-5' : 'grid grid-cols-1 md:grid-cols-2 gap-8'} pt-2`}>
               {projects.map((proj, idx) => (
-                <div key={proj.id} className="bg-white border-3 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 transition-transform flex flex-col">
+                <div key={proj.id} className="bg-white border-3 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_#000] hover:-translate-y-1 transition-transform flex flex-col w-full box-border">
                   {proj.image_url && (
                     <div className="h-44 overflow-hidden border-b-3 border-black">
                       <img src={proj.image_url} alt={proj.title} className="w-full h-full object-cover" />
                     </div>
                   )}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-2">
-                      <h3 className="text-lg font-heading font-extrabold">{proj.title}</h3>
-                      <p className="text-xs text-slate-600 leading-relaxed font-medium">{proj.description}</p>
+                      <h3 className="text-base sm:text-lg font-heading font-extrabold">{proj.title}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed font-medium line-clamp-3">{proj.description}</p>
                     </div>
                     {proj.technologies && proj.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
@@ -121,11 +122,11 @@ export default function NeoBrutalistTemplate({ portfolio }) {
 
         {/* Skills */}
         {skills.length > 0 && (
-          <section className="space-y-6">
-            <h2 className="text-3xl font-heading font-black inline-block bg-[#4DEEEA] px-4 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[1deg]">
+          <section className="space-y-6 w-full box-border">
+            <h2 className="text-2xl sm:text-3xl font-heading font-black inline-block bg-[#4DEEEA] px-4 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[1deg]">
               Skills & Tools
             </h2>
-            <div className="bg-white border-3 border-black p-6 rounded-2xl shadow-[4px_4px_0px_0px_#000] flex flex-wrap gap-3">
+            <div className="bg-white border-3 border-black p-5 sm:p-6 rounded-2xl shadow-[4px_4px_0px_0px_#000] flex flex-wrap gap-2.5 sm:gap-3 w-full box-border">
               {skills.map((skill, idx) => (
                 <div key={skill.id} className={`px-3 py-1.5 border-2 border-black rounded-lg shadow-[2px_2px_0px_0px_#000] ${colors[idx % colors.length]}`}>
                   <span className="text-xs font-bold text-black">{skill.name}</span>
@@ -137,17 +138,17 @@ export default function NeoBrutalistTemplate({ portfolio }) {
         )}
 
         {/* Experience + Education */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className={`${isMobile ? 'flex flex-col gap-6 w-full' : 'grid grid-cols-1 md:grid-cols-2 gap-8'}`}>
           {experiences.length > 0 && (
-            <section className="space-y-5">
-              <h2 className="text-2xl font-heading font-black inline-block bg-[#A8FF78] px-3.5 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[-2deg]">
+            <section className="space-y-5 w-full box-border">
+              <h2 className="text-xl sm:text-2xl font-heading font-black inline-block bg-[#A8FF78] px-3.5 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[-2deg]">
                 Experience
               </h2>
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 {experiences.map((exp) => (
-                  <div key={exp.id} className="bg-white border-3 border-black p-5 rounded-2xl shadow-[4px_4px_0px_0px_#000] space-y-2">
+                  <div key={exp.id} className="bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-[4px_4px_0px_0px_#000] space-y-2 w-full box-border">
                     <div className="flex justify-between items-start flex-wrap gap-1">
-                      <h3 className="font-heading font-black text-base">{exp.company}</h3>
+                      <h3 className="font-heading font-black text-sm sm:text-base">{exp.company}</h3>
                       <span className="text-[10px] font-mono font-bold bg-[#FFE600] px-2 py-0.5 border-2 border-black rounded">{exp.start_date} – {exp.end_date}</span>
                     </div>
                     <div className="text-xs font-bold text-slate-600 flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" /> {exp.role}</div>
@@ -159,15 +160,15 @@ export default function NeoBrutalistTemplate({ portfolio }) {
           )}
 
           {education.length > 0 && (
-            <section className="space-y-5">
-              <h2 className="text-2xl font-heading font-black inline-block bg-[#FF70A6] px-3.5 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[2deg]">
+            <section className="space-y-5 w-full box-border">
+              <h2 className="text-xl sm:text-2xl font-heading font-black inline-block bg-[#FF70A6] px-3.5 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[2deg]">
                 Education
               </h2>
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 {education.map((edu) => (
-                  <div key={edu.id} className="bg-white border-3 border-black p-5 rounded-2xl shadow-[4px_4px_0px_0px_#000] space-y-2">
+                  <div key={edu.id} className="bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-[4px_4px_0px_0px_#000] space-y-2 w-full box-border">
                     <div className="flex justify-between items-start flex-wrap gap-1">
-                      <h3 className="font-heading font-black text-base">{edu.institution}</h3>
+                      <h3 className="font-heading font-black text-sm sm:text-base">{edu.institution}</h3>
                       <span className="text-[10px] font-mono font-bold bg-[#FFE600] px-2 py-0.5 border-2 border-black rounded">{edu.start_year} – {edu.end_year}</span>
                     </div>
                     <div className="text-xs font-bold text-slate-600 flex items-center gap-1"><GraduationCap className="w-3.5 h-3.5" /> {edu.degree}{edu.field ? ` · ${edu.field}` : ''}</div>
@@ -181,16 +182,16 @@ export default function NeoBrutalistTemplate({ portfolio }) {
 
         {/* Achievements */}
         {achievements.length > 0 && (
-          <section className="space-y-6">
-            <h2 className="text-3xl font-heading font-black inline-block bg-[#FFAA00] px-4 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[-1deg]">
+          <section className="space-y-6 w-full box-border">
+            <h2 className="text-2xl sm:text-3xl font-heading font-black inline-block bg-[#FFAA00] px-4 py-1.5 border-3 border-black shadow-[4px_4px_0px_0px_#000] rotate-[-1deg]">
               Certificates & Honors
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className={`${isMobile ? 'flex flex-col gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'} pt-2`}>
               {achievements.map((ach) => (
-                <div key={ach.id} className="bg-white border-3 border-black p-5 rounded-2xl shadow-[4px_4px_0px_0px_#000] flex gap-3 items-start">
-                  <div className="w-10 h-10 rounded-xl bg-[#FFE600] border-2 border-black flex items-center justify-center text-black font-black text-base shrink-0 shadow-[2px_2px_0px_0px_#000]">★</div>
+                <div key={ach.id} className="bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-[4px_4px_0px_0px_#000] flex gap-3 items-start w-full box-border">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FFE600] border-2 border-black flex items-center justify-center text-black font-black text-sm sm:text-base shrink-0 shadow-[2px_2px_0px_0px_#000]">★</div>
                   <div className="space-y-1 flex-1 min-w-0">
-                    <h4 className="font-heading font-extrabold text-sm">{ach.title}</h4>
+                    <h4 className="font-heading font-extrabold text-xs sm:text-sm">{ach.title}</h4>
                     <p className="text-[10px] font-bold text-slate-500">{ach.issuer} · {ach.date}</p>
                     {ach.credential_url && (
                       <a href={ach.credential_url} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-blue-600 hover:underline inline-flex items-center gap-0.5">
@@ -208,3 +209,4 @@ export default function NeoBrutalistTemplate({ portfolio }) {
     </div>
   );
 }
+

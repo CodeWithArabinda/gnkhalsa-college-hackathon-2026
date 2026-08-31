@@ -493,7 +493,7 @@ export default function CanvasPreview({
   return (
     <div
       onClick={() => onSelectElement && onSelectElement(null)}
-      className="flex-1 bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] overflow-y-auto pt-20 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
+      className="flex-1 bg-white bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] overflow-y-auto pt-24 sm:pt-28 pb-16 px-4 sm:px-8 flex flex-col items-center justify-start relative select-none transition-colors duration-200 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
     >
       {/* Hidden Native File Input */}
       <input
@@ -507,38 +507,38 @@ export default function CanvasPreview({
       {/* Frame Wrapper (Neo-Brutalist Preview Window) */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`${getFrameWidth()} transition-all duration-300 ease-in-out bg-white border-[2.5px] border-black rounded-2xl shadow-[8px_8px_0px_#000000] overflow-hidden relative z-10 my-auto min-h-[720px] flex flex-col mb-12`}
+        className={`${getFrameWidth()} transition-all duration-300 ease-in-out bg-white border-[2.5px] border-black rounded-2xl shadow-[8px_8px_0px_#000000] overflow-hidden relative z-10 mt-4 sm:mt-6 mb-12 min-h-[720px] flex flex-col box-border`}
       >
         {/* Frame Top Browser Header */}
-        <div className="bg-white border-b-2 border-black px-4 py-2 flex items-center justify-between shrink-0 text-black">
-          <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-[#FF5F56] border border-black" />
-            <span className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-black" />
-            <span className="w-3 h-3 rounded-full bg-[#27C93F] border border-black" />
+        <div className="w-full bg-white border-b-2 border-black px-3 py-2 flex items-center justify-between gap-2 overflow-hidden shrink-0 text-black">
+          {/* Mac Window Dots */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 border border-black/40" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 border border-black/40" />
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500 border border-black/40" />
           </div>
 
+          {/* Compact Domain Pill */}
           <button
             type="button"
             onClick={() => onOpenDomainModal && onOpenDomainModal()}
-            className="bg-[#FFE600] border-2 border-black rounded-full px-3 py-0.5 font-mono text-[11px] text-black font-black flex items-center gap-1.5 shadow-[1.5px_1.5px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer"
+            className="bg-[#FFE600] border border-black px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold truncate max-w-[150px] sm:max-w-[240px] shadow-[1px_1px_0px_#000000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] transition-all cursor-pointer flex items-center gap-1"
             title="Connect Custom Domain"
           >
             {customDomain ? (
               <>
-                <span className="font-bold">https://{customDomain}</span>
-                <span className="text-emerald-700 font-black">🟢 Live</span>
+                <span className="truncate">{customDomain}</span>
+                <span className="text-emerald-700 font-bold shrink-0">🟢</span>
               </>
             ) : (
-              <>
-                <span className="font-bold">webdevportfolio.io</span>
-                <span className="text-black font-black">is available! Connect Domain</span>
-              </>
+              <span className="truncate">{schema?.branding?.slug || schema?.metadata?.slug || "webdevportfolio.io"}</span>
             )}
           </button>
 
-          <div className="flex items-center gap-2 font-mono text-[10px] font-black text-black">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="hidden sm:inline">STACKFOLIO CANVAS</span>
+          {/* Canvas Status */}
+          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-neutral-500 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:inline-block" />
+            <span className="hidden sm:inline">CANVAS</span>
           </div>
         </div>
 
@@ -555,7 +555,7 @@ export default function CanvasPreview({
           const isHumanist = archetype === 'humanist-light';
 
           return (
-            <div className={`flex-1 overflow-y-auto relative transition-colors duration-300 ${
+            <div className={`flex-1 overflow-y-auto overflow-x-hidden w-full relative transition-colors duration-300 ${
               isCyber ? 'bg-[#090D16] text-white font-mono' :
               isBento ? 'bg-[#F8FAFC] text-slate-900 font-sans' :
               isBrutalist ? 'bg-[#FFFDF5] text-black font-sans' :
@@ -572,6 +572,7 @@ export default function CanvasPreview({
                 archetype={schema?.archetype}
                 scrollToProjects={scrollToProjects}
                 scrollToContact={scrollToContact}
+                viewMode={deviceMode}
               />
 
               {schema.blocks && schema.blocks.length > 0 ? (
@@ -598,6 +599,7 @@ export default function CanvasPreview({
                           triggerFileUpload={triggerFileUpload}
                           scrollToProjects={scrollToProjects}
                           EditableCanvasItem={EditableCanvasItem}
+                          viewMode={deviceMode}
                         />
                       )}
 
@@ -617,6 +619,7 @@ export default function CanvasPreview({
                           handleInlineChange={handleInlineChange}
                           projectsRef={projectsRef}
                           EditableCanvasItem={EditableCanvasItem}
+                          viewMode={deviceMode}
                         />
                       )}
 
@@ -635,6 +638,7 @@ export default function CanvasPreview({
                           handleOpenEditModal={handleOpenEditModal}
                           handleInlineChange={handleInlineChange}
                           EditableCanvasItem={EditableCanvasItem}
+                          viewMode={deviceMode}
                         />
                       )}
 
@@ -653,6 +657,7 @@ export default function CanvasPreview({
                           handleOpenEditModal={handleOpenEditModal}
                           handleInlineChange={handleInlineChange}
                           EditableCanvasItem={EditableCanvasItem}
+                          viewMode={deviceMode}
                         />
                       )}
 
@@ -672,6 +677,7 @@ export default function CanvasPreview({
                           handleInlineChange={handleInlineChange}
                           contactRef={contactRef}
                           EditableCanvasItem={EditableCanvasItem}
+                          viewMode={deviceMode}
                         />
                       )}
 
@@ -691,8 +697,10 @@ export default function CanvasPreview({
                           EditableCanvasItem={EditableCanvasItem}
                           archetype={schema?.archetype}
                           theme={schema?.theme}
+                          viewMode={deviceMode}
                         />
                       )}
+
 
                 </div>
               );

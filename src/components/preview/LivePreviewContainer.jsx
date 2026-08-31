@@ -54,11 +54,12 @@ export default function LivePreviewContainer({ portfolio, onTemplateChange }) {
       </div>
 
       {/* Frame Wrapper Canvas */}
-      <div className="w-full flex justify-center items-center h-full pt-16">
+      <div className="w-full flex justify-center items-center h-full pt-20 sm:pt-24 pb-8 overflow-y-auto">
         <DeviceFrameWrapper mode={deviceMode}>
-          <TemplateRenderer portfolio={portfolio} />
+          <TemplateRenderer portfolio={portfolio} viewMode={deviceMode} />
         </DeviceFrameWrapper>
       </div>
+
     </div>
   );
 }
