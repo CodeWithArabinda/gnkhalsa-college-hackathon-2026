@@ -36,15 +36,12 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
-        // Sign Up with optional metadata options
+        // Sign Up with metadata options
         const { error } = await signUp(cleanEmail, cleanPassword, {
           data: { full_name: fullName.trim() }
         });
         if (error) throw error;
-        
-        // Notify user about confirmation email if applicable, or redirect
-        alert('Registration successful! Please check your email inbox for confirmation, then log in.');
-        setIsSignUp(false);
+        navigate('/dashboard');
       } else {
         // Sign In
         const { error } = await signIn(cleanEmail, cleanPassword);

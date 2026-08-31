@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { generateSlug } from '../lib/slugGenerator';
 import { demoProfile } from '../utils/demoData';
 import { useAuth } from './AuthContext';
@@ -36,6 +36,28 @@ export const PortfolioProvider = ({ children }) => {
     }
   };
 
+  const createCleanLocalPortfolio = (userId, email = '', fullName = '') => ({
+    id: `local-profile-${userId}`,
+    user_id: userId,
+    full_name: fullName || '',
+    headline: 'Full-Stack Developer & Software Engineer',
+    bio: 'Passionate builder crafting modern, responsive web experiences and scalable digital solutions.',
+    profile_image_url: '',
+    avatar_url: '',
+    location: 'Mumbai, India',
+    email: email || '',
+    github_url: 'https://github.com',
+    linkedin_url: 'https://linkedin.com',
+    selected_template: 'dark_developer',
+    is_published: true,
+    public_slug: generateSlug(fullName || 'my-portfolio'),
+    experiences: [],
+    education: [],
+    projects: [],
+    skills: [],
+    achievements: []
+  });
+
   const fetchPortfolio = useCallback(async (userId) => {
     if (!userId) return;
     setLoading(true);
@@ -57,28 +79,12 @@ export const PortfolioProvider = ({ children }) => {
         }
       }
 
-      if (userId === 'guest-user-id') {
-        const cleanState = {
-          id: 'demo-profile-uuid-guest',
-          user_id: 'guest-user-id',
-          full_name: '',
-          headline: '',
-          bio: '',
-          profile_image_url: '',
-          avatar_url: '',
-          location: '',
-          email: '',
-          github_url: '',
-          linkedin_url: '',
-          selected_template: 'dark_developer',
-          is_published: true,
-          public_slug: 'my-portfolio',
-          experiences: [],
-          education: [],
-          projects: [],
-          skills: [],
-          achievements: []
-        };
+      if (userId === 'guest-user-id' || !isSupabaseConfigured || userId.startsWith('local-user')) {
+        const cleanState = createCleanLocalPortfolio(
+          userId,
+          user?.email || '',
+          user?.user_metadata?.full_name || ''
+        );
         setPortfolio(cleanState);
         saveToLocalStorage(cleanState);
         setLoading(false);
@@ -122,18 +128,18 @@ export const PortfolioProvider = ({ children }) => {
         saveToLocalStorage(fetchedState);
       } else {
         // 3. Initialize a clean blank profile if none exists
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
         const slug = generateSlug('my-portfolio');
 
         const cleanNewProfile = {
           user_id: userId,
-          full_name: '',
-          headline: '',
-          bio: '',
-          location: '',
-          email: user?.email || '',
-          github_url: '',
-          linkedin_url: '',
+          full_name: user?.user_metadata?.full_name || '',
+          headline: 'Full-Stack Developer & Software Engineer',
+          bio: 'Passionate builder crafting modern, responsive web experiences.',
+          location: 'Mumbai, India',
+          email: authUser?.email || user?.email || '',
+          github_url: 'https://github.com',
+          linkedin_url: 'https://linkedin.com',
           selected_template: 'dark_developer',
           is_published: true,
           public_slug: slug,
@@ -151,15 +157,12 @@ export const PortfolioProvider = ({ children }) => {
           .single();
 
         if (insertError) {
-          // If insert fails (e.g. RLS), fallback to local clean state
-          setPortfolio({ id: `local-profile-${userId}`, ...cleanNewProfile });
-          saveToLocalStorage({ id: `local-profile-${userId}`, ...cleanNewProfile });
+          const fallback = createCleanLocalPortfolio(userId, user?.email, user?.user_metadata?.full_name);
+          setPortfolio(fallback);
+          saveToLocalStorage(fallback);
         } else {
           const finalState = {
             ...newProfile,
-            full_name: '',
-            headline: '',
-            bio: '',
             experiences: [],
             education: [],
             projects: [],
@@ -171,12 +174,15 @@ export const PortfolioProvider = ({ children }) => {
         }
       }
     } catch (err) {
-      console.error('Error loading portfolio:', err);
-      setError(err.message || 'Failed to load portfolio.');
+      console.warn('Error loading portfolio from backend, using local fallback:', err);
+      const fallback = createCleanLocalPortfolio(userId, user?.email, user?.user_metadata?.full_name);
+      setPortfolio(fallback);
+      saveToLocalStorage(fallback);
+      setError(null);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const savePortfolio = useCallback(async () => {
     if (!portfolio) return { success: false, error: 'No portfolio loaded' };
