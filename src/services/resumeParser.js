@@ -113,7 +113,7 @@ Return ONLY a raw JSON object (no markdown fences) matching this structure:
     };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keyToUse}`;
+  const MODELS = ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
   const requestBody = {
     contents: [
@@ -135,11 +135,34 @@ Return ONLY a raw JSON object (no markdown fences) matching this structure:
     },
   };
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody)
-  });
+  let response = null;
+  let lastError = null;
+
+  for (const model of MODELS) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+      if (res.ok) {
+        response = res;
+        break;
+      } else {
+        const errText = await res.text();
+        console.warn(`Gemini API Model ${model} returned ${res.status}:`, errText);
+        lastError = `Gemini API Error (${res.status}): ${errText}`;
+      }
+    } catch (err) {
+      console.warn(`Fetch error for model ${model}:`, err);
+      lastError = err.message;
+    }
+  }
+
+  if (!response) {
+    throw new Error(lastError || "Failed to execute Gemini Multimodal OCR API request.");
+  }
 
   if (!response.ok) {
     const errText = await response.text();
