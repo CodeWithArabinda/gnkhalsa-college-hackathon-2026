@@ -9,6 +9,7 @@ import ConnectDomainModal from '../components/studio/ConnectDomainModal';
 import { useStudioTheme } from '../context/ThemeContext';
 import { initialPortfolioSchema } from '../types/schema';
 import { generatePortfolioSchema, processUserPrompt, morphSchemaArchetype } from '../lib/geminiBuilder';
+import { processAriaStudioPrompt } from '../services/ariaService';
 
 export default function StudioEditor() {
   const { studioTheme } = useStudioTheme();
@@ -303,12 +304,14 @@ export default function StudioEditor() {
   const handleApplyPrompt = async (userPrompt) => {
     setIsGenerating(true);
     try {
-      const aiResult = await processUserPrompt(userPrompt, schema);
-      if (aiResult?.schema) {
-        updateSchemaState(aiResult.schema);
+      const { replyMessage, updatedSchema } = await processAriaStudioPrompt(userPrompt, schema);
+      if (updatedSchema) {
+        updateSchemaState(updatedSchema);
       }
+      return replyMessage;
     } catch (err) {
       console.error("Gemini build error:", err);
+      throw err;
     } finally {
       setIsGenerating(false);
     }
