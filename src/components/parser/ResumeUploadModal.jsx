@@ -62,10 +62,10 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
     abortControllerRef.current = controller;
 
     try {
-      // Call Python OCR Model API pipeline
+      // Call dual-layer extraction pipeline (Python OCR + Gemini Flash Fallback)
       const parsedData = await parseResumeWithOCR(selectedFile, {
         signal: controller.signal,
-        timeoutMs: 30000
+        timeoutMs: 5000
       });
 
       // Validate required portfolio schema fields
@@ -84,8 +84,8 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
       
       handleCloseModal();
     } catch (err) {
-      console.error('OCR Resume Extraction error:', err);
-      setErrorMsg(err.message || 'Failed to extract resume payload from Python OCR API.');
+      console.error('Resume Extraction error:', err);
+      setErrorMsg(err.message || 'Failed to extract resume details.');
       setIsProcessing(false);
     } finally {
       abortControllerRef.current = null;

@@ -1,7 +1,7 @@
 /**
  * StackFolio Resume Intelligence Client Service
  * Dual-layer extraction pipeline:
- *  - Layer 1 (Primary): Custom Python OCR Model API (FastAPI backend).
+ *  - Layer 1 (Primary): Custom Python OCR Model API (FastAPI backend with 5s timeout).
  *  - Layer 2 (Automatic Fallback): Direct Gemini Flash Multimodal Engine for Vercel/Production deployments.
  */
 
@@ -286,7 +286,7 @@ Return ONLY a valid JSON object (no markdown formatting, no code blocks) matchin
 /**
  * Primary Resume Extraction Function.
  * Dual-layer pipeline:
- *  - Layer 1 (Primary): Custom Python OCR Model API (FastAPI backend).
+ *  - Layer 1 (Primary): Custom Python OCR Model API (FastAPI backend with 5s timeout).
  *  - Layer 2 (Automatic Fallback): Gemini Multimodal Engine (Gemini Flash).
  *
  * @param {File} file - PDF or Image Resume file
@@ -294,7 +294,7 @@ Return ONLY a valid JSON object (no markdown formatting, no code blocks) matchin
  * @returns {Promise<Object>} Standardized parsedData object
  */
 export async function parseResumeWithOCR(file, options = {}) {
-  const { signal: externalSignal, timeoutMs = 8000 } = options;
+  const { signal: externalSignal, timeoutMs = 5000 } = options;
 
   if (!file) {
     throw new Error('No resume document provided for extraction.');
@@ -317,7 +317,7 @@ export async function parseResumeWithOCR(file, options = {}) {
     throw new Error('Uploaded resume file is empty (0 bytes).');
   }
 
-  // Layer 1: Attempt Custom Python OCR Model API (FastAPI backend)
+  // Layer 1: Attempt Custom Python OCR Model API (FastAPI backend with 5s timeout)
   try {
     const rawApiUrl = import.meta.env.VITE_OCR_API_URL || 'http://localhost:8000';
     const ocrApiUrl = rawApiUrl.replace(/\/+$/, '');
@@ -353,6 +353,7 @@ export async function parseResumeWithOCR(file, options = {}) {
         if (res && res.ok) break;
       } catch (e) {
         if (e.name === 'AbortError') throw e;
+        break;
       }
     }
 

@@ -68,10 +68,10 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
     abortControllerRef.current = controller;
 
     try {
-      // Call Python OCR Model API pipeline
+      // Call Python OCR Model API pipeline with automatic Gemini fallback
       const parsedData = await parseResumeWithOCR(selectedFile, {
         signal: controller.signal,
-        timeoutMs: 30000
+        timeoutMs: 5000
       });
 
       const summary = {
