@@ -1,13 +1,15 @@
 /**
  * StackFolio Resume Intelligence Client Service
- * Interfaces directly with the custom Python OCR Model API (FastAPI backend).
- * Sends uploaded PDF resume files to the Python OCR pipeline, parses the
- * resulting PortfolioDraft JSON payload, and converts it into StackFolio schema format.
+ * Dual-layer extraction pipeline:
+ *  - Layer 1 (Primary): Custom Python OCR Model API (FastAPI backend).
+ *  - Layer 2 (Automatic Fallback): Direct Gemini Flash Multimodal Engine for Vercel/Production deployments.
  */
 
+const OCR_API_URL = import.meta.env.VITE_OCR_API_URL || 'http://localhost:8000';
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
 /**
- * Clean and parse JSON output from LLM/service response strings if needed.
- * Retained for backwards compatibility with ariaService and gapEngine.
+ * Clean and parse JSON output from LLM/service response strings.
  */
 export function cleanJsonOutput(text) {
   if (!text) return null;
@@ -51,44 +53,44 @@ export function transformDraftToParsedData(draft) {
   const skills = Array.isArray(draft.skills) ? draft.skills : [];
 
   const extractedSkills = skills
-    .map((s) => (typeof s === 'string' ? s : s.name || ''))
+    .map((s) => (typeof s === 'string' ? s : s?.name || ''))
     .filter(Boolean);
 
   const formattedProjects = projects.map((p) => ({
     title: p.title || '',
     description: p.description || '',
-    techStack: Array.isArray(p.technologies) ? p.technologies : [],
-    demoUrl: p.live_url || '',
-    githubUrl: p.github_url || ''
+    techStack: Array.isArray(p.technologies) ? p.technologies : Array.isArray(p.techStack) ? p.techStack : [],
+    demoUrl: p.live_url || p.demoUrl || '',
+    githubUrl: p.github_url || p.githubUrl || ''
   }));
 
   const formattedExperiences = experiences.map((e) => {
-    const dates = [e.start_date, e.end_date].filter(Boolean).join(' - ');
+    const dates = [e.start_date, e.end_date].filter(Boolean).join(' - ') || e.period || '';
     return {
       role: e.role || '',
       company: e.company || '',
-      period: dates || '',
+      period: dates,
       description: e.description || ''
     };
   });
 
   const formattedEducation = education.map((edu) => {
-    const dates = [edu.start_year, edu.end_year].filter(Boolean).join(' - ');
+    const dates = [edu.start_year, edu.end_year].filter(Boolean).join(' - ') || edu.period || '';
     return {
       institution: edu.institution || '',
       degree: edu.degree || '',
       field: edu.field || '',
-      period: dates || '',
+      period: dates,
       description: edu.description || ''
     };
   });
 
   return {
     hero: {
-      name: profile.full_name || '',
-      title: profile.headline || '',
+      name: profile.full_name || profile.name || '',
+      title: profile.headline || profile.title || '',
       bio: profile.bio || '',
-      avatarUrl: ''
+      avatarUrl: profile.avatarUrl || ''
     },
     skills: extractedSkills,
     projects: formattedProjects,
@@ -97,129 +99,301 @@ export function transformDraftToParsedData(draft) {
     contact: {
       email: profile.email || '',
       socialLinks: {
-        github: profile.github_url || '',
-        linkedin: profile.linkedin_url || '',
-        twitter: ''
+        github: profile.github_url || profile.github || '',
+        linkedin: profile.linkedin_url || profile.linkedin || '',
+        twitter: profile.twitter || ''
       }
     }
   };
 }
 
 /**
- * Primary Resume Extraction Function using Custom Python OCR Model API.
- *
- * @param {File} file - PDF Resume document file
- * @param {Object} [options] - Additional request options (signal, timeoutMs)
- * @returns {Promise<Object>} Standardized parsedData object
+ * Helper function to convert a File or Blob into base64 string for Gemini API
  */
-export async function parseResumeWithOCR(file, options = {}) {
-  const { signal: externalSignal, timeoutMs = 30000 } = options;
-
-  if (!file) {
-    throw new Error('No resume PDF file provided for extraction.');
-  }
-
-  // 1. Client-Side Format & Size Pre-Validation
-  const filename = file.name || '';
-  const isPdf = file.type === 'application/pdf' || filename.toLowerCase().endsWith('.pdf');
-
-  if (!isPdf) {
-    throw new Error('Invalid file format. The StackFolio OCR Engine supports PDF documents (.pdf).');
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error('File size exceeds 5MB limit. Please upload a smaller PDF resume.');
-  }
-
-  if (file.size === 0) {
-    throw new Error('Uploaded PDF file is empty (0 bytes).');
-  }
-
-  // 2. Base URL resolution from environment configuration
-  const rawApiUrl = import.meta.env.VITE_OCR_API_URL || 'http://localhost:8000';
-  const ocrApiUrl = rawApiUrl.replace(/\/+$/, '');
-  const endpoint = `${ocrApiUrl}/api/v1/resume/process`;
-
-  // 3. Construct FormData payload
-  const formData = new FormData();
-  formData.append('file', file);
-
-  // 4. Timeout and Abort Signal Setup
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  if (externalSignal) {
-    if (externalSignal.aborted) {
-      clearTimeout(timeoutId);
-      throw new Error('OCR Parsing request canceled by user.');
-    }
-    externalSignal.addEventListener('abort', () => controller.abort());
-  }
-
-  try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      body: formData,
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!res.ok) {
-      let errorMessage = `OCR Model API Error (${res.status})`;
-      try {
-        const errorData = await res.json();
-        if (typeof errorData.detail === 'string') {
-          errorMessage = errorData.detail;
-        } else if (Array.isArray(errorData.detail)) {
-          errorMessage = errorData.detail.map((e) => e.msg || e.detail).join('; ');
-        }
-      } catch (e) {
-        // Fallback to HTTP status text if non-JSON error
-        errorMessage = res.statusText || errorMessage;
-      }
-      throw new Error(errorMessage);
-    }
-
-    const data = await res.json();
-
-    if (!data || !data.success || !data.draft) {
-      throw new Error('OCR API response structure is malformed or missing PortfolioDraft.');
-    }
-
-    // 5. Transform PortfolioDraft to standard StackFolio parsedData
-    const parsedData = transformDraftToParsedData(data.draft);
-    if (data.processing) {
-      parsedData._processing = data.processing;
-    }
-
-    return parsedData;
-  } catch (err) {
-    clearTimeout(timeoutId);
-
-    if (err.name === 'AbortError') {
-      if (externalSignal?.aborted) {
-        throw new Error('OCR Parsing request canceled by user.');
-      }
-      throw new Error(`OCR Parsing request timed out after ${timeoutMs / 1000}s.`);
-    }
-
-    // Check for network connection failures (service offline, CORS blocked, etc.)
-    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      throw new Error(
-        `Unable to connect to StackFolio OCR Model API at ${ocrApiUrl}. Please verify the Python API server is running.`
-      );
-    }
-
-    throw err;
-  }
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const base64 = typeof result === 'string' && result.includes(',')
+        ? result.substring(result.indexOf(',') + 1)
+        : result;
+      resolve(base64);
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
 }
 
 /**
- * Backwards Compatibility Wrapper:
- * Redirects legacy calls from parseResumeWithGemini to parseResumeWithOCR.
+ * Direct Gemini Multimodal Extraction (Fallback Layer)
+ * Works directly in client applications without requiring the Python OCR server.
+ */
+export async function extractWithGeminiMultimodal(file, apiKey = null, options = {}) {
+  const keyToUse = apiKey || GEMINI_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+
+  if (!keyToUse || keyToUse === 'your_gemini_api_key_here') {
+    throw new Error('OCR Service is offline and VITE_GEMINI_API_KEY is not configured.');
+  }
+
+  const base64Data = await fileToBase64(file);
+  const mimeType = file.type || (file.name?.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+
+  const promptText = `
+You are an expert Resume Parser for StackFolio.
+Extract structured resume information from the provided document.
+
+Return ONLY a valid JSON object (no markdown formatting, no code blocks) matching this exact schema:
+{
+  "hero": {
+    "name": "Full Candidate Name",
+    "title": "Professional Headline or Primary Job Title",
+    "bio": "Comprehensive bio summary or executive summary paragraph",
+    "avatarUrl": ""
+  },
+  "skills": ["Skill 1", "Skill 2", "Skill 3"],
+  "projects": [
+    {
+      "title": "Project Name",
+      "description": "Short project description and achievements",
+      "techStack": ["Technology 1", "Technology 2"],
+      "demoUrl": "",
+      "githubUrl": ""
+    }
+  ],
+  "experience": [
+    {
+      "role": "Job Role / Title",
+      "company": "Company Name",
+      "period": "Start Date - End Date",
+      "description": "Responsibilities and key bullet points"
+    }
+  ],
+  "education": [
+    {
+      "institution": "University / College Name",
+      "degree": "Degree Earned",
+      "field": "Field of Study / Major",
+      "period": "Graduation Period",
+      "description": ""
+    }
+  ],
+  "contact": {
+    "email": "email@example.com",
+    "socialLinks": {
+      "github": "https://github.com/...",
+      "linkedin": "https://linkedin.com/in/...",
+      "twitter": ""
+    }
+  }
+}
+`;
+
+  const MODELS = ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  let lastError = null;
+
+  for (const model of MODELS) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  inline_data: {
+                    mime_type: mimeType,
+                    data: base64Data
+                  }
+                },
+                {
+                  text: promptText
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            response_mime_type: 'application/json',
+            temperature: 0.1
+          }
+        })
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const parsed = cleanJsonOutput(rawText);
+
+        if (parsed) {
+          if (parsed.profile || parsed.experiences) {
+            return transformDraftToParsedData(parsed);
+          }
+          return {
+            hero: {
+              name: parsed.hero?.name || '',
+              title: parsed.hero?.title || '',
+              bio: parsed.hero?.bio || '',
+              avatarUrl: parsed.hero?.avatarUrl || ''
+            },
+            skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+            projects: Array.isArray(parsed.projects) ? (parsed.projects.map(p => ({
+              title: p.title || '',
+              description: p.description || '',
+              techStack: Array.isArray(p.techStack) ? p.techStack : Array.isArray(p.technologies) ? p.technologies : [],
+              demoUrl: p.demoUrl || p.live_url || '',
+              githubUrl: p.githubUrl || p.github_url || ''
+            }))) : [],
+            experience: Array.isArray(parsed.experience) ? (parsed.experience.map(e => ({
+              role: e.role || '',
+              company: e.company || '',
+              period: e.period || '',
+              description: e.description || ''
+            }))) : [],
+            education: Array.isArray(parsed.education) ? (parsed.education.map(edu => ({
+              institution: edu.institution || '',
+              degree: edu.degree || '',
+              field: edu.field || '',
+              period: edu.period || '',
+              description: edu.description || ''
+            }))) : [],
+            contact: {
+              email: parsed.contact?.email || '',
+              socialLinks: {
+                github: parsed.contact?.socialLinks?.github || '',
+                linkedin: parsed.contact?.socialLinks?.linkedin || '',
+                twitter: parsed.contact?.socialLinks?.twitter || ''
+              }
+            }
+          };
+        }
+      } else {
+        const errText = await res.text();
+        console.warn(`Gemini Multimodal model ${model} HTTP ${res.status}:`, errText);
+      }
+    } catch (err) {
+      lastError = err;
+      console.warn(`Gemini Multimodal model ${model} error:`, err);
+    }
+  }
+
+  throw new Error(
+    lastError?.message || 'Gemini Multimodal extraction failed. Please check your network connection and API key.'
+  );
+}
+
+/**
+ * Primary Resume Extraction Function.
+ * Dual-layer pipeline:
+ *  - Layer 1 (Primary): Custom Python OCR Model API (FastAPI backend).
+ *  - Layer 2 (Automatic Fallback): Gemini Multimodal Engine (Gemini Flash).
+ *
+ * @param {File} file - PDF or Image Resume file
+ * @param {Object} [options] - Request options
+ * @returns {Promise<Object>} Standardized parsedData object
+ */
+export async function parseResumeWithOCR(file, options = {}) {
+  const { signal: externalSignal, timeoutMs = 8000 } = options;
+
+  if (!file) {
+    throw new Error('No resume document provided for extraction.');
+  }
+
+  // Pre-validation
+  const filename = file.name || '';
+  const isPdf = file.type === 'application/pdf' || filename.toLowerCase().endsWith('.pdf');
+  const isImage = file.type?.startsWith('image/');
+
+  if (!isPdf && !isImage) {
+    throw new Error('Invalid file format. The StackFolio OCR Engine supports PDF (.pdf) and image files.');
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('File size exceeds 10MB limit. Please upload a smaller resume.');
+  }
+
+  if (file.size === 0) {
+    throw new Error('Uploaded resume file is empty (0 bytes).');
+  }
+
+  // Layer 1: Attempt Custom Python OCR Model API (FastAPI backend)
+  try {
+    const rawApiUrl = import.meta.env.VITE_OCR_API_URL || 'http://localhost:8000';
+    const ocrApiUrl = rawApiUrl.replace(/\/+$/, '');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        clearTimeout(timeoutId);
+        throw new Error('OCR Parsing request canceled by user.');
+      }
+      externalSignal.addEventListener('abort', () => controller.abort());
+    }
+
+    const endpoints = [
+      `${ocrApiUrl}/api/v1/resume/process`,
+      `${ocrApiUrl}/api/extract-resume`,
+      `${ocrApiUrl}/extract-resume`
+    ];
+
+    let res = null;
+    for (const endpoint of endpoints) {
+      try {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal
+        });
+        if (res && res.ok) break;
+      } catch (e) {
+        if (e.name === 'AbortError') throw e;
+      }
+    }
+
+    clearTimeout(timeoutId);
+
+    if (res && res.ok) {
+      const data = await res.json();
+      if (data) {
+        if (data.draft) {
+          const parsedData = transformDraftToParsedData(data.draft);
+          if (data.processing) parsedData._processing = data.processing;
+          return parsedData;
+        } else if (data.hero || data.skills) {
+          return data;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Python OCR service unreachable or timed out. Initiating Gemini Multimodal fallback...", err);
+  }
+
+  // Layer 2: Automatic Fallback to Gemini Flash Multimodal Engine
+  const keyToUse = options.apiKey || GEMINI_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+
+  if (!keyToUse || keyToUse === 'your_gemini_api_key_here') {
+    throw new Error("OCR Service is offline and VITE_GEMINI_API_KEY is not configured.");
+  }
+
+  return await extractWithGeminiMultimodal(file, keyToUse, options);
+}
+
+/**
+ * Alias for parseResumeWithOCR
+ */
+export async function parseResumeDocument(file, options = {}) {
+  return parseResumeWithOCR(file, options);
+}
+
+/**
+ * Backward-compatible wrapper for Gemini extraction
  */
 export async function parseResumeWithGemini(file, apiKey = null, options = {}) {
-  console.warn('parseResumeWithGemini is deprecated for resume OCR. Forwarding request to Python parseResumeWithOCR pipeline.');
-  return parseResumeWithOCR(file, options);
+  return extractWithGeminiMultimodal(file, apiKey, options);
 }
