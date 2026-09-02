@@ -168,7 +168,10 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': keyToUse
+        },
         body: JSON.stringify({
           contents: [
             {
