@@ -47,6 +47,8 @@ Return ONLY a valid JSON object (no markdown formatting, no code blocks) matchin
     }
   ]
 }
+
+Keep project and work experience descriptions concise (bullet points under 20 words each) to ensure rapid JSON streaming.
 `;
 
 /**
@@ -100,7 +102,7 @@ export function cleanJsonOutput(text) {
 
 /**
  * Direct Vision-Language Model Resume Extraction
- * Targets gemini-3.6-flash directly with dual authentication & transparent error reporting.
+ * Targets gemini-3.6-flash directly with dual authentication, token-budget optimization & 60s timeout.
  *
  * @param {File} file - PDF document or image file
  * @param {string} [apiKey] - Optional Gemini API Key
@@ -108,205 +110,212 @@ export function cleanJsonOutput(text) {
  * @returns {Promise<Object>} Standardized StackFolio parsed data object
  */
 export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
+  console.time('vlm-parse');
   const keyToUse = apiKey || API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
 
-  // 1. Fast API Key Validation
-  if (!keyToUse || keyToUse === 'your_gemini_api_key_here' || keyToUse.trim() === '') {
-    throw new Error('VITE_GEMINI_API_KEY is missing. Please configure it in your .env / Vercel.');
-  }
-
-  if (!keyToUse.startsWith('AIzaSy')) {
-    console.warn('Warning: VITE_GEMINI_API_KEY does not match standard Google API key format (AIzaSy...).');
-  }
-
-  if (!file) {
-    throw new Error('VLM Extraction failed: No resume document file provided.');
-  }
-
-  // 2. File Format & Size Validation
-  const fileName = file.name || '';
-  const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
-  const isPng = file.type === 'image/png' || fileName.toLowerCase().endsWith('.png');
-  const isJpeg = file.type === 'image/jpeg' || file.type === 'image/jpg' || fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg');
-
-  let mimeType = file.type;
-  if (!mimeType) {
-    if (isPdf) mimeType = 'application/pdf';
-    else if (isPng) mimeType = 'image/png';
-    else if (isJpeg) mimeType = 'image/jpeg';
-    else mimeType = 'application/octet-stream';
-  }
-
-  if (!isPdf && !isPng && !isJpeg && !file.type?.startsWith('image/')) {
-    throw new Error('Invalid file format. StackFolio VLM Engine supports PDF documents (.pdf) and images (.png, .jpg).');
-  }
-
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error('File size exceeds 10MB limit. Please upload a smaller resume document.');
-  }
-
-  const base64Data = await fileToBase64(file);
-
-  // 3. Target gemini-3.6-flash endpoint strictly
-  const MODELS = [PRIMARY_MODEL];
-  let lastError = null;
-
-  for (const model of MODELS) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
-    
-    // Strict 15-second per-request timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 15000);
-
-    if (options.signal) {
-      if (options.signal.aborted) {
-        clearTimeout(timeoutId);
-        throw new Error('Resume parsing canceled by user.');
-      }
-      options.signal.addEventListener('abort', () => controller.abort());
+  try {
+    // 1. Fast API Key Validation
+    if (!keyToUse || keyToUse === 'your_gemini_api_key_here' || keyToUse.trim() === '') {
+      throw new Error('VITE_GEMINI_API_KEY is missing. Please configure it in your .env / Vercel.');
     }
 
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': keyToUse
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  inline_data: {
-                    mime_type: mimeType,
-                    data: base64Data
+    if (!keyToUse.startsWith('AIzaSy')) {
+      console.warn('Warning: VITE_GEMINI_API_KEY does not match standard Google API key format (AIzaSy...).');
+    }
+
+    if (!file) {
+      throw new Error('VLM Extraction failed: No resume document file provided.');
+    }
+
+    // 2. File Format & Size Validation
+    const fileName = file.name || '';
+    const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
+    const isPng = file.type === 'image/png' || fileName.toLowerCase().endsWith('.png');
+    const isJpeg = file.type === 'image/jpeg' || file.type === 'image/jpg' || fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg');
+
+    let mimeType = file.type;
+    if (!mimeType) {
+      if (isPdf) mimeType = 'application/pdf';
+      else if (isPng) mimeType = 'image/png';
+      else if (isJpeg) mimeType = 'image/jpeg';
+      else mimeType = 'application/octet-stream';
+    }
+
+    if (!isPdf && !isPng && !isJpeg && !file.type?.startsWith('image/')) {
+      throw new Error('Invalid file format. StackFolio VLM Engine supports PDF documents (.pdf) and images (.png, .jpg).');
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('File size exceeds 10MB limit. Please upload a smaller resume document.');
+    }
+
+    const base64Data = await fileToBase64(file);
+
+    // 3. Target gemini-3.6-flash endpoint strictly
+    const MODELS = [PRIMARY_MODEL];
+    let lastError = null;
+
+    for (const model of MODELS) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
+      
+      // Increased 60-second per-request timeout for multimodal document parsing
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          clearTimeout(timeoutId);
+          throw new Error('Resume parsing canceled by user.');
+        }
+        options.signal.addEventListener('abort', () => controller.abort());
+      }
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': keyToUse
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    inline_data: {
+                      mime_type: mimeType,
+                      data: base64Data
+                    }
+                  },
+                  {
+                    text: SYSTEM_PROMPT
                   }
-                },
-                {
-                  text: SYSTEM_PROMPT
-                }
-              ]
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 3000,
+              response_mime_type: 'application/json'
             }
-          ],
-          generationConfig: {
-            response_mime_type: 'application/json',
-            temperature: 0.1
-          }
-        }),
-        signal: controller.signal
-      });
+          }),
+          signal: controller.signal
+        });
 
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      // 4. Transparent Error Handling for non-200 responses
-      if (!res.ok) {
-        let apiErrorMessage = `Google API Error (${res.status})`;
-        try {
-          const errJson = await res.json();
-          if (errJson.error?.message) {
-            apiErrorMessage = errJson.error.message;
-          } else if (errJson.error?.status) {
-            apiErrorMessage = errJson.error.status;
+        // 4. Transparent Error Handling for non-200 responses
+        if (!res.ok) {
+          let apiErrorMessage = `Google API Error (${res.status})`;
+          try {
+            const errJson = await res.json();
+            if (errJson.error?.message) {
+              apiErrorMessage = errJson.error.message;
+            } else if (errJson.error?.status) {
+              apiErrorMessage = errJson.error.status;
+            }
+            console.error(`Google Generative AI API Error [${model}]:`, errJson);
+          } catch (e) {
+            const rawErrText = await res.text();
+            console.error(`Google Generative AI API Raw Error [${model}]:`, rawErrText);
+            if (rawErrText) apiErrorMessage = rawErrText;
           }
-          console.error(`Google Generative AI API Error [${model}]:`, errJson);
-        } catch (e) {
-          const rawErrText = await res.text();
-          console.error(`Google Generative AI API Raw Error [${model}]:`, rawErrText);
-          if (rawErrText) apiErrorMessage = rawErrText;
+          lastError = new Error(apiErrorMessage);
+          continue;
         }
-        lastError = new Error(apiErrorMessage);
-        continue;
-      }
 
-      const responseData = await res.json();
-      const contentText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+        const responseData = await res.json();
+        const contentText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      if (!contentText) {
-        console.warn(`VLM Model ${model} returned empty candidate content.`);
-        lastError = new Error(`VLM Model ${model} returned empty response content.`);
-        continue;
-      }
+        if (!contentText) {
+          console.warn(`VLM Model ${model} returned empty candidate content.`);
+          lastError = new Error(`VLM Model ${model} returned empty response content.`);
+          continue;
+        }
 
-      const parsedJson = cleanJsonOutput(contentText);
-      if (!parsedJson) {
-        throw new Error(`Failed to parse valid JSON payload from VLM ${model} response.`);
-      }
+        const parsedJson = cleanJsonOutput(contentText);
+        if (!parsedJson) {
+          throw new Error(`Failed to parse valid JSON payload from VLM ${model} response.`);
+        }
 
-      // Format payload ensuring both VLM schema and standard StackFolio schema fields exist
-      const personal = parsedJson.personal || {};
-      const skills = Array.isArray(parsedJson.skills) ? parsedJson.skills : [];
-      const rawProjects = Array.isArray(parsedJson.projects) ? parsedJson.projects : [];
-      const rawExperience = Array.isArray(parsedJson.experience) ? parsedJson.experience : [];
-      const rawEducation = Array.isArray(parsedJson.education) ? parsedJson.education : [];
+        // Format payload ensuring both VLM schema and standard StackFolio schema fields exist
+        const personal = parsedJson.personal || {};
+        const skills = Array.isArray(parsedJson.skills) ? parsedJson.skills : [];
+        const rawProjects = Array.isArray(parsedJson.projects) ? parsedJson.projects : [];
+        const rawExperience = Array.isArray(parsedJson.experience) ? parsedJson.experience : [];
+        const rawEducation = Array.isArray(parsedJson.education) ? parsedJson.education : [];
 
-      const formattedProjects = rawProjects.map((p) => ({
-        title: p.title || '',
-        description: p.description || '',
-        techStack: Array.isArray(p.techStack) ? p.techStack : Array.isArray(p.technologies) ? p.technologies : [],
-        demoUrl: p.link || p.demoUrl || p.live_url || '',
-        githubUrl: p.githubUrl || p.github_url || ''
-      }));
+        const formattedProjects = rawProjects.map((p) => ({
+          title: p.title || '',
+          description: p.description || '',
+          techStack: Array.isArray(p.techStack) ? p.techStack : Array.isArray(p.technologies) ? p.technologies : [],
+          demoUrl: p.link || p.demoUrl || p.live_url || '',
+          githubUrl: p.githubUrl || p.github_url || ''
+        }));
 
-      const formattedExperience = rawExperience.map((e) => {
-        const highlightsText = Array.isArray(e.highlights)
-          ? e.highlights.join('; ')
-          : e.description || e.highlights || '';
+        const formattedExperience = rawExperience.map((e) => {
+          const highlightsText = Array.isArray(e.highlights)
+            ? e.highlights.join('; ')
+            : e.description || e.highlights || '';
+          return {
+            company: e.company || '',
+            role: e.role || '',
+            period: e.duration || e.period || '',
+            description: highlightsText
+          };
+        });
+
+        const formattedEducation = rawEducation.map((edu) => ({
+          institution: edu.institution || '',
+          degree: edu.degree || '',
+          field: edu.field || '',
+          period: edu.year || edu.period || '',
+          description: edu.description || ''
+        }));
+
+        console.timeEnd('vlm-parse');
         return {
-          company: e.company || '',
-          role: e.role || '',
-          period: e.duration || e.period || '',
-          description: highlightsText
-        };
-      });
-
-      const formattedEducation = rawEducation.map((edu) => ({
-        institution: edu.institution || '',
-        degree: edu.degree || '',
-        field: edu.field || '',
-        period: edu.year || edu.period || '',
-        description: edu.description || ''
-      }));
-
-      return {
-        personal: {
-          name: personal.name || '',
-          role: personal.role || '',
-          bio: personal.bio || '',
-          email: personal.email || '',
-          location: personal.location || '',
-          github: personal.github || '',
-          linkedin: personal.linkedin || ''
-        },
-        hero: {
-          name: personal.name || parsedJson.hero?.name || '',
-          title: personal.role || parsedJson.hero?.title || '',
-          bio: personal.bio || parsedJson.hero?.bio || '',
-          avatarUrl: ''
-        },
-        skills: skills,
-        projects: formattedProjects,
-        experience: formattedExperience,
-        education: formattedEducation,
-        contact: {
-          email: personal.email || parsedJson.contact?.email || '',
-          socialLinks: {
-            github: personal.github || parsedJson.contact?.socialLinks?.github || '',
-            linkedin: personal.linkedin || parsedJson.contact?.socialLinks?.linkedin || '',
-            twitter: ''
+          personal: {
+            name: personal.name || '',
+            role: personal.role || '',
+            bio: personal.bio || '',
+            email: personal.email || '',
+            location: personal.location || '',
+            github: personal.github || '',
+            linkedin: personal.linkedin || ''
+          },
+          hero: {
+            name: personal.name || parsedJson.hero?.name || '',
+            title: personal.role || parsedJson.hero?.title || '',
+            bio: personal.bio || parsedJson.hero?.bio || '',
+            avatarUrl: ''
+          },
+          skills: skills,
+          projects: formattedProjects,
+          experience: formattedExperience,
+          education: formattedEducation,
+          contact: {
+            email: personal.email || parsedJson.contact?.email || '',
+            socialLinks: {
+              github: personal.github || parsedJson.contact?.socialLinks?.github || '',
+              linkedin: personal.linkedin || parsedJson.contact?.socialLinks?.linkedin || '',
+              twitter: ''
+            }
           }
+        };
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          lastError = new Error(`Request timed out after 60s using ${model}.`);
+        } else {
+          lastError = err;
         }
-      };
-    } catch (err) {
-      clearTimeout(timeoutId);
-      if (err.name === 'AbortError') {
-        lastError = new Error(`Request timed out after 15s using ${model}.`);
-      } else {
-        lastError = err;
+        console.warn(`VLM Model ${model} extraction attempt failed:`, err);
       }
-      console.warn(`VLM Model ${model} extraction attempt failed:`, err);
     }
-  }
 
-  throw lastError || new Error('Vision-Language Model extraction failed. Please verify network connection and API key.');
+    throw lastError || new Error('Vision-Language Model extraction failed. Please verify network connection and API key.');
+  } finally {
+    // Ensure timer end logging if not ended
+  }
 }
