@@ -146,8 +146,8 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
 
   const base64Data = await fileToBase64(file);
 
-  // 3. Public Stable Google Generative Language Model Endpoints (gemini-1.5-flash primary, gemini-2.0-flash secondary)
-  const MODELS = ['gemini-1.5-flash', 'gemini-2.0-flash'];
+  // 3. Primary VLM Model Endpoint (gemini-3.6-flash)
+  const MODELS = ['gemini-3.6-flash', 'gemini-1.5-flash'];
   let lastError = null;
 
   for (const model of MODELS) {
