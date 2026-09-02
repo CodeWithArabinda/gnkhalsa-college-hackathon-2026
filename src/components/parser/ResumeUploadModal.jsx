@@ -8,7 +8,7 @@ import {
   AlertCircle, 
   Loader2 
 } from 'lucide-react';
-import { parseResumeWithOCR } from '../../services/resumeParser';
+import { parseResumeWithVLM } from '../../services/vlmParser';
 import { validateParsedResume, transformToPortfolioSchema } from '../../services/gapEngine';
 import GapResolutionModal from './GapResolutionModal';
 
@@ -62,10 +62,9 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
     abortControllerRef.current = controller;
 
     try {
-      // Call dual-layer extraction pipeline (Python OCR + Gemini Flash Fallback)
-      const parsedData = await parseResumeWithOCR(selectedFile, {
-        signal: controller.signal,
-        timeoutMs: 5000
+      // Call pure client-side Vision-Language Model extraction pipeline
+      const parsedData = await parseResumeWithVLM(selectedFile, null, {
+        signal: controller.signal
       });
 
       // Validate required portfolio schema fields
@@ -84,8 +83,8 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
       
       handleCloseModal();
     } catch (err) {
-      console.error('Resume Extraction error:', err);
-      setErrorMsg(err.message || 'Failed to extract resume details.');
+      console.error('VLM Resume Extraction error:', err);
+      setErrorMsg(err.message || 'Failed to extract resume content using VLM engine.');
       setIsProcessing(false);
     } finally {
       abortControllerRef.current = null;
@@ -139,17 +138,17 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FFE600] border border-black text-[11px] font-mono font-bold text-black shadow-[1.5px_1.5px_0px_#000]">
                 <Sparkles className="w-3 h-3 fill-black"/>
-                StackFolio OCR Engine
+                ⚡ StackFolio VLM Engine
               </span>
               <span className="text-[11px] font-mono px-2 py-0.5 rounded border border-neutral-300 bg-white text-neutral-600 font-semibold">
-                PyMuPDF Fast-Path
+                Gemini Multimodal
               </span>
               <span className="text-[11px] font-mono px-2 py-0.5 rounded border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold">
-                ● API Ready
+                ● Direct Vision Ready
               </span>
             </div>
             <p className="text-xs text-neutral-600 font-medium leading-relaxed">
-              Automatically extract full profile schema, skills matrix, projects, and work history from your document.
+              Extract structured profile schema, skills, projects & experience directly using Vision-Language perception.
             </p>
           </div>
 
@@ -223,12 +222,12 @@ export default function ResumeUploadModal({ isOpen, onClose, onSuccess, onParsed
               {isProcessing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-black"/>
-                  <span>Extracting with OCR Engine...</span>
+                  <span>Extracting with VLM Engine...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 fill-black"/>
-                  <span>Extract Resume with StackFolio OCR 🚀</span>
+                  <span>EXTRACT RESUME WITH STACKFOLIO VLM 🚀</span>
                 </>
               )}
             </button>

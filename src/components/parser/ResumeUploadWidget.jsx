@@ -254,12 +254,12 @@ export default function ResumeUploadWidget({ onUploadSuccess, onGapDetected, inM
             {isProcessing ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-black"/>
-                <span>Extracting with OCR Engine...</span>
+                <span>Extracting with VLM Engine...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 fill-black"/>
-                <span>Extract Resume with StackFolio OCR 🚀</span>
+                <span>EXTRACT RESUME WITH STACKFOLIO VLM 🚀</span>
               </>
             )}
           </button>
