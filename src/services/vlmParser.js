@@ -1,10 +1,21 @@
 /**
- * StackFolio Vision-Language Model (VLM) Resume Intelligence Service
- * Pure client-side multimodal extraction pipeline powered strictly by OpenRouter Free Vision API.
+ * StackFolio Vision-Language Model (VLM) & Fast Text LLM Resume Intelligence Service
+ * Client-side text extraction + OpenRouter Fast Text LLM & Free Vision API cascade.
  * Decommissions all Google Gemini direct REST endpoints and local Python backend.
  */
 
+import { extractTextFromPDF } from '../utils/pdfExtractor';
+
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+
+export const OPENROUTER_TEXT_MODELS = [
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'google/gemini-2.0-flash-exp:free',
+  'qwen/qwen-2.5-72b-instruct:free',
+  'deepseek/deepseek-r1:free',
+  'minimax/minimax-01',
+  'openrouter/auto'
+];
 
 export const FREE_VISION_MODELS = [
   'google/gemini-2.0-flash-exp:free',
@@ -16,8 +27,8 @@ export const FREE_VISION_MODELS = [
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const SYSTEM_PROMPT = `
-You are an expert Vision-Language Model (VLM) Resume Parser for StackFolio.
-Analyze the provided document (PDF or image) and extract structured resume information.
+You are an expert Vision-Language Model (VLM) & Resume Parser for StackFolio.
+Analyze the provided document (PDF text or image) and extract structured resume information.
 
 Return ONLY a valid JSON object (no markdown formatting, no code blocks) matching this exact schema:
 {
@@ -178,8 +189,10 @@ function normalizeParsedResume(parsedJson) {
 }
 
 /**
- * Direct Vision-Language Model Resume Extraction
- * Runs 100% on OpenRouter Free Vision API cascade without legacy Gemini direct endpoints.
+ * Direct Resume Extraction Gateway
+ * Dual-pathway:
+ *  1. Client-Side PDF Text Extraction + OpenRouter Fast Text LLM Cascade
+ *  2. Image / Scanned Document Vision API Cascade
  *
  * @param {File} file - PDF document or image file
  * @param {string} [apiKey] - Optional custom OpenRouter API Key
@@ -195,15 +208,102 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
   }
 
   if (!file) {
-    throw new Error('VLM Extraction failed: No resume document file provided.');
+    throw new Error('Resume extraction failed: No document file provided.');
   }
 
-  // Pre-validation
   const fileName = file.name || '';
   const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
   const isPng = file.type === 'image/png' || fileName.toLowerCase().endsWith('.png');
   const isJpeg = file.type === 'image/jpeg' || file.type === 'image/jpg' || fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg');
 
+  if (!isPdf && !isPng && !isJpeg && !file.type?.startsWith('image/')) {
+    throw new Error('Invalid file format. Supported formats: PDF documents (.pdf) and images (.png, .jpg).');
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('File size exceeds 10MB limit. Please upload a smaller document.');
+  }
+
+  let lastError = null;
+
+  // ----------------------------------------------------
+  // Pathway 1: Client-Side PDF Text Extraction + Fast LLM Cascade
+  // ----------------------------------------------------
+  if (isPdf) {
+    try {
+      const extractedText = await extractTextFromPDF(file);
+      if (extractedText && extractedText.length > 50) {
+        for (const model of OPENROUTER_TEXT_MODELS) {
+          const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 30000);
+
+          if (options.signal) {
+            if (options.signal.aborted) {
+              clearTimeout(timeoutId);
+              throw new Error('Resume parsing canceled by user.');
+            }
+            options.signal.addEventListener('abort', () => controller.abort());
+          }
+
+          try {
+            const res = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${keyToUse}`,
+                'HTTP-Referer': 'https://gnkhalsa-hackathon-2026.vercel.app',
+                'X-Title': 'StackFolio Resume Parser'
+              },
+              body: JSON.stringify({
+                model: model,
+                messages: [
+                  {
+                    role: 'user',
+                    content: `${SYSTEM_PROMPT}\n\nEXTRACTED RESUME TEXT DOCUMENT:\n${extractedText}`
+                  }
+                ],
+                temperature: 0.1,
+                max_tokens: 3000
+              }),
+              signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+              const responseData = await res.json();
+              const contentText = responseData.choices?.[0]?.message?.content || responseData.choices?.[0]?.text;
+              const parsedJson = cleanJsonOutput(contentText);
+              if (parsedJson) {
+                console.timeEnd('vlm-parse');
+                return normalizeParsedResume(parsedJson);
+              }
+            } else {
+              let errText = `OpenRouter HTTP ${res.status}`;
+              try {
+                const errJson = await res.json();
+                errText = errJson.error?.message || errJson.error || errText;
+              } catch (e) {}
+              console.warn(`OpenRouter Text model ${model} HTTP ${res.status}:`, errText);
+              lastError = new Error(`OpenRouter [${model}]: ${errText}`);
+              await sleep(400);
+            }
+          } catch (err) {
+            clearTimeout(timeoutId);
+            lastError = err;
+            console.warn(`OpenRouter Text model ${model} attempt failed:`, err);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('PDF text extraction pathway bypassed, falling back to Vision multimodal API:', e);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Pathway 2: Vision Multimodal API Cascade (Images / Scanned PDFs)
+  // ----------------------------------------------------
   let mimeType = file.type;
   if (!mimeType) {
     if (isPdf) mimeType = 'application/pdf';
@@ -212,18 +312,8 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
     else mimeType = 'application/octet-stream';
   }
 
-  if (!isPdf && !isPng && !isJpeg && !file.type?.startsWith('image/')) {
-    throw new Error('Invalid file format. StackFolio VLM Engine supports PDF documents (.pdf) and images (.png, .jpg).');
-  }
-
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error('File size exceeds 10MB limit. Please upload a smaller resume document.');
-  }
-
   const base64Data = await fileToBase64(file);
-  let lastError = null;
 
-  // OpenRouter Multi-Model Free Vision Cascade Loop
   for (const model of FREE_VISION_MODELS) {
     const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
     const controller = new AbortController();
@@ -283,7 +373,7 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
           if (errText) errMessage = errText;
         }
 
-        console.warn(`OpenRouter model ${model} returned error (${errMessage}). Trying next candidate in cascade...`);
+        console.warn(`OpenRouter Vision model ${model} returned error (${errMessage}). Trying next candidate in cascade...`);
         lastError = new Error(`OpenRouter [${model}]: ${errMessage}`);
         await sleep(500);
         continue;
@@ -293,7 +383,7 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
       const contentText = responseData.choices?.[0]?.message?.content || responseData.choices?.[0]?.text;
 
       if (!contentText) {
-        console.warn(`OpenRouter model ${model} returned empty content. Trying next model...`);
+        console.warn(`OpenRouter Vision model ${model} returned empty content. Trying next model...`);
         lastError = new Error(`OpenRouter [${model}]: Returned empty candidate content.`);
         continue;
       }
@@ -303,17 +393,17 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
         console.timeEnd('vlm-parse');
         return normalizeParsedResume(parsedJson);
       } else {
-        console.warn(`OpenRouter model ${model} output could not be parsed as JSON. Trying next model...`);
+        console.warn(`OpenRouter Vision model ${model} output could not be parsed as JSON. Trying next model...`);
         lastError = new Error(`OpenRouter [${model}]: Output payload unparseable.`);
       }
     } catch (err) {
       clearTimeout(timeoutId);
       if (err.name === 'AbortError') {
-        lastError = new Error(`OpenRouter request timed out after 60s using ${model}.`);
+        lastError = new Error(`OpenRouter Vision request timed out after 60s using ${model}.`);
       } else {
         lastError = err;
       }
-      console.warn(`OpenRouter model ${model} attempt failed:`, err);
+      console.warn(`OpenRouter Vision model ${model} attempt failed:`, err);
     }
   }
 
