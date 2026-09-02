@@ -1,26 +1,16 @@
 /**
  * StackFolio Vision-Language Model (VLM) Resume Intelligence Service
- * Pure client-side multimodal extraction pipeline supporting OpenRouter Vision API (MiniMax M3 / Free Fallback)
- * with automatic fallback to Gemini Multimodal models.
+ * Pure client-side multimodal extraction pipeline powered strictly by OpenRouter Free Vision API.
+ * Decommissions all Google Gemini direct REST endpoints and local Python backend.
  */
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
-export const OPENROUTER_MODELS = [
-  'minimax/minimax-01',
-  'meta-llama/llama-3.2-11b-vision-instruct:free',
-  'google/gemini-2.0-flash-lite-preview-02-05:free',
+export const FREE_VISION_MODELS = [
   'google/gemini-2.0-flash-exp:free',
+  'meta-llama/llama-3.2-11b-vision-instruct:free',
   'qwen/qwen-2.5-vl-72b-instruct:free',
-  'openrouter/auto'
-];
-
-export const GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-2.5-flash',
-  'gemini-2.5-pro',
-  'gemini-1.5-flash-latest'
+  'minimax/minimax-01'
 ];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -189,18 +179,20 @@ function normalizeParsedResume(parsedJson) {
 
 /**
  * Direct Vision-Language Model Resume Extraction
- * Primary Layer: OpenRouter OpenAI-Compatible Vision API (MiniMax M3 / Free Fallback)
- * Fallback Layer: Direct Gemini Multimodal API
+ * Runs 100% on OpenRouter Free Vision API cascade without legacy Gemini direct endpoints.
  *
  * @param {File} file - PDF document or image file
- * @param {string} [apiKey] - Optional custom API Key
+ * @param {string} [apiKey] - Optional custom OpenRouter API Key
  * @param {Object} [options] - Additional request options
  * @returns {Promise<Object>} Standardized StackFolio parsed data object
  */
 export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
   console.time('vlm-parse');
-  const openrouterKey = options.openrouterKey || OPENROUTER_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY;
-  const geminiKey = apiKey || GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+  const keyToUse = apiKey || OPENROUTER_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY;
+
+  if (!keyToUse || keyToUse === 'your_openrouter_api_key_here' || keyToUse.trim() === '') {
+    throw new Error('VITE_OPENROUTER_API_KEY is missing. Please configure it in your .env / Vercel.');
+  }
 
   if (!file) {
     throw new Error('VLM Extraction failed: No resume document file provided.');
@@ -231,178 +223,99 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
   const base64Data = await fileToBase64(file);
   let lastError = null;
 
-  // ----------------------------------------------------
-  // Layer 1: OpenRouter Vision API (Completions Endpoint)
-  // ----------------------------------------------------
-  if (openrouterKey && openrouterKey !== 'your_openrouter_api_key_here' && openrouterKey.trim() !== '') {
-    for (const model of OPENROUTER_MODELS) {
-      const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
+  // OpenRouter Multi-Model Free Vision Cascade Loop
+  for (const model of FREE_VISION_MODELS) {
+    const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
 
-      if (options.signal) {
-        if (options.signal.aborted) {
-          clearTimeout(timeoutId);
-          throw new Error('Resume parsing canceled by user.');
-        }
-        options.signal.addEventListener('abort', () => controller.abort());
-      }
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openrouterKey}`,
-            'HTTP-Referer': 'https://gnkhalsa-hackathon-2026.vercel.app',
-            'X-Title': 'StackFolio Resume Parser'
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'image_url',
-                    image_url: {
-                      url: `data:${mimeType};base64,${base64Data}`
-                    }
-                  },
-                  {
-                    type: 'text',
-                    text: SYSTEM_PROMPT
-                  }
-                ]
-              }
-            ],
-            temperature: 0.1,
-            max_tokens: 3000
-          }),
-          signal: controller.signal
-        });
-
+    if (options.signal) {
+      if (options.signal.aborted) {
         clearTimeout(timeoutId);
-
-        if (!res.ok) {
-          let errText = `OpenRouter API Error (${res.status})`;
-          try {
-            const errJson = await res.json();
-            errText = errJson.error?.message || errJson.error || errText;
-          } catch (e) {
-            // ignore JSON parse fail
-          }
-          console.warn(`OpenRouter model ${model} HTTP ${res.status}:`, errText);
-          lastError = new Error(`OpenRouter [${model}]: ${errText}`);
-          await sleep(500);
-          continue;
-        }
-
-        const responseData = await res.json();
-        const contentText = responseData.choices?.[0]?.message?.content || responseData.choices?.[0]?.text;
-
-        if (!contentText) {
-          console.warn(`OpenRouter model ${model} returned empty content.`);
-          continue;
-        }
-
-        const parsedJson = cleanJsonOutput(contentText);
-        if (parsedJson) {
-          console.timeEnd('vlm-parse');
-          return normalizeParsedResume(parsedJson);
-        }
-      } catch (err) {
-        clearTimeout(timeoutId);
-        if (err.name === 'AbortError') {
-          lastError = new Error(`OpenRouter request timed out after 60s using ${model}.`);
-        } else {
-          lastError = err;
-        }
-        console.warn(`OpenRouter model ${model} attempt failed:`, err);
+        throw new Error('Resume parsing canceled by user.');
       }
+      options.signal.addEventListener('abort', () => controller.abort());
     }
-  }
 
-  // ----------------------------------------------------
-  // Layer 2: Gemini Direct Multimodal API Fallback
-  // ----------------------------------------------------
-  if (geminiKey && geminiKey !== 'your_gemini_api_key_here' && geminiKey.trim() !== '') {
-    for (const model of GEMINI_MODELS) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
-
-      if (options.signal) {
-        if (options.signal.aborted) {
-          clearTimeout(timeoutId);
-          throw new Error('Resume parsing canceled by user.');
-        }
-        options.signal.addEventListener('abort', () => controller.abort());
-      }
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': geminiKey
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    inline_data: {
-                      mime_type: mimeType,
-                      data: base64Data
-                    }
-                  },
-                  {
-                    text: SYSTEM_PROMPT
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${keyToUse}`,
+          'HTTP-Referer': 'https://gnkhalsa-hackathon-2026.vercel.app',
+          'X-Title': 'StackFolio Resume Parser'
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64Data}`
                   }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.1,
-              maxOutputTokens: 3000,
-              response_mime_type: 'application/json'
+                },
+                {
+                  type: 'text',
+                  text: SYSTEM_PROMPT
+                }
+              ]
             }
-          }),
-          signal: controller.signal
-        });
+          ],
+          temperature: 0.1,
+          max_tokens: 3000
+        }),
+        signal: controller.signal
+      });
 
-        clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
 
-        if (!res.ok) {
-          let errText = `Gemini API Error (${res.status})`;
-          try {
-            const errJson = await res.json();
-            errText = errJson.error?.message || errText;
-          } catch (e) {}
-          console.warn(`Gemini model ${model} HTTP ${res.status}:`, errText);
-          lastError = new Error(`Gemini [${model}]: ${errText}`);
-          if (res.status === 503 || res.status === 429) await sleep(1000);
-          continue;
+      if (!res.ok) {
+        let errMessage = `OpenRouter HTTP ${res.status}`;
+        try {
+          const errJson = await res.json();
+          errMessage = errJson.error?.message || errJson.error || errMessage;
+        } catch (e) {
+          const errText = await res.text();
+          if (errText) errMessage = errText;
         }
 
-        const responseData = await res.json();
-        const contentText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (contentText) {
-          const parsedJson = cleanJsonOutput(contentText);
-          if (parsedJson) {
-            console.timeEnd('vlm-parse');
-            return normalizeParsedResume(parsedJson);
-          }
-        }
-      } catch (err) {
-        clearTimeout(timeoutId);
-        lastError = err;
-        console.warn(`Gemini model ${model} attempt failed:`, err);
+        console.warn(`OpenRouter model ${model} returned error (${errMessage}). Trying next candidate in cascade...`);
+        lastError = new Error(`OpenRouter [${model}]: ${errMessage}`);
+        await sleep(500);
+        continue;
       }
+
+      const responseData = await res.json();
+      const contentText = responseData.choices?.[0]?.message?.content || responseData.choices?.[0]?.text;
+
+      if (!contentText) {
+        console.warn(`OpenRouter model ${model} returned empty content. Trying next model...`);
+        lastError = new Error(`OpenRouter [${model}]: Returned empty candidate content.`);
+        continue;
+      }
+
+      const parsedJson = cleanJsonOutput(contentText);
+      if (parsedJson) {
+        console.timeEnd('vlm-parse');
+        return normalizeParsedResume(parsedJson);
+      } else {
+        console.warn(`OpenRouter model ${model} output could not be parsed as JSON. Trying next model...`);
+        lastError = new Error(`OpenRouter [${model}]: Output payload unparseable.`);
+      }
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        lastError = new Error(`OpenRouter request timed out after 60s using ${model}.`);
+      } else {
+        lastError = err;
+      }
+      console.warn(`OpenRouter model ${model} attempt failed:`, err);
     }
   }
 
-  throw lastError || new Error('Vision-Language Model extraction failed across all OpenRouter and Gemini candidate endpoints. Please verify network connection and API key configuration.');
+  throw lastError || new Error('Vision-Language Model extraction failed across all OpenRouter free vision candidate models. Please check network connection and API key configuration.');
 }
