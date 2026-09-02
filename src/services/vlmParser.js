@@ -1,12 +1,22 @@
 /**
  * StackFolio Vision-Language Model (VLM) Resume Intelligence Service
- * Pure client-side multimodal extraction pipeline with candidate failover cascade & automated retry.
- * Decommissions local Python backend/PyMuPDF server dependencies.
+ * Pure client-side multimodal extraction pipeline supporting OpenRouter Vision API (MiniMax M3 / Free Fallback)
+ * with automatic fallback to Gemini Multimodal models.
  */
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
-export const CANDIDATE_MODELS = [
+export const OPENROUTER_MODELS = [
+  'minimax/minimax-01',
+  'meta-llama/llama-3.2-11b-vision-instruct:free',
+  'google/gemini-2.0-flash-lite-preview-02-05:free',
+  'google/gemini-2.0-flash-exp:free',
+  'qwen/qwen-2.5-vl-72b-instruct:free',
+  'openrouter/auto'
+];
+
+export const GEMINI_MODELS = [
   'gemini-3.6-flash',
   'gemini-2.5-flash',
   'gemini-2.5-pro',
@@ -109,62 +119,124 @@ export function cleanJsonOutput(text) {
 }
 
 /**
+ * Format raw parsed JSON into standardized StackFolio schema payload
+ */
+function normalizeParsedResume(parsedJson) {
+  const personal = parsedJson.personal || {};
+  const skills = Array.isArray(parsedJson.skills) ? parsedJson.skills : [];
+  const rawProjects = Array.isArray(parsedJson.projects) ? parsedJson.projects : [];
+  const rawExperience = Array.isArray(parsedJson.experience) ? parsedJson.experience : [];
+  const rawEducation = Array.isArray(parsedJson.education) ? parsedJson.education : [];
+
+  const formattedProjects = rawProjects.map((p) => ({
+    title: p.title || '',
+    description: p.description || '',
+    techStack: Array.isArray(p.techStack) ? p.techStack : Array.isArray(p.technologies) ? p.technologies : [],
+    demoUrl: p.link || p.demoUrl || p.live_url || '',
+    githubUrl: p.githubUrl || p.github_url || ''
+  }));
+
+  const formattedExperience = rawExperience.map((e) => {
+    const highlightsText = Array.isArray(e.highlights)
+      ? e.highlights.join('; ')
+      : e.description || e.highlights || '';
+    return {
+      company: e.company || '',
+      role: e.role || '',
+      period: e.duration || e.period || '',
+      description: highlightsText
+    };
+  });
+
+  const formattedEducation = rawEducation.map((edu) => ({
+    institution: edu.institution || '',
+    degree: edu.degree || '',
+    field: edu.field || '',
+    period: edu.year || edu.period || '',
+    description: edu.description || ''
+  }));
+
+  return {
+    personal: {
+      name: personal.name || '',
+      role: personal.role || '',
+      bio: personal.bio || '',
+      email: personal.email || '',
+      location: personal.location || '',
+      github: personal.github || '',
+      linkedin: personal.linkedin || ''
+    },
+    hero: {
+      name: personal.name || parsedJson.hero?.name || '',
+      title: personal.role || parsedJson.hero?.title || '',
+      bio: personal.bio || parsedJson.hero?.bio || '',
+      avatarUrl: ''
+    },
+    skills: skills,
+    projects: formattedProjects,
+    experience: formattedExperience,
+    education: formattedEducation,
+    contact: {
+      email: personal.email || parsedJson.contact?.email || '',
+      socialLinks: {
+        github: personal.github || parsedJson.contact?.socialLinks?.github || '',
+        linkedin: personal.linkedin || parsedJson.contact?.socialLinks?.linkedin || '',
+        twitter: ''
+      }
+    }
+  };
+}
+
+/**
  * Direct Vision-Language Model Resume Extraction
- * Implements multi-model fallback cascade with exponential backoff for high demand spikes.
+ * Primary Layer: OpenRouter OpenAI-Compatible Vision API (MiniMax M3 / Free Fallback)
+ * Fallback Layer: Direct Gemini Multimodal API
  *
  * @param {File} file - PDF document or image file
- * @param {string} [apiKey] - Optional Gemini API Key
+ * @param {string} [apiKey] - Optional custom API Key
  * @param {Object} [options] - Additional request options
  * @returns {Promise<Object>} Standardized StackFolio parsed data object
  */
 export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
   console.time('vlm-parse');
-  const keyToUse = apiKey || API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+  const openrouterKey = options.openrouterKey || OPENROUTER_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY;
+  const geminiKey = apiKey || GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
 
-  try {
-    // 1. Fast API Key Validation
-    if (!keyToUse || keyToUse === 'your_gemini_api_key_here' || keyToUse.trim() === '') {
-      throw new Error('VITE_GEMINI_API_KEY is missing. Please configure it in your .env / Vercel.');
-    }
+  if (!file) {
+    throw new Error('VLM Extraction failed: No resume document file provided.');
+  }
 
-    if (!keyToUse.startsWith('AIzaSy')) {
-      console.warn('Warning: VITE_GEMINI_API_KEY does not match standard Google API key format (AIzaSy...).');
-    }
+  // Pre-validation
+  const fileName = file.name || '';
+  const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
+  const isPng = file.type === 'image/png' || fileName.toLowerCase().endsWith('.png');
+  const isJpeg = file.type === 'image/jpeg' || file.type === 'image/jpg' || fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg');
 
-    if (!file) {
-      throw new Error('VLM Extraction failed: No resume document file provided.');
-    }
+  let mimeType = file.type;
+  if (!mimeType) {
+    if (isPdf) mimeType = 'application/pdf';
+    else if (isPng) mimeType = 'image/png';
+    else if (isJpeg) mimeType = 'image/jpeg';
+    else mimeType = 'application/octet-stream';
+  }
 
-    // 2. File Format & Size Validation
-    const fileName = file.name || '';
-    const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
-    const isPng = file.type === 'image/png' || fileName.toLowerCase().endsWith('.png');
-    const isJpeg = file.type === 'image/jpeg' || file.type === 'image/jpg' || fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg');
+  if (!isPdf && !isPng && !isJpeg && !file.type?.startsWith('image/')) {
+    throw new Error('Invalid file format. StackFolio VLM Engine supports PDF documents (.pdf) and images (.png, .jpg).');
+  }
 
-    let mimeType = file.type;
-    if (!mimeType) {
-      if (isPdf) mimeType = 'application/pdf';
-      else if (isPng) mimeType = 'image/png';
-      else if (isJpeg) mimeType = 'image/jpeg';
-      else mimeType = 'application/octet-stream';
-    }
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('File size exceeds 10MB limit. Please upload a smaller resume document.');
+  }
 
-    if (!isPdf && !isPng && !isJpeg && !file.type?.startsWith('image/')) {
-      throw new Error('Invalid file format. StackFolio VLM Engine supports PDF documents (.pdf) and images (.png, .jpg).');
-    }
+  const base64Data = await fileToBase64(file);
+  let lastError = null;
 
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error('File size exceeds 10MB limit. Please upload a smaller resume document.');
-    }
-
-    const base64Data = await fileToBase64(file);
-
-    // 3. Multi-Model Failover Cascade Loop
-    let lastError = null;
-
-    for (const model of CANDIDATE_MODELS) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
-      
+  // ----------------------------------------------------
+  // Layer 1: OpenRouter Vision API (Completions Endpoint)
+  // ----------------------------------------------------
+  if (openrouterKey && openrouterKey !== 'your_openrouter_api_key_here' && openrouterKey.trim() !== '') {
+    for (const model of OPENROUTER_MODELS) {
+      const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
 
@@ -181,7 +253,99 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': keyToUse
+            'Authorization': `Bearer ${openrouterKey}`,
+            'HTTP-Referer': 'https://gnkhalsa-hackathon-2026.vercel.app',
+            'X-Title': 'StackFolio Resume Parser'
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:${mimeType};base64,${base64Data}`
+                    }
+                  },
+                  {
+                    type: 'text',
+                    text: SYSTEM_PROMPT
+                  }
+                ]
+              }
+            ],
+            temperature: 0.1,
+            max_tokens: 3000
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          let errText = `OpenRouter API Error (${res.status})`;
+          try {
+            const errJson = await res.json();
+            errText = errJson.error?.message || errJson.error || errText;
+          } catch (e) {
+            // ignore JSON parse fail
+          }
+          console.warn(`OpenRouter model ${model} HTTP ${res.status}:`, errText);
+          lastError = new Error(`OpenRouter [${model}]: ${errText}`);
+          await sleep(500);
+          continue;
+        }
+
+        const responseData = await res.json();
+        const contentText = responseData.choices?.[0]?.message?.content || responseData.choices?.[0]?.text;
+
+        if (!contentText) {
+          console.warn(`OpenRouter model ${model} returned empty content.`);
+          continue;
+        }
+
+        const parsedJson = cleanJsonOutput(contentText);
+        if (parsedJson) {
+          console.timeEnd('vlm-parse');
+          return normalizeParsedResume(parsedJson);
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          lastError = new Error(`OpenRouter request timed out after 60s using ${model}.`);
+        } else {
+          lastError = err;
+        }
+        console.warn(`OpenRouter model ${model} attempt failed:`, err);
+      }
+    }
+  }
+
+  // ----------------------------------------------------
+  // Layer 2: Gemini Direct Multimodal API Fallback
+  // ----------------------------------------------------
+  if (geminiKey && geminiKey !== 'your_gemini_api_key_here' && geminiKey.trim() !== '') {
+    for (const model of GEMINI_MODELS) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          clearTimeout(timeoutId);
+          throw new Error('Resume parsing canceled by user.');
+        }
+        options.signal.addEventListener('abort', () => controller.abort());
+      }
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiKey
           },
           body: JSON.stringify({
             contents: [
@@ -210,126 +374,35 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
 
         clearTimeout(timeoutId);
 
-        // 4. Transparent Error Handling & High-Demand Cascade Failover
         if (!res.ok) {
-          let apiErrorMessage = `Google API Error (${res.status})`;
+          let errText = `Gemini API Error (${res.status})`;
           try {
             const errJson = await res.json();
-            if (errJson.error?.message) {
-              apiErrorMessage = errJson.error.message;
-            } else if (errJson.error?.status) {
-              apiErrorMessage = errJson.error.status;
-            }
-          } catch (e) {
-            const rawErrText = await res.text();
-            if (rawErrText) apiErrorMessage = rawErrText;
-          }
-
-          console.warn(`Model ${model} returned HTTP ${res.status} (${apiErrorMessage}). Falling back to next model...`);
-          lastError = new Error(`[${model}] ${apiErrorMessage}`);
-
-          // Backoff delay for rate limit / high demand spikes before trying next candidate
-          if (res.status === 503 || res.status === 429 || res.status >= 500) {
-            await sleep(1000);
-          }
-
+            errText = errJson.error?.message || errText;
+          } catch (e) {}
+          console.warn(`Gemini model ${model} HTTP ${res.status}:`, errText);
+          lastError = new Error(`Gemini [${model}]: ${errText}`);
+          if (res.status === 503 || res.status === 429) await sleep(1000);
           continue;
         }
 
         const responseData = await res.json();
         const contentText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        if (!contentText) {
-          console.warn(`Model ${model} returned empty candidate content. Trying next model...`);
-          lastError = new Error(`Model ${model} returned empty response content.`);
-          continue;
-        }
-
-        const parsedJson = cleanJsonOutput(contentText);
-        if (!parsedJson) {
-          console.warn(`Model ${model} returned invalid JSON payload. Trying next model...`);
-          lastError = new Error(`Failed to parse valid JSON payload from VLM ${model} response.`);
-          continue;
-        }
-
-        // 5. Success! Format payload ensuring both VLM schema and standard StackFolio schema fields exist
-        const personal = parsedJson.personal || {};
-        const skills = Array.isArray(parsedJson.skills) ? parsedJson.skills : [];
-        const rawProjects = Array.isArray(parsedJson.projects) ? parsedJson.projects : [];
-        const rawExperience = Array.isArray(parsedJson.experience) ? parsedJson.experience : [];
-        const rawEducation = Array.isArray(parsedJson.education) ? parsedJson.education : [];
-
-        const formattedProjects = rawProjects.map((p) => ({
-          title: p.title || '',
-          description: p.description || '',
-          techStack: Array.isArray(p.techStack) ? p.techStack : Array.isArray(p.technologies) ? p.technologies : [],
-          demoUrl: p.link || p.demoUrl || p.live_url || '',
-          githubUrl: p.githubUrl || p.github_url || ''
-        }));
-
-        const formattedExperience = rawExperience.map((e) => {
-          const highlightsText = Array.isArray(e.highlights)
-            ? e.highlights.join('; ')
-            : e.description || e.highlights || '';
-          return {
-            company: e.company || '',
-            role: e.role || '',
-            period: e.duration || e.period || '',
-            description: highlightsText
-          };
-        });
-
-        const formattedEducation = rawEducation.map((edu) => ({
-          institution: edu.institution || '',
-          degree: edu.degree || '',
-          field: edu.field || '',
-          period: edu.year || edu.period || '',
-          description: edu.description || ''
-        }));
-
-        console.timeEnd('vlm-parse');
-        return {
-          personal: {
-            name: personal.name || '',
-            role: personal.role || '',
-            bio: personal.bio || '',
-            email: personal.email || '',
-            location: personal.location || '',
-            github: personal.github || '',
-            linkedin: personal.linkedin || ''
-          },
-          hero: {
-            name: personal.name || parsedJson.hero?.name || '',
-            title: personal.role || parsedJson.hero?.title || '',
-            bio: personal.bio || parsedJson.hero?.bio || '',
-            avatarUrl: ''
-          },
-          skills: skills,
-          projects: formattedProjects,
-          experience: formattedExperience,
-          education: formattedEducation,
-          contact: {
-            email: personal.email || parsedJson.contact?.email || '',
-            socialLinks: {
-              github: personal.github || parsedJson.contact?.socialLinks?.github || '',
-              linkedin: personal.linkedin || parsedJson.contact?.socialLinks?.linkedin || '',
-              twitter: ''
-            }
+        if (contentText) {
+          const parsedJson = cleanJsonOutput(contentText);
+          if (parsedJson) {
+            console.timeEnd('vlm-parse');
+            return normalizeParsedResume(parsedJson);
           }
-        };
+        }
       } catch (err) {
         clearTimeout(timeoutId);
-        if (err.name === 'AbortError') {
-          lastError = new Error(`Request timed out after 60s using ${model}.`);
-        } else {
-          lastError = err;
-        }
-        console.warn(`VLM Model ${model} extraction attempt failed:`, err);
+        lastError = err;
+        console.warn(`Gemini model ${model} attempt failed:`, err);
       }
     }
-
-    throw lastError || new Error('Vision-Language Model extraction failed across all fallback candidate models.');
-  } finally {
-    // End console timer safely
   }
+
+  throw lastError || new Error('Vision-Language Model extraction failed across all OpenRouter and Gemini candidate endpoints. Please verify network connection and API key configuration.');
 }
