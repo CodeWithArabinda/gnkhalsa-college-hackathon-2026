@@ -1,11 +1,19 @@
 /**
  * StackFolio Vision-Language Model (VLM) Resume Intelligence Service
- * Pure client-side multimodal extraction pipeline powered strictly by Gemini Flash Multimodal API (gemini-3.6-flash).
+ * Pure client-side multimodal extraction pipeline with candidate failover cascade & automated retry.
  * Decommissions local Python backend/PyMuPDF server dependencies.
  */
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const PRIMARY_MODEL = 'gemini-3.6-flash';
+
+export const CANDIDATE_MODELS = [
+  'gemini-3.6-flash',
+  'gemini-2.5-flash',
+  'gemini-2.5-pro',
+  'gemini-1.5-flash-latest'
+];
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const SYSTEM_PROMPT = `
 You are an expert Vision-Language Model (VLM) Resume Parser for StackFolio.
@@ -102,7 +110,7 @@ export function cleanJsonOutput(text) {
 
 /**
  * Direct Vision-Language Model Resume Extraction
- * Targets gemini-3.6-flash directly with dual authentication, token-budget optimization & 60s timeout.
+ * Implements multi-model fallback cascade with exponential backoff for high demand spikes.
  *
  * @param {File} file - PDF document or image file
  * @param {string} [apiKey] - Optional Gemini API Key
@@ -151,14 +159,12 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
 
     const base64Data = await fileToBase64(file);
 
-    // 3. Target gemini-3.6-flash endpoint strictly
-    const MODELS = [PRIMARY_MODEL];
+    // 3. Multi-Model Failover Cascade Loop
     let lastError = null;
 
-    for (const model of MODELS) {
+    for (const model of CANDIDATE_MODELS) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
       
-      // Increased 60-second per-request timeout for multimodal document parsing
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 60000);
 
@@ -204,7 +210,7 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
 
         clearTimeout(timeoutId);
 
-        // 4. Transparent Error Handling for non-200 responses
+        // 4. Transparent Error Handling & High-Demand Cascade Failover
         if (!res.ok) {
           let apiErrorMessage = `Google API Error (${res.status})`;
           try {
@@ -214,13 +220,19 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
             } else if (errJson.error?.status) {
               apiErrorMessage = errJson.error.status;
             }
-            console.error(`Google Generative AI API Error [${model}]:`, errJson);
           } catch (e) {
             const rawErrText = await res.text();
-            console.error(`Google Generative AI API Raw Error [${model}]:`, rawErrText);
             if (rawErrText) apiErrorMessage = rawErrText;
           }
-          lastError = new Error(apiErrorMessage);
+
+          console.warn(`Model ${model} returned HTTP ${res.status} (${apiErrorMessage}). Falling back to next model...`);
+          lastError = new Error(`[${model}] ${apiErrorMessage}`);
+
+          // Backoff delay for rate limit / high demand spikes before trying next candidate
+          if (res.status === 503 || res.status === 429 || res.status >= 500) {
+            await sleep(1000);
+          }
+
           continue;
         }
 
@@ -228,17 +240,19 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
         const contentText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!contentText) {
-          console.warn(`VLM Model ${model} returned empty candidate content.`);
-          lastError = new Error(`VLM Model ${model} returned empty response content.`);
+          console.warn(`Model ${model} returned empty candidate content. Trying next model...`);
+          lastError = new Error(`Model ${model} returned empty response content.`);
           continue;
         }
 
         const parsedJson = cleanJsonOutput(contentText);
         if (!parsedJson) {
-          throw new Error(`Failed to parse valid JSON payload from VLM ${model} response.`);
+          console.warn(`Model ${model} returned invalid JSON payload. Trying next model...`);
+          lastError = new Error(`Failed to parse valid JSON payload from VLM ${model} response.`);
+          continue;
         }
 
-        // Format payload ensuring both VLM schema and standard StackFolio schema fields exist
+        // 5. Success! Format payload ensuring both VLM schema and standard StackFolio schema fields exist
         const personal = parsedJson.personal || {};
         const skills = Array.isArray(parsedJson.skills) ? parsedJson.skills : [];
         const rawProjects = Array.isArray(parsedJson.projects) ? parsedJson.projects : [];
@@ -314,8 +328,8 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
       }
     }
 
-    throw lastError || new Error('Vision-Language Model extraction failed. Please verify network connection and API key.');
+    throw lastError || new Error('Vision-Language Model extraction failed across all fallback candidate models.');
   } finally {
-    // Ensure timer end logging if not ended
+    // End console timer safely
   }
 }
