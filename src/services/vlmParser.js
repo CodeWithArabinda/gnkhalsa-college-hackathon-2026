@@ -1,10 +1,11 @@
 /**
  * StackFolio Vision-Language Model (VLM) Resume Intelligence Service
- * Pure client-side multimodal extraction pipeline powered by Gemini Flash Multimodal API.
+ * Pure client-side multimodal extraction pipeline powered strictly by Gemini Flash Multimodal API (gemini-3.6-flash).
  * Decommissions local Python backend/PyMuPDF server dependencies.
  */
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const PRIMARY_MODEL = 'gemini-3.6-flash';
 
 export const SYSTEM_PROMPT = `
 You are an expert Vision-Language Model (VLM) Resume Parser for StackFolio.
@@ -99,7 +100,7 @@ export function cleanJsonOutput(text) {
 
 /**
  * Direct Vision-Language Model Resume Extraction
- * Uses stable Gemini Flash Multimodal API endpoints with fast-fail timeout & transparent error reporting.
+ * Targets gemini-3.6-flash directly with dual authentication & transparent error reporting.
  *
  * @param {File} file - PDF document or image file
  * @param {string} [apiKey] - Optional Gemini API Key
@@ -146,8 +147,8 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
 
   const base64Data = await fileToBase64(file);
 
-  // 3. Primary VLM Model Endpoint (gemini-3.6-flash)
-  const MODELS = ['gemini-3.6-flash', 'gemini-1.5-flash'];
+  // 3. Target gemini-3.6-flash endpoint strictly
+  const MODELS = [PRIMARY_MODEL];
   let lastError = null;
 
   for (const model of MODELS) {
