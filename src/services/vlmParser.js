@@ -99,7 +99,7 @@ export function cleanJsonOutput(text) {
 
 /**
  * Direct Vision-Language Model Resume Extraction
- * Uses Gemini Flash Multimodal API directly without backend server dependencies.
+ * Uses stable Gemini Flash Multimodal API endpoints with fast-fail timeout & transparent error reporting.
  *
  * @param {File} file - PDF document or image file
  * @param {string} [apiKey] - Optional Gemini API Key
@@ -109,15 +109,20 @@ export function cleanJsonOutput(text) {
 export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
   const keyToUse = apiKey || API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
 
-  if (!keyToUse || keyToUse === 'your_gemini_api_key_here') {
-    throw new Error('VLM Extraction failed: VITE_GEMINI_API_KEY is not configured in environment variables.');
+  // 1. Fast API Key Validation
+  if (!keyToUse || keyToUse === 'your_gemini_api_key_here' || keyToUse.trim() === '') {
+    throw new Error('VITE_GEMINI_API_KEY is missing. Please configure it in your .env / Vercel.');
+  }
+
+  if (!keyToUse.startsWith('AIzaSy')) {
+    console.warn('Warning: VITE_GEMINI_API_KEY does not match standard Google API key format (AIzaSy...).');
   }
 
   if (!file) {
     throw new Error('VLM Extraction failed: No resume document file provided.');
   }
 
-  // File Format & Size Validation
+  // 2. File Format & Size Validation
   const fileName = file.name || '';
   const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
   const isPng = file.type === 'image/png' || fileName.toLowerCase().endsWith('.png');
@@ -141,12 +146,25 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
 
   const base64Data = await fileToBase64(file);
 
-  // Target model fallback sequence (gemini-2.5-flash as primary)
-  const MODELS = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  // 3. Public Stable Google Generative Language Model Endpoints (gemini-1.5-flash primary, gemini-2.0-flash secondary)
+  const MODELS = ['gemini-1.5-flash', 'gemini-2.0-flash'];
   let lastError = null;
 
   for (const model of MODELS) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${keyToUse}`;
+    
+    // Strict 15-second per-request timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || 15000);
+
+    if (options.signal) {
+      if (options.signal.aborted) {
+        clearTimeout(timeoutId);
+        throw new Error('Resume parsing canceled by user.');
+      }
+      options.signal.addEventListener('abort', () => controller.abort());
+    }
+
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -171,26 +189,44 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
             response_mime_type: 'application/json',
             temperature: 0.1
           }
-        })
+        }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
+      // 4. Transparent Error Handling for non-200 responses
       if (!res.ok) {
-        const errorText = await res.text();
-        console.warn(`VLM Model ${model} HTTP ${res.status}:`, errorText);
+        let apiErrorMessage = `Google API Error (${res.status})`;
+        try {
+          const errJson = await res.json();
+          if (errJson.error?.message) {
+            apiErrorMessage = errJson.error.message;
+          } else if (errJson.error?.status) {
+            apiErrorMessage = errJson.error.status;
+          }
+          console.error(`Google Generative AI API Error [${model}]:`, errJson);
+        } catch (e) {
+          const rawErrText = await res.text();
+          console.error(`Google Generative AI API Raw Error [${model}]:`, rawErrText);
+          if (rawErrText) apiErrorMessage = rawErrText;
+        }
+        lastError = new Error(apiErrorMessage);
         continue;
       }
 
       const responseData = await res.json();
-      const rawText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+      const contentText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      if (!rawText) {
+      if (!contentText) {
         console.warn(`VLM Model ${model} returned empty candidate content.`);
+        lastError = new Error(`VLM Model ${model} returned empty response content.`);
         continue;
       }
 
-      const parsedJson = cleanJsonOutput(rawText);
+      const parsedJson = cleanJsonOutput(contentText);
       if (!parsedJson) {
-        throw new Error(`Failed to parse structured JSON candidate from VLM ${model} response.`);
+        throw new Error(`Failed to parse valid JSON payload from VLM ${model} response.`);
       }
 
       // Format payload ensuring both VLM schema and standard StackFolio schema fields exist
@@ -258,12 +294,15 @@ export async function parseResumeWithVLM(file, apiKey = null, options = {}) {
         }
       };
     } catch (err) {
-      lastError = err;
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        lastError = new Error(`Request timed out after 15s using ${model}.`);
+      } else {
+        lastError = err;
+      }
       console.warn(`VLM Model ${model} extraction attempt failed:`, err);
     }
   }
 
-  throw new Error(
-    lastError?.message || 'Vision-Language Model extraction failed across all model endpoints. Please check network connection and API key.'
-  );
+  throw lastError || new Error('Vision-Language Model extraction failed. Please verify network connection and API key.');
 }
